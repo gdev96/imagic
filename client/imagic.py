@@ -18,18 +18,21 @@ class Imagic:
         self.current_image.category = category
 
     def upload_image(self):
-        received_message = self.message_handler.send_message(b'0', self.current_image)
+        self.message_handler.send_message(b'0', self.current_image)
+        received_message = self.message_handler.receive_message()
         return received_message.payload
 
     def find_thumbs(self, category):
-        received_message = self.message_handler.send_message(b'1', category)
+        self.message_handler.send_message(b'1', category)
+        received_message = self.message_handler.receive_message()
         thumbs_dict = received_message.payload
         self.current_thumbs = thumbs_dict
         return self.current_thumbs
 
     def show_image(self, thumb_file):
         thumb_path = self.current_thumbs[thumb_file]
-        received_message = self.message_handler.send_message(b'2', thumb_path)
+        self.message_handler.send_message(b'2', thumb_path)
+        received_message = self.message_handler.receive_message()
         image = received_message.payload
         self.current_image = image
         return self.current_image
@@ -60,6 +63,9 @@ class MessageHandler:
         message = Message(header, payload)
         self.load_balancer_connector.send(message)
 
+    def receive_message(self):
+        return self.load_balancer_connector.receive()
+
 
 class Message:
     def __init__(self, header, payload):
@@ -81,37 +87,23 @@ class Host:
 
 
 class LoadBalancerConnector:
-    def __init__(self, sock, source, destination):
-        self.sock = sock
+    def __init__(self, source, destination, message_length=1024, sock=None):
         self.source = source
         self.destination = destination
+        self.message_length = message_length
+
+        if sock is None:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        else:
+            self.sock = sock
+
+        self.sock.connect((destination.address, destination.port))
+        print("Socket connection opened!")
 
     def send(self, message):
         message.header.source = self.source
         message.header.destination = self.destination
-        self.sock.connect(self.destination)
-        self.sock.send(message)
-        return self.sock.receive()
 
-
-class Socket:
-    def __init__(self, sock=None, message_length=1024):
-        if sock is None:
-            self.sock = socket.socket(
-                socket.AF_INET, socket.SOCK_STREAM
-            )
-        else:
-            self.sock = sock
-
-        self.message_length = message_length
-
-    def connect(self, destination):
-        self.sock.connect(
-            (destination.address, destination.port)
-        )
-        print("Socket connection opened!")
-
-    def send(self, message):
         total_sent = 0
         while total_sent < self.message_length:
             sent = self.sock.send(message[total_sent:])
