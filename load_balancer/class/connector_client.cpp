@@ -1,37 +1,50 @@
-#include "connector_client.hpp"
-#include<netinet/in.h>
+#include <netinet/in.h>
 #include <sys/socket.h>
-#include<arpa/inet.h>
-#include <unistd.h> 
+#include <arpa/inet.h>
+#include <iostream>
+#include <string>
+#include "class.hpp"
 
-void send(Message msg){    
+
+#define BUFFER_SIZE 10000000
+
+using namespace std;
+
+ 
+ /*
+void send(Message * msg){    
+
+    //BUFFER del connettore universale
+    unsigned char buffer[BUFFER_SIZE];
     
-    //Bisogna capire come gestire il messaggio nella write
-
-    char ch;
-
     int sockfd, result, len;
     struct sockaddr_in address;
 
-    sockfd = socket(AF_INET,SOCK_STREAM,0);  //Create the socket 
+    //SOCKET CREATION
+    sockfd = socket(AF_INET,SOCK_STREAM,0); 
 
+    //SETTING CONNECTION PARAMETERS
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr("151.97.6.4"); //IP address
-    address.sin_port = htons(1000); //Port address
+    address.sin_addr.s_addr = inet_addr(msg->getHeader()->getSender()->getAddress().c_str); //IP address
+    address.sin_port = htons(msg->getHeader()->getSender()->getPort()); //Port address
     len = sizeof(address);
 
-    result = connect(sockfd, (struct sockaddr*)&address, len);  //Connect to Server (our Client)
+    result = connect(sockfd, (struct sockaddr*)&address, len);  //Connect to Server (Application's client)
 
-    write(sockfd, &ch, 1); //Send request
+    //SEND THE MESSAGE
 
+    //write(sockfd, &ch, 1); //Send request
+
+    //SOCKET CLOSURE
     close(sockfd);  //Close the socket     
 
 }
 
+*/
 
-void receive(){ //LB is Server
+/*void receive(){ //LB is Server
 
-    char ch; 
+     char ch; 
     int server_sockfd, client_sockfd, result, server_len, client_len;
     struct sockaddr_in server_address, client_address;
 
@@ -51,4 +64,4 @@ void receive(){ //LB is Server
 
     close(client_sockfd);
 
-}
+} */
