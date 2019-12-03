@@ -1,5 +1,6 @@
 from pathlib import Path
 import socket
+import struct
 
 
 class Image:
@@ -54,7 +55,7 @@ class Message:
 class LoadBalancerConnector:
     def __init__(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.destination = Host("localhost", 5000)
+        self.destination = Host("127.0.0.1", 5000)
         self.client_socket.connect((self.destination.address, self.destination.port))
         self.source = self.client_socket.getsockname()
         self.message_length = 1024
@@ -63,15 +64,28 @@ class LoadBalancerConnector:
         print("Destination address:", self.destination)
 
     def send(self, message):
-        message.header.source = self.source
-        message.header.destination = self.destination
+        message.header.source.address = socket.inet_aton(self.source[0])
+        message.header.source.port = socket.htons(self.source[1])
+        message.header.destination.address = socket.inet_aton(self.destination.address)
+        message.header.destination.port = socket.htons(self.destination.port)
 
-        total_sent = 0
-        while total_sent < self.message_length:
-            sent = self.client_socket.send(message[total_sent:])
-            if sent == 0:
-                raise RuntimeError("Socket connection closed!")
-            total_sent = total_sent + sent
+        header = struct.pack(
+            '!BIHIHL',
+            message.header.message_type,
+            message.header.source.address,
+            message.header.source.port,
+            message.header.destination.address,
+            message.header.destination.port,
+            message.header.payload_length
+        )
+
+        sent = self.client_socket.send(header)
+        if sent == 0:
+            raise RuntimeError("Socket connection closed!")
+
+        sent = self.client_socket.send(message.payload)
+        if sent == 0:
+            raise RuntimeError("Socket connection closed!")
 
     def receive(self):
         message = b''
@@ -90,6 +104,7 @@ class MessageHandler:
 
     def send_message(self, message_type, payload):
         self.current_message.header.message_type = message_type
+        self.current_message.header.payload_length = socket.htonl(len(payload))
         self.current_message.payload = payload
         self.load_balancer_connector.send(self.current_message)
 
@@ -114,12 +129,12 @@ class Imagic:
         self.current_image.category = category
 
     def upload_image(self):
-        self.message_handler.send_message(0, self.current_image)
+        self.message_handler.send_message(b'0', self.current_image)
         received_message = self.message_handler.receive_message()
         return received_message.payload
 
     def find_thumbs(self, category):
-        self.message_handler.send_message(1, category)
+        self.message_handler.send_message(b'1', category)
         received_message = self.message_handler.receive_message()
         thumbs_dict = received_message.payload
         self.current_thumbs = thumbs_dict
@@ -127,7 +142,7 @@ class Imagic:
 
     def show_image(self, thumb_file):
         thumb_file_path = self.current_thumbs[thumb_file]
-        self.message_handler.send_message(2, thumb_file_path)
+        self.message_handler.send_message(b'2', thumb_file_path)
         received_message = self.message_handler.receive_message()
         image = received_message.payload
         self.current_image = image
