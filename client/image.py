@@ -1,5 +1,7 @@
 from pathlib import Path
 
+EXTENSIONS = '.jpg', '.png', '.gif', '.tif'
+
 
 class Image:
     def __init__(self, image_file):
@@ -22,7 +24,7 @@ class ImageValidator:
 
     @staticmethod
     def load_image_extensions():
-        return '.jpg', '.png', '.gif', '.tif'
+        return EXTENSIONS
 
     def validate(self, image_file_path):
         file_extension = Path(image_file_path).suffix

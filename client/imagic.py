@@ -25,14 +25,12 @@ class Imagic:
         received_message = self.message_handler.send_message(1, category)
         thumbs_dict = received_message.payload
         self.current_thumbs = thumbs_dict
-        return self.current_thumbs
 
     def show_image(self, thumb_file):
         thumb_file_path = self.current_thumbs[thumb_file]
         received_message = self.message_handler.send_message(2, thumb_file_path)
         image = received_message.payload
         self.current_image = image
-        return self.current_image
 
     def download_image(self):
         return self.current_image.file

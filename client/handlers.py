@@ -1,19 +1,21 @@
 from message import Message
-from image import Image
 import socket
 import struct
+
+HOST_ADDRESS = "127.0.0.1"
+PORT = 5000
+PACKET_LENGTH = 4096
 
 
 class LoadBalancerConnector:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print("Socket connection opened!")
 
     def send(self, message):
-        self.sock.connect(("127.0.0.1", 5000))
+        self.sock.connect((HOST_ADDRESS, PORT))
         self.sock.send(message.header)
         bytes_to_send = len(message.payload)
-        times_to_send = bytes_to_send / 4096
+        times_to_send = bytes_to_send / PACKET_LENGTH
         while times_to_send >= 0:
             self.sock.send(message.payload)
             times_to_send -= 1
@@ -37,7 +39,7 @@ class MessageHandler:
             0,
             len(payload)
         )
-        if type(payload) is Image:
+        if message_type == 1:
             image_file_length = len(payload.image_file)
             category_length = len(payload.category)
             payload = struct.pack(
