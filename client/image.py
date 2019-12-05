@@ -7,6 +7,14 @@ class Image:
         self.category = None
         self.thumb_file = None
 
+    def __len__(self):
+        image_length = 0
+        for key in self.__dict__.keys():
+            attr = self.__getattribute__(key)
+            if attr is not None:
+                image_length += len(attr)
+        return image_length
+
 
 class ImageValidator:
     def __init__(self):
