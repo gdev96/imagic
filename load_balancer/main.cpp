@@ -6,7 +6,8 @@ using namespace std;
 
 int main() {
 
-    cout <<"ciao";
+    int v[3];
+    cout << v[2];
 
 
 }
