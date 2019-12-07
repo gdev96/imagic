@@ -2,6 +2,6 @@ client/.idea/
 client/__pycache__/
 client/venv/
 
-load_balancer/cmake-build-debug/
 load_balancer/.idea/
+load_balancer/cmake-build-debug/
 

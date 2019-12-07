@@ -1,10 +1,7 @@
 from message import Message
 import socket
 import struct
-
-HOST_ADDRESS = "127.0.0.1"
-PORT = 5000
-PACKET_LENGTH = 4096
+from constants import *
 
 
 class LoadBalancerConnector:
@@ -39,7 +36,7 @@ class MessageHandler:
             0,
             len(payload)
         )
-        if message_type == 1:
+        if message_type == UPLOAD_IMAGE:
             image_file_length = len(payload.image_file)
             category_length = len(payload.category)
             payload = struct.pack(
@@ -49,7 +46,30 @@ class MessageHandler:
                 category_length,
                 payload.category.encode("raw_unicode_escape")
             )
+        else:  # FIND_THUMBS or DOWNLOAD_IMAGE
+            payload.encode("raw_unicode_escape")
+
         self.current_message.payload = payload
 
         self.current_message.header, self.current_message.payload = \
             self.load_balancer_connector.send(self.current_message)
+
+        message_type = struct.unpack('!BII', self.current_message.header)[0]
+
+        if message_type == FIND_THUMBS:
+            thumbs_dict = dict()
+            offset = 0
+            while True:
+                next_length = struct.unpack_from('!I', self.current_message.payload, offset)
+                if next_length == 0:
+                    break
+                offset += struct.calcsize('!I')
+                thumb_file = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)
+                offset += struct.calcsize('!{}s'.format(next_length))
+                next_length = struct.unpack_from('!I', self.current_message.payload, offset)
+                offset += struct.calcsize('!I')
+                thumb_file_path = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)
+                offset += struct.calcsize('!{}s'.format(next_length))
+                thumbs_dict[thumb_file] = thumb_file_path
+            return self.current_message.header, thumbs_dict
+        return self.current_message.header, self.current_message.payload
