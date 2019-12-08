@@ -19,19 +19,19 @@ class Imagic:
         self.current_image.category = category
 
     def upload_image(self):
-        received_header, received_payload = self.message_handler.send_message(UPLOAD_IMAGE, self.current_image)
+        received_payload = self.message_handler.send_message(UPLOAD_IMAGE, self.current_image)[1]
         return received_payload
 
     def find_thumbs(self, category):
-        received_header, received_payload = self.message_handler.send_message(FIND_THUMBS, category)
-        thumbs_dict = received_payload
-        self.current_thumbs = thumbs_dict
+        received_payload = self.message_handler.send_message(FIND_THUMBS, category)[1]
+        self.current_thumbs = received_payload
 
     def show_image(self, thumb_file):
         thumb_file_path = self.current_thumbs[thumb_file]
-        received_header, received_payload = self.message_handler.send_message(DOWNLOAD_IMAGE, thumb_file_path)
-        image_file = received_payload
-        return image_file
+        received_payload = self.message_handler.send_message(DOWNLOAD_IMAGE, thumb_file_path)[1]
+        self.current_image.image_file = received_payload
 
-    def download_image(self):
-        pass  # save file to disk
+    def download_image(self, dir_path):
+        with open(dir_path, "wb") as f:
+            f.write(self.current_image.image_file)
+            f.close()

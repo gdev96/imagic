@@ -9,7 +9,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.stackedWidget = QtWidgets.QStackedWidget(self.centralwidget)
-        self.stackedWidget.setGeometry(QtCore.QRect(0, 0, 871, 481))
+        self.stackedWidget.setGeometry(QtCore.QRect(9, 9, 856, 472))
         self.stackedWidget.setObjectName("stackedWidget")
         self.mainpage = QtWidgets.QWidget()
         self.mainpage.setObjectName("mainpage")
@@ -90,6 +90,29 @@ class Ui_MainWindow(object):
         self.searchbutton.setFont(font)
         self.searchbutton.setObjectName("searchbutton")
         self.stackedWidget.addWidget(self.downloadpage)
+        self.thumbspage = QtWidgets.QWidget()
+        self.thumbspage.setObjectName("thumbspage")
+        self.scrollArea = QtWidgets.QScrollArea(self.thumbspage)
+        self.scrollArea.setGeometry(QtCore.QRect(0, 0, 851, 411))
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 849, 409))
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.gridLayoutWidget = QtWidgets.QWidget(self.scrollAreaWidgetContents)
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(0, 0, 851, 411))
+        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout.setObjectName("gridLayout")
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.thumbscancelbutton = QtWidgets.QPushButton(self.thumbspage)
+        self.thumbscancelbutton.setGeometry(QtCore.QRect(700, 430, 91, 41))
+        font = QtGui.QFont()
+        font.setPointSize(18)
+        self.thumbscancelbutton.setFont(font)
+        self.thumbscancelbutton.setObjectName("thumbscancelbutton")
+        self.stackedWidget.addWidget(self.thumbspage)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 874, 22))
@@ -122,6 +145,7 @@ class Ui_MainWindow(object):
         self.downloadcancelbutton.setText(_translate("MainWindow", "Cancel"))
         self.downloadlabel.setText(_translate("MainWindow", "Download images"))
         self.searchbutton.setText(_translate("MainWindow", "Search"))
+        self.thumbscancelbutton.setText(_translate("MainWindow", "Cancel"))
 
     def uploadbutton_onclick(self):
         file_dialog = QtWidgets.QFileDialog(self.mainpage)
@@ -154,12 +178,26 @@ class Ui_MainWindow(object):
 
     def searchbutton_onclick(self):
         imagic.find_thumbs(self.searchbutton.text())
-        for thumb_file, category in imagic.current_thumbs:
+        for thumb_file, thumb_path in imagic.current_thumbs:
             image_pixmap = QtGui.QPixmap()
             image_pixmap.loadFromData(QtCore.QByteArray(thumb_file))
-            width = self.imagelabel.width()
-            height = self.imagelabel.height()
-            self.imagelabel.setPixmap(image_pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio))
+            thumb_label = QtWidgets.QLabel(self.thumbspage)
+            thumb_label.setObjectName(thumb_path)
+            width = thumb_label.width()
+            height = thumb_label.height()
+            thumb_label.setPixmap(image_pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio))
+            thumb_label.clicked.connect(self.thumblabel_onclick)
+            thumb_label.hovered.connect(self.thumblabel_onhover)
+            self.gridLayout.addWidget(thumb_label)
+        self.stackedWidget.setCurrentIndex(3)
+
+    def thumblabel_onclick(self):
+        sending_thumb = self.thumbspage.sender()
+        imagic.show_image(sending_thumb.objectName())
+
+    def thumblabel_onhover(self):
+        sending_thumb = self.thumbspage.sender()
+        sending_thumb.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
 
 if __name__ == "__main__":
