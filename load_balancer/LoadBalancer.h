@@ -5,6 +5,7 @@
 
 #include <queue>
 #include <iostream>
+#include <cstring>
 #include "Connector.h"
 
 using namespace std;
@@ -20,9 +21,8 @@ class LoadBalancer{
     public:
         LoadBalancer();
         int balance();
-        int manageResponse();
-        void readHeader(header * hdr);
-        void readPayload(unsigned char pld[], int pld_len);
+        void manageRequest();
+        void readBytes(unsigned char buffer[], int offset, int n_bytes);
 };
 
 #endif //IMAGIC_BACKEND_LOADBALANCER_H

@@ -1,23 +1,9 @@
 #include "LoadBalancer.h"
 
-void LoadBalancer::readHeader(header * hdr){
+void LoadBalancer::readBytes(unsigned char buffer[],int offset, int n_bytes){
 
-    hdr->message_type = message_queue.front();
-    message_queue.pop();
-    for(int i=4; i>0; i--) {
-        hdr->source_id[i] = message_queue.front();
-        message_queue.pop();
-    }
-    for(int i=8; i>4; i--) {
-        hdr->payload_length[i] = message_queue.front();
-        message_queue.pop();
-    }
-}
-
-void LoadBalancer::readPayload(unsigned char pld[], int pld_len){
-
-    for(int i=pld_len; i>0; i--){
-        pld[i]=message_queue.front();
+    for(int i=offset; i<n_bytes; i++){
+        buffer[i]=message_queue.front();
         message_queue.pop();
     }
 }
@@ -56,35 +42,40 @@ int LoadBalancer::balance(){
     return server_low_load;
 };
 
-void messageCopyOnBufferConnector(header* hdr, unsigned char pld[], int pld_len, ConnectorServer* cs){
+void messageCopyOnBufferConnector(unsigned char message[], int offset, int n_bytes, ConnectorServer* cs){
 
-    cs->writeBuffer(0,hdr->message_type);
-    for(int i=1; i<5; i++) cs->writeBuffer(i,hdr->source_id[i]);
-    for(int i=6; i<10; i++) cs->writeBuffer(i,hdr->payload_length[i]);
-    for(int i=10; i<(pld_len+10); i++) cs->writeBuffer(i, pld[i]);
+    cs->writeBuffer(message, n_bytes, offset);
 }
 
-int LoadBalancer::manageResponse() {
+void LoadBalancer::manageRequest() {
 
     while(true) {
         if(!message_queue.empty()) {
             // MESSAGE FROM QUEUE
-            header hdr;
-            readHeader(&hdr);
-            int byte_pld_l = payloadLengthByteToInt(hdr.payload_length);
+            unsigned char header[HEADER_LENGTH];
+            readBytes(header, 0, HEADER_LENGTH);
+            unsigned char msg_t;
+            memcpy(&msg_t, header, MESSAGE_TYPE_LENGTH);
+            int message_type = byteToInt(&msg_t, MESSAGE_TYPE_LENGTH);
+            unsigned char p_len[PAYLOAD_LENGTH];
+            memcpy(&p_len, header + MESSAGE_TYPE_LENGTH + SOURCE_ID_LENGTH, PAYLOAD_LENGTH);
+            int byte_pld_l = byteToInt(p_len, PAYLOAD_LENGTH);
             unsigned char pld[byte_pld_l];
-            readPayload(pld, byte_pld_l);
+            readBytes(pld, 0, byte_pld_l);
 
-            if(hdr.message_type == 0){ //Message must be send in broadcast
+            if(!msg_t){ //Message must be sent in broadcast
                 for(int i=0; i<N_SERVER; i++){
-                    messageCopyOnBufferConnector(&hdr,pld,byte_pld_l,server_connector[i]);
+                    server_connector[i]->setServerLoad(server_connector[i]->getServerLoad()+1);
+                    messageCopyOnBufferConnector(header, 0, HEADER_LENGTH,server_connector[i]);
+                    messageCopyOnBufferConnector(pld, HEADER_LENGTH, byte_pld_l,server_connector[i]);
                     server_connector[i]->send();
                 }
             }
-            else{ //Message must be send only to one server
-                int choosen_server = balance();
-                messageCopyOnBufferConnector(&hdr,pld,byte_pld_l,server_connector[choosen_server]);
-                server_connector[choosen_server]->send();
+            else{ //Message must be sent only to one server
+                int chosen_server = balance();
+                messageCopyOnBufferConnector(header, 0, HEADER_LENGTH,server_connector[chosen_server]);
+                messageCopyOnBufferConnector(pld, HEADER_LENGTH, byte_pld_l,server_connector[chosen_server]);
+                server_connector[chosen_server]->send();
             }
         }
     }

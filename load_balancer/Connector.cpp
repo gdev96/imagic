@@ -8,19 +8,13 @@ int ConnectorClient::getClientSockfd() const {
     return client_sockfd;
 }
 
-void ConnectorClient::readHeader(header hdr){
 
-    read(client_sockfd, &(hdr.message_type), 1);
-    read(client_sockfd, hdr.source_id, 4);
-    read(client_sockfd, hdr.payload_length, 4);
+int ConnectorClient::readHeader(unsigned char header[HEADER_LENGTH]){
+    unsigned char pld_len[PAYLOAD_LENGTH];
+    read(client_sockfd, &header, HEADER_LENGTH);
+    memcpy(pld_len, header + HEADER_LENGTH - PAYLOAD_LENGTH, PAYLOAD_LENGTH);
+    return byteToInt(pld_len, PAYLOAD_LENGTH);
 }
-
-void ConnectorClient::pushRequest(header hdr, unsigned char payload[]){
-    message_queue_pointer->push(hdr.message_type);
-    pushBytes(message_queue_pointer, hdr.source_id);
-    pushBytes(message_queue_pointer, hdr.payload_length);
-    pushBytes(message_queue_pointer, payload);
-};
 
 void ConnectorClient::receive(){
 
@@ -45,15 +39,13 @@ void ConnectorClient::receive(){
                                reinterpret_cast<socklen_t *>(&client_length));
         cout << "\nConnection accepted...\n Elaborating response...";
 
-        //READ REQUEST
-        header hdr;
-        readHeader(hdr);
-        int byte_pld_l = payloadLengthByteToInt(hdr.payload_length);
+        //READ AND PUSH REQUEST
+        unsigned char header[HEADER_LENGTH];
+        int byte_pld_l = readHeader(header);
+        pushBytes(message_queue_pointer, header, byte_pld_l);
         unsigned char payload[byte_pld_l];
         read(client_sockfd, payload, byte_pld_l);
-
-        //PUSH REQUEST IN THE QUEUE
-        pushRequest(hdr,payload);
+        pushBytes(message_queue_pointer, payload, byte_pld_l);
     }
 }
 
@@ -82,80 +74,65 @@ void ConnectorServer::setServerLoad(unsigned int serverLoad) {
     server_load = serverLoad;
 }
 
-void ConnectorServer::writeBuffer(int position, unsigned char value){
-    connector_buffer[position] = value;
+void ConnectorServer::writeBuffer(unsigned char msg[], int n_bytes, int offset){
+    memcpy(connector_buffer + offset, msg, n_bytes);
 }
 
-void ConnectorServer::readHeader(header * hdr){
-
-    hdr->message_type = connector_buffer[0];
-    for(int i=1; i<5; i++){ //Fill two array with one cycle
-        hdr->source_id[i] = connector_buffer[i];
-        hdr->payload_length[i+4] = connector_buffer[i+4];
-    }
+int ConnectorServer::readSourceId(unsigned char source[]){
+    unsigned char s_id[SOURCE_ID_LENGTH];
+    memcpy(s_id, source + MESSAGE_TYPE_LENGTH, SOURCE_ID_LENGTH);
+    return byteToInt(s_id, SOURCE_ID_LENGTH);
 }
 
-void ConnectorServer::readPayload(unsigned char pld[], int pld_len){
-
-    for(int i=9; i<(pld_len+9); i++){
-        pld[i] = connector_buffer[i+9];
-    }
+int ConnectorServer::readPayloadLength(unsigned char source[]){
+    unsigned char p_len[PAYLOAD_LENGTH];
+    memcpy(p_len, source + HEADER_LENGTH - PAYLOAD_LENGTH, PAYLOAD_LENGTH);
+    return byteToInt(p_len, PAYLOAD_LENGTH);
 }
 
-void ConnectorServer::sendMessage(header hdr, unsigned char pld[], int pld_len, int sockfd){
-
-    write(sockfd, &hdr.message_type,1);
-    for(int i=4; i>0; i--){
-        write(sockfd, &hdr.source_id[i],1);
-    }
-    for(int i=8; i>4; i--){
-        write(sockfd, &hdr.payload_length[i],1);
-    }
-    for(int i=pld_len; i>8; i--){
-        write(sockfd, &pld[i],1);
-    }
-}
-
-void ConnectorServer::receiveHeader(header hdr, int sockfd){
-    read(sockfd, &(hdr.message_type), 1);
-    read(sockfd, hdr.source_id, 4);
-    read(sockfd, hdr.payload_length, 4);
+void ConnectorServer::readMessage(unsigned char message[], int n_byte){
+    memcpy(message, connector_buffer, n_byte);
 }
 
 void ConnectorServer::send() {
 
     //GET REQUEST FROM BUFFER
-    header hdr;
-    readHeader(&hdr);
-    int byte_pld_l = payloadLengthByteToInt(hdr.payload_length);
-    unsigned char payload[byte_pld_l];
-    readPayload(payload,byte_pld_l);
+    client_sockfd = readSourceId(connector_buffer);
+    unsigned char payload_length = readPayloadLength(connector_buffer);
+    unsigned char message[HEADER_LENGTH+payload_length];
+    readMessage(message, HEADER_LENGTH+payload_length);
 
     //SEND REQUEST TO SERVER
-    sendMessage(hdr, payload, byte_pld_l, server_sockfd);
+    write(server_sockfd, message, HEADER_LENGTH+payload_length);
 
     //GET RESPONSE FROM SERVER
-    receiveHeader(hdr,server_sockfd);
-    byte_pld_l = payloadLengthByteToInt(hdr.payload_length);
-    unsigned char payload2[byte_pld_l];
-    read(client_sockfd, payload2, byte_pld_l);
+    unsigned char header[HEADER_LENGTH];
+    read(server_sockfd,header, HEADER_LENGTH);
+    int byte_pld_l = readPayloadLength(header);
+    unsigned char payload[byte_pld_l];
+    read(server_sockfd, payload, byte_pld_l);
 
     //SEND RESPONSE TO CLIENT
-    sendMessage(hdr,payload2,byte_pld_l,sockfd);
+    write(client_sockfd, header,HEADER_LENGTH);
+    write(client_sockfd, payload, PAYLOAD_LENGTH);
+
+    //DECREMENT SERVER LOAD
+    server_load--;
 
     //CLOSE CONNECTION TO CLIENT
     close(client_sockfd);
 }
 
 //OTHER FUNCTIONS
-int payloadLengthByteToInt(unsigned char pld_l[4]){
-    int((unsigned char)(pld_l[0]) << 24 |
-        (unsigned char)(pld_l[1]) << 16 |
-        (unsigned char)(pld_l[2]) << 8 |
-        (unsigned char)(pld_l[3]));
+
+int byteToInt(const unsigned char bytes[], unsigned int n_bytes) {
+   int integer_value = 0;
+   for(int i = 0; i<n_bytes; i++){
+       integer_value += bytes[i] << (n_bytes - i - 1) * 8;
+   }
+   return integer_value;
 }
 
-void pushBytes(queue<unsigned char> *q_pnt, unsigned char *arr) {
-    unsigned int arr_bytes = sizeof(arr);
-    for(int i=arr_bytes; i>0; i--) q_pnt->push(arr[i]); //first push low significant byte
+void pushBytes(queue<unsigned char> *q_pnt, unsigned char *arr, int n_bytes) {
+    for(int i=0; i<n_bytes; i++) q_pnt->push(arr[i]);
 }

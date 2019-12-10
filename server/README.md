@@ -1,2 +1,3 @@
 # server
-An image server that stores and loads images
+The imagic server that send responses
+
