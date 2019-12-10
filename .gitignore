@@ -5,3 +5,6 @@ client/venv/
 load_balancer/.idea/
 load_balancer/cmake-build-debug/
 
+server/.idea/
+server/cmake-build-debug/
+
