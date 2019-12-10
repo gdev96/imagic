@@ -33,11 +33,11 @@ void ConnectorClient::receive(){
 
     while (true) {
 
-        cout << "\nServer in waiting for connections...";
+        cout << "Server is waiting for connections..." << endl;
         int client_length = sizeof(client_address);
         client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, //every connector has a sockfd
                                reinterpret_cast<socklen_t *>(&client_length));
-        cout << "\nConnection accepted...\n Elaborating response...";
+        cout << "\nConnection accepted...\n Elaborating response..." << endl;
 
         //READ AND PUSH REQUEST
         unsigned char header[HEADER_LENGTH];

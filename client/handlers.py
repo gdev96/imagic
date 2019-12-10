@@ -11,6 +11,8 @@ class LoadBalancerConnector:
     def send(self, message):
         self.sock.connect((HOST_ADDRESS, PORT))
         self.sock.send(message.header)
+        if isinstance(message.payload, str):
+            message.payload = message.payload.encode("raw_unicode_escape")
         bytes_to_send = len(message.payload)
         times_to_send = bytes_to_send / PACKET_LENGTH
         while times_to_send >= 0:
@@ -47,7 +49,7 @@ class MessageHandler:
                 payload.category.encode("raw_unicode_escape")
             )
         else:  # FIND_THUMBS or DOWNLOAD_IMAGE
-            payload.encode("raw_unicode_escape")
+            payload = payload.encode("raw_unicode_escape")
 
         self.current_message.payload = payload
 

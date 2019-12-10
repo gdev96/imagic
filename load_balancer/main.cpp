@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
-#include "Connector.h"
+#include "LoadBalancer.h"
 
 using namespace std;
 
 int main() {
-
+    LoadBalancer * lb = new LoadBalancer();
 }
