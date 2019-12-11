@@ -27,9 +27,9 @@ using  namespace std;
 
 //HEADER
 #define HEADER_LENGTH 9
+#define MESSAGE_TYPE 1
+#define SOURCE_ID 4
 #define PAYLOAD_LENGTH 4
-#define SOURCE_ID_LENGTH 4
-#define MESSAGE_TYPE_LENGTH 1
 
 //LOAD BALANCER
 #define N_SERVER 3

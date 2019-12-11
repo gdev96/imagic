@@ -1,6 +1,7 @@
 #ifndef IMAGIC_BACKEND_CONNECTOR_H
 #define IMAGIC_BACKEND_CONNECTOR_H
 
+#include "Message.h"
 #include "Constants.h"
 
 typedef struct header header;
@@ -15,7 +16,7 @@ struct header{
 class ConnectorClient{
 
     private:
-        queue <unsigned char> * message_queue_pointer;
+        queue <Message> * message_queue_pointer;
         int client_sockfd;
 
     public:

@@ -1,4 +1,5 @@
 #include "Connector.h"
+#include "Message.h"
 
 //CONNECTOR CLIENT SIDE
 ConnectorClient::ConnectorClient(queue<unsigned char> *messageQueuePointer) : message_queue_pointer(
@@ -39,12 +40,16 @@ void ConnectorClient::manageRequest(){
         cout << "\nConnection accepted...\n Elaborating response..." << endl;
 
         //READ AND PUSH REQUEST
-        unsigned char header[HEADER_LENGTH];
-        int byte_pld_l = readHeader(header);
+        unsigned char buffer[HEADER_LENGTH];
+        read(client_sockfd, buffer, HEADER_LENGTH);
+        auto *header = new Header();
+        header->deserialize(buffer);
+
+        /*int byte_pld_l = readHeader(header);
         pushBytes(message_queue_pointer, header, byte_pld_l);
         unsigned char payload[byte_pld_l];
         read(client_sockfd, payload, byte_pld_l);
-        pushBytes(message_queue_pointer, payload, byte_pld_l);
+        pushBytes(message_queue_pointer, payload, byte_pld_l);*/
     }
 }
 
@@ -78,9 +83,9 @@ void ConnectorServer::writeBuffer(unsigned char msg[], int n_bytes, int offset){
 }
 
 int ConnectorServer::readSourceId(unsigned char source[]){
-    unsigned char s_id[SOURCE_ID_LENGTH];
-    memcpy(s_id, source + MESSAGE_TYPE_LENGTH, SOURCE_ID_LENGTH);
-    return byteToInt(s_id, SOURCE_ID_LENGTH);
+    unsigned char s_id[SOURCE_ID];
+    memcpy(s_id, source + MESSAGE_TYPE, SOURCE_ID);
+    return byteToInt(s_id, SOURCE_ID);
 }
 
 int ConnectorServer::readPayloadLength(unsigned char source[]){

@@ -17,7 +17,7 @@ void LoadBalancer::initializeServerAddresses(){
         server_address[i].sin_addr.s_addr = inet_addr(CONNECTOR_SERVER_ADDRESS);
         server_address[i].sin_port = htons(server_address[i-1].sin_port+ CONNECTOR_SERVER_OFFSET_PORT);
     }
-    cout <<"Server addresses inizialized..." << endl;
+    cout <<"Server addresses initialized..." << endl;
 }
 
 LoadBalancer::LoadBalancer() {
@@ -63,10 +63,10 @@ void LoadBalancer::manageRequest() {
             unsigned char header[HEADER_LENGTH];
             readBytes(header, 0, HEADER_LENGTH);
             unsigned char msg_t;
-            memcpy(&msg_t, header, MESSAGE_TYPE_LENGTH);
-            int message_type = byteToInt(&msg_t, MESSAGE_TYPE_LENGTH);
+            memcpy(&msg_t, header, MESSAGE_TYPE);
+            int message_type = byteToInt(&msg_t, MESSAGE_TYPE);
             unsigned char p_len[PAYLOAD_LENGTH];
-            memcpy(&p_len, header + MESSAGE_TYPE_LENGTH + SOURCE_ID_LENGTH, PAYLOAD_LENGTH);
+            memcpy(&p_len, header + MESSAGE_TYPE + SOURCE_ID, PAYLOAD_LENGTH);
             int byte_pld_l = byteToInt(p_len, PAYLOAD_LENGTH);
             unsigned char pld[byte_pld_l];
             readBytes(pld, 0, byte_pld_l);

@@ -3,11 +3,12 @@
 
 #include "Constants.h"
 #include "Connector.h"
+#include "Message.h"
 
 class LoadBalancer{
 
     private:
-        queue <unsigned char> message_queue;
+        queue <Message> message_queue;
         ConnectorClient *client_connector;
         ConnectorServer *server_connector[N_SERVER];
         struct sockaddr_in server_address[MAX_SERVER];
