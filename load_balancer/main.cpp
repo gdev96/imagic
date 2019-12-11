@@ -1,9 +1,8 @@
 #include <iostream>
-#include <string>
 #include "LoadBalancer.h"
 
-using namespace std;
-
 int main() {
-    LoadBalancer * lb = new LoadBalancer();
+
+    LoadBalancer * load_balancer = new LoadBalancer();
+    thread lb_thread=thread(&LoadBalancer::manageRequest, load_balancer);
 }

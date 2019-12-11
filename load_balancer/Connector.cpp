@@ -8,7 +8,6 @@ int ConnectorClient::getClientSockfd() const {
     return client_sockfd;
 }
 
-
 int ConnectorClient::readHeader(unsigned char header[HEADER_LENGTH]){
     unsigned char pld_len[PAYLOAD_LENGTH];
     read(client_sockfd, &header, HEADER_LENGTH);
@@ -16,14 +15,14 @@ int ConnectorClient::readHeader(unsigned char header[HEADER_LENGTH]){
     return byteToInt(pld_len, PAYLOAD_LENGTH);
 }
 
-void ConnectorClient::receive(){
+void ConnectorClient::manageRequest(){
 
     //CREATE SOCKET
     struct sockaddr_in server_address, client_address;
 
     server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
-    server_address.sin_port = htons(SERVER_PORT);
+    server_address.sin_addr.s_addr = inet_addr(CONNECTOR_CLIENT_ADDRESS);
+    server_address.sin_port = htons(CONNECTOR_CLIENT_PORT);
     int server_length = sizeof(server_address);
 
     //CONNECTION WITH CLIENT
@@ -33,7 +32,7 @@ void ConnectorClient::receive(){
 
     while (true) {
 
-        cout << "Server is waiting for connections..." << endl;
+        cout << "Connector-Client is waiting for connections..." << endl;
         int client_length = sizeof(client_address);
         client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, //every connector has a sockfd
                                reinterpret_cast<socklen_t *>(&client_length));
@@ -94,7 +93,7 @@ void ConnectorServer::readMessage(unsigned char message[], int n_byte){
     memcpy(message, connector_buffer, n_byte);
 }
 
-void ConnectorServer::send() {
+void ConnectorServer::manageResponse(){
 
     //GET REQUEST FROM BUFFER
     client_sockfd = readSourceId(connector_buffer);

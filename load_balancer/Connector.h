@@ -1,28 +1,12 @@
 #ifndef IMAGIC_BACKEND_CONNECTOR_H
 #define IMAGIC_BACKEND_CONNECTOR_H
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <string>
-#include <cstring>
-#include <iostream>
-#include <unistd.h>
-#include <queue>
+#include "Constants.h"
 
-#define BUFFER_SIZE 10000000
-#define SERVER_ADDRESS "127.0.0.1"
-#define SERVER_PORT 5000
-#define QUEUE_LENGTH_CONNECTIONS 5
-#define HEADER_LENGTH 9
-#define PAYLOAD_LENGTH 4
-#define SOURCE_ID_LENGTH 4
-#define MESSAGE_TYPE_LENGTH 1
-
-using namespace std;
 typedef struct header header;
 
 struct header{
+
     unsigned char message_type;
     unsigned char source_id[4];
     unsigned char payload_length[4];
@@ -38,7 +22,7 @@ class ConnectorClient{
         explicit ConnectorClient(queue<unsigned char> *messageQueuePointer);
         int getClientSockfd() const;
         int readHeader(unsigned char header[HEADER_LENGTH]);
-        void receive();
+        void manageRequest();
 };
 
 class ConnectorServer{
@@ -58,7 +42,7 @@ class ConnectorServer{
         int readSourceId(unsigned char source[]);
         int readPayloadLength(unsigned char source[]);
         void readMessage(unsigned char message[], int n_byte);
-        void send();
+        void manageResponse();
 };
 
 int byteToInt(const unsigned char[], unsigned int n_bytes);
