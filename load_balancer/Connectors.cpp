@@ -1,11 +1,10 @@
-#include "Connector.h"
+#include "Connectors.h"
 
 //CONNECTOR CLIENT SIDE
 
 ConnectorClient::ConnectorClient(queue<Message *> *messageQueue) : message_queue(messageQueue) {}
 
-void ConnectorClient::manageRequest(){
-
+void ConnectorClient::manageRequest() {
     //CREATE SOCKET
     struct sockaddr_in server_address, client_address;
 
@@ -42,7 +41,6 @@ void ConnectorClient::manageRequest(){
 
 //CONNECTOR SERVER-SIDE
 ConnectorServer::ConnectorServer(sockaddr_in *serverAddress) : server_address(serverAddress) {
-
     server_load = 0;
 
     //CONNECTION WITH SERVER
@@ -59,8 +57,7 @@ void ConnectorServer::setServerLoad(unsigned int serverLoad) {
     server_load = serverLoad;
 }
 
-void ConnectorServer::manageResponse(Message *message){//Connector server know the current_message
-
+void ConnectorServer::manageResponse(Message *message) { //Connector server know the current_message
     //GET THE CLIENT_SOCKFD
     uint32_t client_sockfd = message->getHeader()->getSourceId();
     uint32_t payload_length = message->getHeader()->getPayloadLength();

@@ -9,7 +9,6 @@ class Header {
         unsigned char message_type;
         uint32_t source_id;
         uint32_t payload_length;
-
     public:
         Header();
         unsigned char getMessageType() const;
@@ -20,8 +19,7 @@ class Header {
         void setPayloadLength(uint32_t payloadLength);
         void serialize(unsigned char *buffer);
         void deserialize(unsigned char *buffer);
-
-    friend std::ostream &operator<<(std::ostream &os, const Header &header);
+        friend std::ostream &operator<<(std::ostream &os, const Header &header);
 };
 
 class Message {
@@ -30,6 +28,7 @@ class Message {
         unsigned char *payload;
     public:
         Message(Header *header, unsigned char *payload);
+        ~Message();
         Header *getHeader() const;
         unsigned char *getPayload() const;
 };

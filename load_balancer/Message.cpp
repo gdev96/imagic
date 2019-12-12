@@ -47,8 +47,11 @@ ostream &operator<<(ostream &os, const Header &header) {
     return os;
 }
 
-Message::Message(Header *header, unsigned char *payload) : header(header), payload(payload) {
+Message::Message(Header *header, unsigned char *payload) : header(header), payload(payload) {}
 
+Message::~Message() {
+    delete header;
+    delete[] payload;
 }
 
 Header *Message::getHeader() const {
