@@ -2,19 +2,8 @@
 #include "Message.h"
 
 //CONNECTOR CLIENT SIDE
-ConnectorClient::ConnectorClient(queue<unsigned char> *messageQueuePointer) : message_queue_pointer(
-        messageQueuePointer) {}
 
-int ConnectorClient::getClientSockfd() const {
-    return client_sockfd;
-}
-
-int ConnectorClient::readHeader(unsigned char header[HEADER_LENGTH]){
-    unsigned char pld_len[PAYLOAD_LENGTH];
-    read(client_sockfd, &header, HEADER_LENGTH);
-    memcpy(pld_len, header + HEADER_LENGTH - PAYLOAD_LENGTH, PAYLOAD_LENGTH);
-    return byteToInt(pld_len, PAYLOAD_LENGTH);
-}
+ConnectorClient::ConnectorClient(queue<Message> *message_queue) : message_queue(message_queue) {}
 
 void ConnectorClient::manageRequest(){
 
@@ -42,27 +31,24 @@ void ConnectorClient::manageRequest(){
         //READ AND PUSH REQUEST
         unsigned char buffer[HEADER_LENGTH];
         read(client_sockfd, buffer, HEADER_LENGTH);
-        auto *header = new Header();
+        auto header = new Header();
         header->deserialize(buffer);
-
-        /*int byte_pld_l = readHeader(header);
-        pushBytes(message_queue_pointer, header, byte_pld_l);
-        unsigned char payload[byte_pld_l];
-        read(client_sockfd, payload, byte_pld_l);
-        pushBytes(message_queue_pointer, payload, byte_pld_l);*/
+        header->setSourceId(client_sockfd);
+        uint32_t payload_length = header->getPayloadLength();
+        auto payload = new unsigned char[payload_length];
+        read(client_sockfd, payload, payload_length);
+        auto message = new Message(header, payload);
+        message_queue->push(*message);
     }
 }
 
 //CONNECTOR SERVER-SIDE
-ConnectorServer::ConnectorServer(int clientSockfd, sockaddr_in *serverAddress) : client_sockfd(clientSockfd),
-                                                                                 server_address(serverAddress) {
+ConnectorServer::ConnectorServer(sockaddr_in *serverAddress) : server_address(serverAddress) {
     server_load = 0;
-    for (int i=0; i<BUFFER_SIZE; i++){
-        connector_buffer[i]=0;
-    }
+
     //CONNECTION WITH SERVER
-    server_sockfd=socket(AF_INET, SOCK_STREAM, 0);
-    unsigned int len = sizeof(server_address);
+    server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    unsigned int len = sizeof(*server_address);
     connect(server_sockfd, (struct sockaddr *)&server_address, len);
 }
 
@@ -82,26 +68,14 @@ void ConnectorServer::writeBuffer(unsigned char msg[], int n_bytes, int offset){
     memcpy(connector_buffer + offset, msg, n_bytes);
 }
 
-int ConnectorServer::readSourceId(unsigned char source[]){
-    unsigned char s_id[SOURCE_ID];
-    memcpy(s_id, source + MESSAGE_TYPE, SOURCE_ID);
-    return byteToInt(s_id, SOURCE_ID);
-}
-
-int ConnectorServer::readPayloadLength(unsigned char source[]){
-    unsigned char p_len[PAYLOAD_LENGTH];
-    memcpy(p_len, source + HEADER_LENGTH - PAYLOAD_LENGTH, PAYLOAD_LENGTH);
-    return byteToInt(p_len, PAYLOAD_LENGTH);
-}
-
 void ConnectorServer::readMessage(unsigned char message[], int n_byte){
     memcpy(message, connector_buffer, n_byte);
 }
 
-void ConnectorServer::manageResponse(){
+void ConnectorServer::manageResponse(Message *message){
 
     //GET REQUEST FROM BUFFER
-    client_sockfd = readSourceId(connector_buffer);
+    uint32_t client_sockfd = message->getHeader()->getSourceId();
     unsigned char payload_length = readPayloadLength(connector_buffer);
     unsigned char message[HEADER_LENGTH+payload_length];
     readMessage(message, HEADER_LENGTH+payload_length);
@@ -120,23 +94,12 @@ void ConnectorServer::manageResponse(){
     write(client_sockfd, header,HEADER_LENGTH);
     write(client_sockfd, payload, PAYLOAD_LENGTH);
 
+    //DELETE MESSAGE
+    delete message;
+
     //DECREMENT SERVER LOAD
     server_load--;
 
     //CLOSE CONNECTION TO CLIENT
     close(client_sockfd);
-}
-
-//OTHER FUNCTIONS
-
-int byteToInt(const unsigned char bytes[], unsigned int n_bytes) {
-   int integer_value = 0;
-   for(int i = 0; i<n_bytes; i++){
-       integer_value += bytes[i] << (n_bytes - i - 1) * 8;
-   }
-   return integer_value;
-}
-
-void pushBytes(queue<unsigned char> *q_pnt, unsigned char *arr, int n_bytes) {
-    for(int i=0; i<n_bytes; i++) q_pnt->push(arr[i]);
 }

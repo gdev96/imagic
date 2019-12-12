@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <thread>
 #include <pthread.h>
+#include "Message.h"
 
 //NAMESPACES
 using  namespace std;

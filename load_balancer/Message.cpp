@@ -5,25 +5,58 @@ Header::Header() {
 
 }
 
-void Header::serialize(unsigned char *buffer) {
-    *buffer = message_type;
-    *((uint32_t *)(buffer + MESSAGE_TYPE)) = htonl(source_id);
-    *((uint32_t *)(buffer + MESSAGE_TYPE + SOURCE_ID)) = htonl(payload_length);
+unsigned char Header::getMessageType() const {
+    return message_type;
 }
 
-void Header::deserialize(const unsigned char *buffer) {
-    message_type = *buffer;
-    source_id = ntohl(*((uint32_t *)(buffer + MESSAGE_TYPE)));
-    payload_length = ntohl(*((uint32_t *)(buffer + MESSAGE_TYPE + SOURCE_ID)));
+uint32_t Header::getSourceId() const {
+    return source_id;
+}
+
+uint32_t Header::getPayloadLength() const {
+    return payload_length;
+}
+
+void Header::setMessageType(unsigned char messageType) {
+    message_type = messageType;
+}
+
+void Header::setSourceId(uint32_t sourceId) {
+    source_id = sourceId;
+}
+
+void Header::setPayloadLength(uint32_t payloadLength) {
+    payload_length = payloadLength;
+}
+
+void Header::serialize(unsigned char *buffer) {
+    *buffer++ = message_type;
+    auto *int_buffer = (uint32_t *)buffer;
+    *int_buffer++ = htonl(source_id);
+    *int_buffer = htonl(payload_length);
+}
+
+void Header::deserialize(unsigned char *buffer) {
+    message_type = *buffer++;
+    auto *int_buffer = (uint32_t *)buffer;
+    source_id = ntohl(*int_buffer++);
+    payload_length = ntohl(*int_buffer);
 }
 
 ostream &operator<<(ostream &os, const Header &header) {
-    os << "message_type: " << (uint16_t)header.message_type << " source_id: " << header.source_id << " payload_length: "
+    os << "message_type: " << (unsigned int)header.message_type << " source_id: " << header.source_id << " payload_length: "
        << header.payload_length;
     return os;
 }
 
-Message::Message(const Header &header, unsigned char *payload, uint32_t payload_length) : header(header) {
-    this->payload = new unsigned char[payload_length];
-    //COPY payload ARRAY CONTENT
+Message::Message(Header *header, unsigned char *payload) : header(header), payload(payload) {
+
+}
+
+Header *Message::getHeader() const {
+    return header;
+}
+
+unsigned char *Message::getPayload() const {
+    return payload;
 }

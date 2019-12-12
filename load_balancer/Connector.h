@@ -4,46 +4,35 @@
 #include "Message.h"
 #include "Constants.h"
 
-typedef struct header header;
-
-struct header{
-
-    unsigned char message_type;
-    unsigned char source_id[4];
-    unsigned char payload_length[4];
-};
-
 class ConnectorClient{
 
     private:
-        queue <Message> * message_queue_pointer;
+        queue<Message> *message_queue;
         int client_sockfd;
 
     public:
-        explicit ConnectorClient(queue<unsigned char> *messageQueuePointer);
-        int getClientSockfd() const;
-        int readHeader(unsigned char header[HEADER_LENGTH]);
+        ConnectorClient(queue<Message> *message_queue);
         void manageRequest();
 };
 
 class ConnectorServer{
 
     private:
-        int client_sockfd, server_sockfd;
-        struct sockaddr_in* server_address;
+        int server_sockfd;
+        struct sockaddr_in *server_address;
         unsigned int server_load;
-        unsigned char connector_buffer[BUFFER_SIZE];
+        Message *message;
 
     public:
-        ConnectorServer(int clientSockfd, sockaddr_in *serverAddress);
-        [[nodiscard]] const unsigned char *getConnectorBuffer() const;
-        [[nodiscard]] unsigned int getServerLoad() const;
+        ConnectorServer(sockaddr_in *serverAddress);
+        const unsigned char *getConnectorBuffer() const;
+        unsigned int getServerLoad() const;
         void setServerLoad(unsigned int serverLoad);
         void writeBuffer(unsigned char msg[], int n_bytes, int offset);
         int readSourceId(unsigned char source[]);
         int readPayloadLength(unsigned char source[]);
         void readMessage(unsigned char message[], int n_byte);
-        void manageResponse();
+        void manageResponse(Message *message);
 };
 
 int byteToInt(const unsigned char[], unsigned int n_bytes);

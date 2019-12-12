@@ -8,7 +8,8 @@
 class LoadBalancer{
 
     private:
-        queue <Message> message_queue;
+        Message *current_message;
+        queue<Message> message_queue;
         ConnectorClient *client_connector;
         ConnectorServer *server_connector[N_SERVER];
         struct sockaddr_in server_address[MAX_SERVER];
