@@ -7,11 +7,11 @@
 class ConnectorClient{
 
     private:
-        queue<Message> *message_queue;
+        queue<Message *> *message_queue;
         int client_sockfd;
 
     public:
-        ConnectorClient(queue<Message> *message_queue);
+        ConnectorClient(queue<Message *> *messageQueue);
         void manageRequest();
 };
 
@@ -21,7 +21,6 @@ class ConnectorServer{
         int server_sockfd;
         struct sockaddr_in *server_address;
         unsigned int server_load;
-        Message *message;
 
     public:
         ConnectorServer(sockaddr_in *serverAddress);

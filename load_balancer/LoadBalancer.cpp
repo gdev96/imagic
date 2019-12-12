@@ -50,7 +50,7 @@ void LoadBalancer::manageRequests() {
 
         if(!message_queue.empty()) {
             //GET MESSAGE FROM QUEUE
-            current_message = &message_queue.front();
+            current_message = message_queue.front();
             message_queue.pop();
             cout << "Message received:" << endl;
             cout << *current_message->getHeader() << endl;

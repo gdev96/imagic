@@ -2,7 +2,7 @@
 
 //CONNECTOR CLIENT SIDE
 
-ConnectorClient::ConnectorClient(queue<Message> *message_queue) : message_queue(message_queue) {}
+ConnectorClient::ConnectorClient(queue<Message *> *messageQueue) : message_queue(messageQueue) {}
 
 void ConnectorClient::manageRequest(){
 
@@ -36,7 +36,8 @@ void ConnectorClient::manageRequest(){
         auto payload = new unsigned char[payload_length];
         read(client_sockfd, payload, payload_length);
         auto message = new Message(header, payload);
-        message_queue->push(*message);
+        message_queue->push(message);
+        int s = 0;
     }
 }
 
