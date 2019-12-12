@@ -37,7 +37,6 @@ void ConnectorClient::manageRequest(){
         read(client_sockfd, payload, payload_length);
         auto message = new Message(header, payload);
         message_queue->push(message);
-        int s = 0;
     }
 }
 
