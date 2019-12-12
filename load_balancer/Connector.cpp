@@ -1,5 +1,4 @@
 #include "Connector.h"
-#include "Message.h"
 
 //CONNECTOR CLIENT SIDE
 
@@ -44,16 +43,13 @@ void ConnectorClient::manageRequest(){
 
 //CONNECTOR SERVER-SIDE
 ConnectorServer::ConnectorServer(sockaddr_in *serverAddress) : server_address(serverAddress) {
+
     server_load = 0;
 
     //CONNECTION WITH SERVER
     server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     unsigned int len = sizeof(*server_address);
     connect(server_sockfd, (struct sockaddr *)&server_address, len);
-}
-
-const unsigned char *ConnectorServer::getConnectorBuffer() const {
-    return connector_buffer;
 }
 
 unsigned int ConnectorServer::getServerLoad() const {
@@ -64,35 +60,26 @@ void ConnectorServer::setServerLoad(unsigned int serverLoad) {
     server_load = serverLoad;
 }
 
-void ConnectorServer::writeBuffer(unsigned char msg[], int n_bytes, int offset){
-    memcpy(connector_buffer + offset, msg, n_bytes);
-}
+void ConnectorServer::manageResponse(Message *message){//Connector server know the current_message
 
-void ConnectorServer::readMessage(unsigned char message[], int n_byte){
-    memcpy(message, connector_buffer, n_byte);
-}
-
-void ConnectorServer::manageResponse(Message *message){
-
-    //GET REQUEST FROM BUFFER
+    //GET THE CLIENT_SOCKFD
     uint32_t client_sockfd = message->getHeader()->getSourceId();
-    unsigned char payload_length = readPayloadLength(connector_buffer);
-    unsigned char message[HEADER_LENGTH+payload_length];
-    readMessage(message, HEADER_LENGTH+payload_length);
+    uint32_t payload_lenght = message->getHeader()->getPayloadLength();
 
     //SEND REQUEST TO SERVER
-    write(server_sockfd, message, HEADER_LENGTH+payload_length);
+    unsigned char buffer[HEADER_LENGTH];
+    message->getHeader()->deserialize(buffer);
+    write(server_sockfd, buffer, HEADER_LENGTH);
+    write(server_sockfd, message->getPayload(), payload_lenght);
 
     //GET RESPONSE FROM SERVER
-    unsigned char header[HEADER_LENGTH];
-    read(server_sockfd,header, HEADER_LENGTH);
-    int byte_pld_l = readPayloadLength(header);
-    unsigned char payload[byte_pld_l];
-    read(server_sockfd, payload, byte_pld_l);
+    read(server_sockfd, buffer, HEADER_LENGTH);
+    message->getHeader()->deserialize(buffer);
+    read(server_sockfd, buffer, message->getHeader()->getPayloadLength());
 
     //SEND RESPONSE TO CLIENT
-    write(client_sockfd, header,HEADER_LENGTH);
-    write(client_sockfd, payload, PAYLOAD_LENGTH);
+    write(client_sockfd, message->getHeader(),HEADER_LENGTH);
+    write(client_sockfd, buffer, message->getHeader()->getPayloadLength());
 
     //DELETE MESSAGE
     delete message;

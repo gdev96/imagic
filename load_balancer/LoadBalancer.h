@@ -20,7 +20,6 @@ class LoadBalancer{
         void initializeServerAddresses();
         int balance();
         void manageRequest();
-        void readBytes(unsigned char buffer[], int offset, int n_bytes);
 };
 
 #endif //IMAGIC_BACKEND_LOADBALANCER_H

@@ -1,14 +1,6 @@
 #include "LoadBalancer.h"
 #include "Constants.h"
 
-void LoadBalancer::readBytes(unsigned char buffer[],int offset, int n_bytes){
-
-    for(int i=offset; i<n_bytes; i++){
-        buffer[i]=message_queue.front();
-        message_queue.pop();
-    }
-}
-
 void LoadBalancer::initializeServerAddresses(){
     server_address[0].sin_family = AF_INET;
     server_address[0].sin_addr.s_addr = inet_addr(CONNECTOR_SERVER_ADDRESS);
@@ -38,7 +30,7 @@ LoadBalancer::LoadBalancer() {
     }
 }
 
-int LoadBalancer::balance(){
+int LoadBalancer::balance() {
 
     int server_low_load=0, low_load=0;
     for(int i=0; i<N_SERVER; i++) {
@@ -47,11 +39,6 @@ int LoadBalancer::balance(){
     }
     return server_low_load;
 };
-
-void messageCopyOnBufferConnector(unsigned char message[], int offset, int n_bytes, ConnectorServer* cs){
-
-    cs->writeBuffer(message, n_bytes, offset);
-}
 
 void LoadBalancer::manageRequest() {
 
@@ -65,12 +52,14 @@ void LoadBalancer::manageRequest() {
                 for(int i=0; i<N_SERVER; i++){
                     server_connector[i]->setServerLoad(server_connector[i]->getServerLoad()+1);
                     arrayThreads[i+1] = thread(&ConnectorServer::manageResponse, this->server_connector[i], current_message);
+                    arrayThreads[i+1].detach();
                 }
             }
-            else{ //Message must be sent to one server only
+            else{//Message must be sent to one server only
                 int chosen_server = balance();
                 server_connector[chosen_server]->setServerLoad(server_connector[chosen_server]->getServerLoad()+1);
                 arrayThreads[chosen_server+1] = thread(&ConnectorServer::manageResponse, this->server_connector[chosen_server], current_message);
+                arrayThreads[chosen_server+1].detach();
             }
         }
     }

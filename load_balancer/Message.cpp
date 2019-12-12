@@ -1,9 +1,7 @@
 #include "Message.h"
 #include "Constants.h"
 
-Header::Header() {
-
-}
+Header::Header() {}
 
 unsigned char Header::getMessageType() const {
     return message_type;

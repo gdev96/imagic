@@ -25,13 +25,8 @@ class ConnectorServer{
 
     public:
         ConnectorServer(sockaddr_in *serverAddress);
-        const unsigned char *getConnectorBuffer() const;
         unsigned int getServerLoad() const;
         void setServerLoad(unsigned int serverLoad);
-        void writeBuffer(unsigned char msg[], int n_bytes, int offset);
-        int readSourceId(unsigned char source[]);
-        int readPayloadLength(unsigned char source[]);
-        void readMessage(unsigned char message[], int n_byte);
         void manageResponse(Message *message);
 };
 
