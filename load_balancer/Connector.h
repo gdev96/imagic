@@ -30,7 +30,4 @@ class ConnectorServer{
         void manageResponse(Message *message);
 };
 
-int byteToInt(const unsigned char[], unsigned int n_bytes);
-void pushBytes(queue<unsigned char>* q_pnt, unsigned char arr[],int n_bytes);
-
 #endif //IMAGIC_BACKEND_CONNECTOR_H

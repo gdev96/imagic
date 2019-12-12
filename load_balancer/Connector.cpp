@@ -18,14 +18,13 @@ void ConnectorClient::manageRequest(){
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
+    cout << "Client connector is waiting for connections..." << endl;
 
     while (true) {
-
-        cout << "Connector-Client is waiting for connections..." << endl;
         int client_length = sizeof(client_address);
         client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, //every connector has a sockfd
                                reinterpret_cast<socklen_t *>(&client_length));
-        cout << "\nConnection accepted...\n Elaborating response..." << endl;
+        cout << "Connection accepted...Elaborating request..." << endl;
 
         //READ AND PUSH REQUEST
         unsigned char buffer[HEADER_LENGTH];
@@ -64,13 +63,13 @@ void ConnectorServer::manageResponse(Message *message){//Connector server know t
 
     //GET THE CLIENT_SOCKFD
     uint32_t client_sockfd = message->getHeader()->getSourceId();
-    uint32_t payload_lenght = message->getHeader()->getPayloadLength();
+    uint32_t payload_length = message->getHeader()->getPayloadLength();
 
     //SEND REQUEST TO SERVER
     unsigned char buffer[HEADER_LENGTH];
     message->getHeader()->deserialize(buffer);
     write(server_sockfd, buffer, HEADER_LENGTH);
-    write(server_sockfd, message->getPayload(), payload_lenght);
+    write(server_sockfd, message->getPayload(), payload_length);
 
     //GET RESPONSE FROM SERVER
     read(server_sockfd, buffer, HEADER_LENGTH);

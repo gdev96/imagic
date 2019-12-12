@@ -177,7 +177,7 @@ class Ui_MainWindow(object):
         self.stackedWidget.setCurrentIndex(0)
 
     def searchbutton_onclick(self):
-        imagic.find_thumbs(self.searchbutton.text())
+        imagic.find_thumbs(self.searchtext.text())
         for thumb_file, thumb_path in imagic.current_thumbs:
             image_pixmap = QtGui.QPixmap()
             image_pixmap.loadFromData(QtCore.QByteArray(thumb_file))

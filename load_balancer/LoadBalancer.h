@@ -19,7 +19,7 @@ class LoadBalancer{
         LoadBalancer();
         void initializeServerAddresses();
         int balance();
-        void manageRequest();
+        void manageRequests();
 };
 
 #endif //IMAGIC_BACKEND_LOADBALANCER_H

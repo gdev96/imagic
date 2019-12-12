@@ -10,7 +10,7 @@ void LoadBalancer::initializeServerAddresses(){
         server_address[i].sin_addr.s_addr = inet_addr(CONNECTOR_SERVER_ADDRESS);
         server_address[i].sin_port = htons(server_address[i-1].sin_port+ CONNECTOR_SERVER_OFFSET_PORT);
     }
-    cout <<"Server addresses initialized..." << endl;
+    cout << "Server addresses initialized..." << endl;
 }
 
 LoadBalancer::LoadBalancer() {
@@ -20,34 +20,41 @@ LoadBalancer::LoadBalancer() {
 
     //CREATE CLIENT CONNECTOR
     client_connector = new ConnectorClient(&message_queue);
-    cout <<"Connector-Client created..." << endl;
+    cout << "Client connector created..." << endl;
     arrayThreads[0] = thread(&ConnectorClient::manageRequest, this->client_connector);
 
+    /*
     //CREATE SERVER CONNECTORS
     for(int i=0; i<N_SERVER; i++){
         server_connector[i] = new ConnectorServer(&server_address[i]);
         cout << "Connector-Server[" << i << "] created..." << endl;
     }
+    */
 }
 
 int LoadBalancer::balance() {
-
+    /*
     int server_low_load=0, low_load=0;
     for(int i=0; i<N_SERVER; i++) {
         if ((server_connector[i]->getServerLoad()) <= low_load)
             server_low_load = i;
     }
     return server_low_load;
+    */
+    return 0;
 };
 
-void LoadBalancer::manageRequest() {
+void LoadBalancer::manageRequests() {
 
     while(true) {
 
         if(!message_queue.empty()) {
             //GET MESSAGE FROM QUEUE
-            *current_message = message_queue.front();
+            current_message = &message_queue.front();
             message_queue.pop();
+            cout << "Message received:" << endl;
+            cout << *current_message->getHeader() << endl;
+            /*
             if(!current_message->getHeader()->getMessageType()){ //Message must be sent in broadcast
                 for(int i=0; i<N_SERVER; i++){
                     server_connector[i]->setServerLoad(server_connector[i]->getServerLoad()+1);
@@ -61,6 +68,7 @@ void LoadBalancer::manageRequest() {
                 arrayThreads[chosen_server+1] = thread(&ConnectorServer::manageResponse, this->server_connector[chosen_server], current_message);
                 arrayThreads[chosen_server+1].detach();
             }
+            */
         }
     }
 };
