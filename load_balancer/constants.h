@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include <thread>
 #include <pthread.h>
-#include "Message.h"
+#include "message.h"
 
 //NAMESPACES
 using  namespace std;
@@ -22,7 +22,7 @@ using  namespace std;
 #define CONNECTOR_CLIENT_PORT 5000
 #define CONNECTOR_SERVER_ADDRESS "127.0.0.1"
 #define CONNECTOR_SERVER_FIRST_PORT 6000
-#define CONNECTOR_SERVER_OFFSET_PORT 10
+#define CONNECTOR_SERVER_PORT_STRIDE 10
 #define BUFFER_SIZE 10000000 //bytes
 #define QUEUE_LENGTH_CONNECTIONS 5
 

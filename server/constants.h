@@ -2,9 +2,9 @@
 #define IMAGIC_BACKEND_CONSTANTS_H
 
 //INCLUDES
+#include <cstring>
 #include <iostream>
 #include <string>
-#include <cstring>
 #include <queue>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -12,7 +12,8 @@
 #include <unistd.h>
 #include <thread>
 #include <pthread.h>
-#include "Message.h"
+
+#include "message.h"
 
 //NAMESPACES
 using  namespace std;
