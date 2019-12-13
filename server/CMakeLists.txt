@@ -3,4 +3,14 @@ project(server)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(server main.cpp)
+include_directories(.)
+
+add_executable(server
+        Connectors.cpp
+        Connectors.h
+        Constants.h
+        LoadBalancer.cpp
+        LoadBalancer.h
+        main.cpp
+        Message.cpp
+        Message.h Image.cpp Image.h)
