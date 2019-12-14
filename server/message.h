@@ -3,6 +3,13 @@
 
 #include <cstdint>
 #include <ostream>
+#include <unordered_map>
+#include <variant>
+#include <vector>
+
+#include "image.h"
+
+using namespace std;
 
 class header {
     private:
@@ -22,15 +29,29 @@ class header {
         friend std::ostream &operator<<(std::ostream &os, const header &header);
 };
 
+class payload {
+    private:
+        variant<
+                image *,
+                string *,
+                vector<unsigned char> *,
+                unordered_map<vector<unsigned char>,string> *
+               > content_;
+    public:
+        void serialize(unsigned char *buffer);
+        void deserialize(unsigned char *buffer, uint32_t buffer_size, unsigned char message_type);
+};
+
 class message {
     private:
         header *header_;
-        unsigned char *payload_;
+        payload *payload_;
     public:
-        message(header *header, unsigned char *payload);
+        message();
+        message(header *header, payload *payload);
         ~message();
         header *get_header() const;
-        unsigned char *get_payload() const;
+        payload *get_payload() const;
 };
 
 #endif //IMAGIC_BACKEND_MESSAGE_H
