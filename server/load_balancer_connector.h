@@ -1,8 +1,7 @@
 #ifndef SERVER_LOAD_BALANCER_CONNECTOR_H
 #define SERVER_LOAD_BALANCER_CONNECTOR_H
 
-#include "message.h"
-#include "constants.h"
+#include <netinet/in.h>
 
 class load_balancer_connector {
     private:
@@ -12,6 +11,9 @@ class load_balancer_connector {
         load_balancer_connector(char *address, int port);
         void receive_requests();
         void manage_request(int lb_sockfd);
+        void download_image();
+        void view_thumbs();
+        void upload_request();
 };
 
 #endif //SERVER_LOAD_BALANCER_CONNECTOR_H

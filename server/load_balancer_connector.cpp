@@ -1,3 +1,11 @@
+#include <arpa/inet.h>
+#include <iostream>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <thread>
+#include <unistd.h>
+#include "constants.h"
+#include "message.h"
 #include "load_balancer_connector.h"
 
 load_balancer_connector::load_balancer_connector(){};
@@ -18,21 +26,32 @@ void load_balancer_connector::receive_requests() {
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address_, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
-    cout << "Client connector is waiting for connections..." << endl;
+    std::cout << "Client connector is waiting for connections..." << std::endl;
 
     while (true) {
         int lb_length = sizeof(lb_address);
         int lb_sockfd_ = accept(server_sockfd, (struct sockaddr *) &lb_address, //every connector has a sockfd
                            reinterpret_cast<socklen_t *>(&lb_length));
-        cout << "Connection accepted...Elaborating request..." << endl;
+        std::cout << "Connection accepted...Elaborating request..." << std::endl;
 
-        thread t(&load_balancer_connector::receive_requests, this);
+        std::thread t(&load_balancer_connector::receive_requests, this);
 
     }
 }
 
-void manage_request(int lb_sockfd){
+void download_image() {
 
+}
+
+void view_thumbs() {
+
+}
+
+void upload_request() {
+
+}
+
+void manage_request(int lb_sockfd){
     //READ REQUEST FROM SOCKET AND CREATE MESSAGE
     unsigned char header_buffer[HEADER_LENGTH];
     read(lb_sockfd, header_buffer, HEADER_LENGTH);
@@ -45,16 +64,20 @@ void manage_request(int lb_sockfd){
     read(lb_sockfd, payload_buffer, payload_length);
     message_payload->deserialize(payload_buffer, payload_length, message_type);
     auto received_message = new message(message_header, message_payload);
-    cout << "Message received.." << endl << "Processing request.." << endl;
+    std::cout << "Message received.." << std::endl << "Processing request.." << std::endl;
 
     //MANAGE REQUEST
     switch(message_type) {
         case 0: //UPLOAD REQUEST -> save paths in db e file in storage
+            upload_request();
             break;
         case 1: //VIEW THUMBS -> get thumbs map and send in response
+            view_thumbs();
             break;
         case 2: //DOWNLOAD IMAGE -> get the image to send in response
+            download_image();
             break;
-        default: break;
+        default:
+            break;
     }
 }

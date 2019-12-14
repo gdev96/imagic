@@ -1,5 +1,5 @@
+#include <netinet/in.h>
 #include "message.h"
-#include "constants.h"
 
 header::header() {}
 
@@ -41,7 +41,7 @@ void header::deserialize(unsigned char *buffer) {
     payload_length_ = ntohl(*int_buffer);
 }
 
-ostream &operator<<(ostream &os, const header &header) {
+std::ostream &operator<<(std::ostream &os, const header &header) {
     os << "message_type: " << (unsigned int)header.message_type_ << " source_id: " << header.source_id_
         << " payload_length: " << header.payload_length_;
     return os;
@@ -66,11 +66,37 @@ payload *message::get_payload() const {
 
 void payload::serialize(unsigned char *buffer) {
     if(content_.index() == 3) { //SERIALIZE MAP
+        //GET MAP FROM VARIANT
+        std::map<std::vector<unsigned char>, std::string> *thumbs_map = std::get<3>(content_);
 
+        uint32_t *int_buffer;
+        unsigned char *byte_buffer = buffer;
+        uint32_t next_length;
+
+        //ITERATE OVER MAP
+        for(const auto& [key, value] : *thumbs_map) {
+            //COPY THUMB LENGTH AND THUMB FILE
+            int_buffer = (uint32_t *)buffer;
+            next_length = key.size();
+            *int_buffer++ = htonl(next_length);
+            byte_buffer = (unsigned char *)int_buffer;
+            std::copy(key.begin(), key.end(), byte_buffer);
+            byte_buffer += next_length;
+
+            //COPY PATH LENGTH AND PATH
+            int_buffer = (uint32_t *)byte_buffer;
+            next_length = value.length();
+            *int_buffer++ = htonl(next_length);
+            byte_buffer = (unsigned char *)int_buffer;
+            std::copy(key.begin(), key.end(), byte_buffer);
+            byte_buffer += next_length;
+        }
+        int_buffer = (uint32_t *)byte_buffer;
+        *int_buffer = htonl(0);
     }
     else { //SERIALIZE BYTE VECTOR
         //GET BYTE VECTOR FROM VARIANT
-        vector<unsigned char> *byte_vector = std::get<2>(content_);
+        std::vector<unsigned char> *byte_vector = std::get<2>(content_);
 
         //POPULATE BUFFER
         std::copy(byte_vector->begin(), byte_vector->end(), buffer);
@@ -87,19 +113,19 @@ void payload::deserialize(unsigned char *buffer, uint32_t buffer_size, unsigned 
         int_buffer = (uint32_t *)buffer;
         image_size = ntohl(*int_buffer++);
         byte_buffer = (unsigned char *)int_buffer;
-        auto image_file = new vector<unsigned char>(image_size);
+        auto image_file = new std::vector<unsigned char>(image_size);
         image_file->assign(byte_buffer, byte_buffer + image_size);
 
         //GET CATEGORY FROM PAYLOAD
         int_buffer = (uint32_t *)(byte_buffer + image_size);
         category_size = ntohl(*int_buffer++);
         byte_buffer = (unsigned char *)int_buffer;
-        auto category = new string((char *)byte_buffer, category_size);
+        auto category = new std::string((char *)byte_buffer, category_size);
 
         //PUT IMAGE FILE AND CATEGORY IN IMAGE
         content_ = new image(image_file, category);
     }
     else { //VIEW THUMBS OR DOWNLOAD IMAGE
-        content_ = new string((char *)buffer, buffer_size);
+        content_ = new std::string((char *)buffer, buffer_size);
     }
 }

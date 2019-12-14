@@ -1,22 +1,5 @@
-#ifndef IMAGIC_BACKEND_CONSTANTS_H
-#define IMAGIC_BACKEND_CONSTANTS_H
-
-//INCLUDES
-#include <cstring>
-#include <iostream>
-#include <string>
-#include <queue>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <thread>
-#include <pthread.h>
-
-#include "message.h"
-
-//NAMESPACES
-using  namespace std;
+#ifndef SERVER_CONSTANTS_H
+#define SERVER_CONSTANTS_H
 
 //CONNECTOR
 #define CONNECTOR_CLIENT_ADDRESS "127.0.0.1"
@@ -29,12 +12,5 @@ using  namespace std;
 
 //HEADER
 #define HEADER_LENGTH 9
-#define MESSAGE_TYPE 1
-#define SOURCE_ID 4
-#define PAYLOAD_LENGTH 4
 
-//LOAD BALANCER
-#define N_SERVER 3
-#define MAX_SERVER 10
-
-#endif //IMAGIC_BACKEND_CONSTANTS_H
+#endif //SERVER_CONSTANTS_H

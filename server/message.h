@@ -1,15 +1,13 @@
-#ifndef IMAGIC_BACKEND_MESSAGE_H
-#define IMAGIC_BACKEND_MESSAGE_H
+#ifndef SERVER_MESSAGE_H
+#define SERVER_MESSAGE_H
 
 #include <cstdint>
+#include <map>
 #include <ostream>
-#include <unordered_map>
+#include <string>
 #include <variant>
 #include <vector>
-
 #include "image.h"
-
-using namespace std;
 
 class header {
     private:
@@ -31,11 +29,11 @@ class header {
 
 class payload {
     private:
-        variant<
+        std::variant<
                 image *,
-                string *,
-                vector<unsigned char> *,
-                unordered_map<vector<unsigned char>,string> *
+                std::string *,
+                std::vector<unsigned char> *,
+                std::map<std::vector<unsigned char>, std::string> *
                > content_;
     public:
         void serialize(unsigned char *buffer);
@@ -54,4 +52,4 @@ class message {
         payload *get_payload() const;
 };
 
-#endif //IMAGIC_BACKEND_MESSAGE_H
+#endif //SERVER_MESSAGE_H
