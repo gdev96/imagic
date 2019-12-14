@@ -6,15 +6,9 @@
 
 class server {
 private:
-    message *current_message_;
-    queue<message *> message_queue_;
-    load_balancer_connector *lb_connector_;
-    struct sockaddr_in server_address_;
-
+    load_balancer_connector lb_connector_;
 public:
-    server();
-    void manage_requests();
-    void initialize();
+    server(char *address, int port);
 };
 
 #endif //SERVER_SERVER_H

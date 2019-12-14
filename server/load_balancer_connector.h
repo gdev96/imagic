@@ -5,12 +5,13 @@
 #include "constants.h"
 
 class load_balancer_connector {
-private:
-    queue<message *> *message_queue_;
-    int lb_sockfd_;
-public:
-    load_balancer_connector(queue<message *> *message_queue);
-    void manage_requests();
+    private:
+        struct sockaddr_in server_address_;
+    public:
+        load_balancer_connector();
+        load_balancer_connector(char *address, int port);
+        void receive_requests();
+        void manage_request(int lb_sockfd);
 };
 
 #endif //SERVER_LOAD_BALANCER_CONNECTOR_H
