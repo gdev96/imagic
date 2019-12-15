@@ -4,7 +4,10 @@ project(server)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS -pthread)
 
-include_directories(.)
+include_directories(.
+        /usr/include/mysql-cppconn-8)
+
+set(PROJECT_LINK_LIBS libmysqlcppconn8.so)
 
 add_executable(server
         constants.h
@@ -19,3 +22,5 @@ add_executable(server
         server.h
         storage_manager.cpp
         storage_manager.h)
+
+target_link_libraries(server ${PROJECT_LINK_LIBS})
