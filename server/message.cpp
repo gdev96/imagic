@@ -129,3 +129,8 @@ void payload::deserialize(unsigned char *buffer, uint32_t buffer_size, unsigned 
         content_ = new std::string((char *)buffer, buffer_size);
     }
 }
+
+const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
+payload::getContent() const {
+    return content_;
+}
