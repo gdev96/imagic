@@ -64,6 +64,11 @@ payload *message::get_payload() const {
     return payload_;
 }
 
+const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
+payload::getContent() const {
+    return content_;
+}
+
 void payload::serialize(unsigned char *buffer) {
     if(content_.index() == 3) { //SERIALIZE MAP
         //GET MAP FROM VARIANT
@@ -128,9 +133,4 @@ void payload::deserialize(unsigned char *buffer, uint32_t buffer_size, unsigned 
     else { //VIEW THUMBS OR DOWNLOAD IMAGE
         content_ = new std::string((char *)buffer, buffer_size);
     }
-}
-
-const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
-payload::getContent() const {
-    return content_;
 }

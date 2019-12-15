@@ -1,16 +1,36 @@
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 #include <mysqlx/xdevapi.h>
+#include "image.h"
 #include "storage_manager.h"
 
 storage_manager::storage_manager(const message &current_request) : current_request_(current_request) {}
 
-void storage_manager::upload_request() { //UPLOAD REQUEST -> save paths in db and files in storage
-    //current_request_.get_payload()->getContent()->(std::get<2>);
+void storage_manager::upload_request() {
+    //GET IMAGE AND ITS CONTENT FROM MESSAGE
+    image *image = std::get<0>(current_request_.get_payload()->getContent());
+    std::vector<unsigned char> *image_file = image->getImageFile();
+    std::string *category = image->getCategory();
 
+    //SAVE FILE TO DISK
+    std::string path = "image.jpg";
+    std::ofstream output_file(path, std::ios::binary);
+    output_file.write((const char*)image_file->data(), image_file->size());
+
+    //CREATE A NEW DB SESSION TO ACCESS DATA
     mysqlx::Session session("mysqlx://root@127.0.0.1");
-    mysqlx::Schema schema= session.getSchema("test");
-    //1.Prelevo l'immagine
-    //2.Salvo i percorsi e la categoria nel DB
-    //3.Salvo i file nei rispettivi percorsi
+
+    //OBTAIN SCHEMA/DATABASE FROM SESSION
+    mysqlx::Schema schema = session.getSchema("imagic", true);
+
+    //GET TABLE
+    mysqlx::Table table = schema.getTable("image", true);
+
+    //CREATE QUERY TO INSERT PATH AND CATEGORY IN DB
+    mysqlx::Result result = table.insert("category", "image_path").values(*category, path).execute();
+    std::cout << "Image added to database (" << result.getWarningsCount() << " warnings generated)" << std::endl;
 }
 
 void storage_manager::view_thumbs() { //VIEW THUMBS -> get thumbs map and send response

@@ -36,11 +36,10 @@ class payload {
                 std::map<std::vector<unsigned char>, std::string> *
                > content_;
     public:
+        const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
+        getContent() const;
         void serialize(unsigned char *buffer);
         void deserialize(unsigned char *buffer, uint32_t buffer_size, unsigned char message_type);
-
-    const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
-    getContent() const;
 };
 
 class message {
