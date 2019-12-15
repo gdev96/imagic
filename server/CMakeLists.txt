@@ -16,4 +16,6 @@ add_executable(server
         message.cpp
         message.h
         server.cpp
-        server.h)
+        server.h
+        storage_manager.cpp
+        storage_manager.h)

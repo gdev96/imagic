@@ -8,7 +8,7 @@
 #include "message.h"
 #include "load_balancer_connector.h"
 
-load_balancer_connector::load_balancer_connector(){};
+load_balancer_connector::load_balancer_connector() {};
 
 load_balancer_connector::load_balancer_connector(char *address, int port) {
     server_address_.sin_family = AF_INET;
@@ -39,19 +39,7 @@ void load_balancer_connector::receive_requests() {
     }
 }
 
-void download_image() {
-
-}
-
-void view_thumbs() {
-
-}
-
-void upload_request() {
-
-}
-
-void manage_request(int lb_sockfd){
+void load_balancer_connector::manage_request(int lb_sockfd){
     //READ REQUEST FROM SOCKET AND CREATE MESSAGE
     unsigned char header_buffer[HEADER_LENGTH];
     read(lb_sockfd, header_buffer, HEADER_LENGTH);
@@ -64,18 +52,19 @@ void manage_request(int lb_sockfd){
     read(lb_sockfd, payload_buffer, payload_length);
     message_payload->deserialize(payload_buffer, payload_length, message_type);
     auto received_message = new message(message_header, message_payload);
-    std::cout << "Message received.." << std::endl << "Processing request.." << std::endl;
+    std::cout << "Message received...Processing request..." << std::endl;
 
     //MANAGE REQUEST
+    storage_manager_ = new storage_manager(*received_message);
     switch(message_type) {
-        case 0: //UPLOAD REQUEST -> save paths in db e file in storage
-            upload_request();
+        case 0: //UPLOAD REQUEST -> save paths in db and files in storage
+            storage_manager_->upload_request();
             break;
-        case 1: //VIEW THUMBS -> get thumbs map and send in response
-            view_thumbs();
+        case 1: //VIEW THUMBS -> get thumbs map and send response
+            storage_manager_->view_thumbs();
             break;
-        case 2: //DOWNLOAD IMAGE -> get the image to send in response
-            download_image();
+        case 2: //DOWNLOAD IMAGE -> get the image to send response
+            storage_manager_->download_image();
             break;
         default:
             break;
