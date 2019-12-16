@@ -1,13 +1,17 @@
 # server
-The imagic server that send responses
+The Imagic server that send responses to the Imagic client
 
-## PREREQUISITES
+## Prerequisites
 
-Download MySQL C++ connector files choosing the appropriate OS and architecture from:
+In order to create and connect to DB, download MySQL Community Server 8 from:
+
+https://dev.mysql.com/downloads/mysql/
+
+Then, download MySQL Connector/C++ 8 from:
 
 https://dev.mysql.com/downloads/connector/cpp/
 
-## SQL COMMANDS TO CREATE THE SUPPORT DB
+## SQL command to create the DB
 
 ```
 CREATE TABLE IF NOT EXISTS `mydb`.`image` (
