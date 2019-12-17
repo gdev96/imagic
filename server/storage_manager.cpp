@@ -5,16 +5,20 @@
 #include "image.h"
 #include "storage_manager.h"
 
+storage_manager::storage_manager(message *current_request, unsigned int server_id) : current_request_(current_request),
+                                                                                   server_id_(server_id) {}
 
-storage_manager::storage_manager(const message &current_request, unsigned int server_id) : current_request_(
-        current_request), server_id_(server_id) {}
+storage_manager::~storage_manager() {
+    db_session_->close();
+    delete db_session_;
+}
 
 mysqlx::Table storage_manager::connect(const std::string &url, const std::string &database, const std::string &table) {
     //CREATE A NEW DB SESSION TO ACCESS DATA
-    mysqlx::Session session(url);
+    db_session_ = new mysqlx::Session(url);
 
     //OBTAIN SCHEMA/DATABASE FROM SESSION
-    mysqlx::Schema schema = session.getSchema(database, true);
+    mysqlx::Schema schema = db_session_->getSchema(database, true);
 
     //RETURN TABLE
     return schema.getTable(table, true);
@@ -22,7 +26,7 @@ mysqlx::Table storage_manager::connect(const std::string &url, const std::string
 
 void storage_manager::upload_request() {
     //GET IMAGE AND ITS CONTENT FROM MESSAGE
-    image *image = std::get<0>(current_request_.get_payload()->get_content());
+    image *image = std::get<0>(current_request_->get_payload()->get_content());
     std::vector<unsigned char> *image_file = image->getImageFile();
     std::string *category = image->getCategory();
 
@@ -48,10 +52,10 @@ void storage_manager::upload_request() {
     auto response = new std::string("Upload Completed");
 
     //SET PAYLOAD LENGTH IN MESSAGE HEADER
-    current_request_.get_header()->set_payload_length(response->length());
+    current_request_->get_header()->set_payload_length(response->length());
 
     //SET NEW PAYLOAD
-    current_request_.get_payload()->set_content(response);
+    current_request_->get_payload()->set_content(response);
 }
 
 void storage_manager::view_thumbs() { //VIEW THUMBS -> get thumbs map and send response
@@ -62,7 +66,7 @@ void storage_manager::view_thumbs() { //VIEW THUMBS -> get thumbs map and send r
 
 void storage_manager::download_image() {
     //GET THUMB_PATH FROM MESSAGE
-    std::string *thumb_path = std::get<1>(current_request_.get_payload()->get_content());
+    std::string *thumb_path = std::get<1>(current_request_->get_payload()->get_content());
 
     //CONNECT TO DB
     mysqlx::Table image_table = connect("mysqlx://root@127.0.0.1", "imagic", "image");
@@ -83,8 +87,8 @@ void storage_manager::download_image() {
     input_image_file.close();
 
     //SET PAYLOAD LENGTH IN MESSAGE HEADER
-    current_request_.get_header()->set_payload_length(image_size);
+    current_request_->get_header()->set_payload_length(image_size);
 
     //SET NEW PAYLOAD
-    current_request_.get_payload()->set_content(image_file);
+    current_request_->get_payload()->set_content(image_file);
 }

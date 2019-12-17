@@ -56,7 +56,7 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     std::cout << "Message received...Processing request..." << std::endl;
 
     //MANAGE REQUEST
-    storage_manager_ = new storage_manager(*temporary_message_, server_id_);
+    storage_manager_ = new storage_manager(temporary_message_, server_id_);
     switch(message_type) {
         case UPLOAD_IMAGE:
             storage_manager_->upload_request();
@@ -67,9 +67,10 @@ void load_balancer_connector::manage_request(int lb_sockfd){
         case DOWNLOAD_IMAGE:
             storage_manager_->download_image();
             break;
-        default:
-            break;
     }
+    //DELETE STORAGE MANAGER
+    delete storage_manager_;
+
     //SERIALIZE RESPONSE HEADER
     unsigned char response_header_buffer[HEADER_LENGTH];
     temporary_message_->get_header()->serialize(response_header_buffer);
@@ -85,6 +86,6 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     //SEND PAYLOAD
     write(lb_sockfd, response_payload_buffer, response_payload_length);
 
-    //DELETE OBJECTS
+    //DELETE MESSAGE
     delete temporary_message_;
 }
