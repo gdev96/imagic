@@ -64,9 +64,18 @@ payload *message::get_payload() const {
     return payload_;
 }
 
+void message::set_payload(payload *payload) {
+    payload_ = payload;
+}
+
 const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
-payload::getContent() const {
+payload::get_content() const {
     return content_;
+}
+
+void payload::set_content(
+        const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &content) {
+    content_ = content;
 }
 
 void payload::serialize(unsigned char *buffer) {

@@ -36,7 +36,6 @@ void load_balancer_connector::receive_requests() {
         std::cout << "Connection accepted...Elaborating request..." << std::endl;
 
         std::thread t(&load_balancer_connector::receive_requests, this);
-
     }
 }
 
@@ -52,11 +51,11 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     unsigned char payload_buffer[payload_length];
     read(lb_sockfd, payload_buffer, payload_length);
     message_payload->deserialize(payload_buffer, payload_length, message_type);
-    auto received_message = new message(message_header, message_payload);
+    temporary_message_ = new message(message_header, message_payload);
     std::cout << "Message received...Processing request..." << std::endl;
 
     //MANAGE REQUEST
-    storage_manager_ = new storage_manager(*received_message, server_id_);
+    storage_manager_ = new storage_manager(*temporary_message_, server_id_);
     switch(message_type) {
         case 0: //UPLOAD REQUEST -> save paths in db and files in storage
             storage_manager_->upload_request();
@@ -71,5 +70,8 @@ void load_balancer_connector::manage_request(int lb_sockfd){
             break;
     }
     //SEND RESPONSE
+    write(lb_sockfd,header_buffer,HEADER_LENGTH); //->bisogna prima cambiare payload lenght nell'header
+
+    //DELETE OBJECTS
 
 }

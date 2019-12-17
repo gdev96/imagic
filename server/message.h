@@ -37,7 +37,10 @@ class payload {
                > content_;
     public:
         const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
-        getContent() const;
+        get_content() const;
+        void set_content(
+            const std::variant<image *, std::string *, std::vector<unsigned char> *,
+                    std::map<std::vector<unsigned char>, std::string> *> &content);
         void serialize(unsigned char *buffer);
         void deserialize(unsigned char *buffer, uint32_t buffer_size, unsigned char message_type);
 };
@@ -52,6 +55,7 @@ class message {
         ~message();
         header *get_header() const;
         payload *get_payload() const;
+        void set_payload(payload *payload);
 };
 
 #endif //SERVER_MESSAGE_H
