@@ -10,10 +10,11 @@
 
 load_balancer_connector::load_balancer_connector() {};
 
-load_balancer_connector::load_balancer_connector(char *address, int port) {
+load_balancer_connector::load_balancer_connector(char *address, int port, unsigned int server_id) {
     server_address_.sin_family = AF_INET;
     server_address_.sin_addr.s_addr = inet_addr(address);
     server_address_.sin_port = htons(port);
+    server_id_ = server_id;
 }
 
 void load_balancer_connector::receive_requests() {
@@ -55,7 +56,7 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     std::cout << "Message received...Processing request..." << std::endl;
 
     //MANAGE REQUEST
-    storage_manager_ = new storage_manager(*received_message);
+    storage_manager_ = new storage_manager(*received_message, server_id_);
     switch(message_type) {
         case 0: //UPLOAD REQUEST -> save paths in db and files in storage
             storage_manager_->upload_request();
@@ -69,4 +70,6 @@ void load_balancer_connector::manage_request(int lb_sockfd){
         default:
             break;
     }
+    //SEND RESPONSE
+
 }

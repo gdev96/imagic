@@ -6,8 +6,9 @@
 class storage_manager {
 private:
     message current_request_;
+    unsigned int server_id_;
 public:
-    storage_manager(const message &current_request);
+    storage_manager(const message &currentRequest, unsigned int serverId);
     void upload_request();
     void view_thumbs();
     void download_image();
