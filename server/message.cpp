@@ -3,7 +3,7 @@
 
 header::header() {}
 
-unsigned char header::get_message_type() const {
+MESSAGE_TYPE header::get_message_type() const {
     return message_type_;
 }
 
@@ -15,7 +15,7 @@ uint32_t header::get_payload_length() const {
     return payload_length_;
 }
 
-void header::set_message_type(unsigned char message_type) {
+void header::set_message_type(MESSAGE_TYPE message_type) {
     message_type_ = message_type;
 }
 
@@ -35,7 +35,7 @@ void header::serialize(unsigned char *buffer) {
 }
 
 void header::deserialize(unsigned char *buffer) {
-    message_type_ = *buffer++;
+    message_type_ = (MESSAGE_TYPE)(*buffer++);
     auto *int_buffer = (uint32_t *)buffer;
     source_id_ = ntohl(*int_buffer++);
     payload_length_ = ntohl(*int_buffer);

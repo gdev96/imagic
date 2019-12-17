@@ -13,4 +13,10 @@
 //HEADER
 #define HEADER_LENGTH 9
 
+typedef enum : unsigned char {
+    UPLOAD_IMAGE = 0,
+    VIEW_THUMBS = 1,
+    DOWNLOAD_IMAGE = 2
+} MESSAGE_TYPE;
+
 #endif //SERVER_CONSTANTS_H

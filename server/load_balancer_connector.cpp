@@ -31,11 +31,12 @@ void load_balancer_connector::receive_requests() {
 
     while (true) {
         int lb_length = sizeof(lb_address);
-        int lb_sockfd_ = accept(server_sockfd, (struct sockaddr *) &lb_address, //every connector has a sockfd
+        int lb_sockfd = accept(server_sockfd, (struct sockaddr *) &lb_address, //every connector has a sockfd
                            reinterpret_cast<socklen_t *>(&lb_length));
         std::cout << "Connection accepted...Elaborating request..." << std::endl;
 
-        std::thread t(&load_balancer_connector::receive_requests, this);
+        std::thread t(&load_balancer_connector::manage_request, this, lb_sockfd);
+        t.detach();
     }
 }
 
@@ -46,7 +47,7 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     auto message_header = new header();
     message_header->deserialize(header_buffer);
     uint32_t payload_length = message_header->get_payload_length();
-    unsigned char message_type = message_header->get_message_type();
+    MESSAGE_TYPE message_type = message_header->get_message_type();
     auto message_payload = new payload();
     unsigned char payload_buffer[payload_length];
     read(lb_sockfd, payload_buffer, payload_length);
@@ -57,21 +58,33 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     //MANAGE REQUEST
     storage_manager_ = new storage_manager(*temporary_message_, server_id_);
     switch(message_type) {
-        case 0: //UPLOAD REQUEST -> save paths in db and files in storage
+        case UPLOAD_IMAGE:
             storage_manager_->upload_request();
             break;
-        case 1: //VIEW THUMBS -> get thumbs map and send response
+        case VIEW_THUMBS:
             storage_manager_->view_thumbs();
             break;
-        case 2: //DOWNLOAD IMAGE -> get the image to send response
+        case DOWNLOAD_IMAGE:
             storage_manager_->download_image();
             break;
         default:
             break;
     }
-    //SEND RESPONSE
-    write(lb_sockfd,header_buffer,HEADER_LENGTH); //->bisogna prima cambiare payload lenght nell'header
+    //SERIALIZE RESPONSE HEADER
+    unsigned char response_header_buffer[HEADER_LENGTH];
+    temporary_message_->get_header()->serialize(response_header_buffer);
+
+    //SEND HEADER
+    write(lb_sockfd, response_header_buffer, HEADER_LENGTH);
+
+    //SERIALIZE RESPONSE PAYLOAD
+    uint32_t response_payload_length = temporary_message_->get_header()->get_payload_length();
+    unsigned char response_payload_buffer[response_payload_length];
+    temporary_message_->get_payload()->serialize(response_payload_buffer);
+
+    //SEND PAYLOAD
+    write(lb_sockfd, response_payload_buffer, response_payload_length);
 
     //DELETE OBJECTS
-
+    delete temporary_message_;
 }
