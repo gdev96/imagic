@@ -3,7 +3,7 @@
 
 header::header() {}
 
-MESSAGE_TYPE header::get_message_type() const {
+message_type header::get_message_type() const {
     return message_type_;
 }
 
@@ -15,8 +15,8 @@ uint32_t header::get_payload_length() const {
     return payload_length_;
 }
 
-void header::set_message_type(MESSAGE_TYPE message_type) {
-    message_type_ = message_type;
+void header::set_message_type(message_type msg_type) {
+    message_type_ = msg_type;
 }
 
 void header::set_source_id(uint32_t source_id) {
@@ -28,14 +28,14 @@ void header::set_payload_length(uint32_t payload_length) {
 }
 
 void header::serialize(unsigned char *buffer) {
-    *buffer++ = message_type_;
+    *buffer++ = (unsigned char)message_type_;
     auto *int_buffer = (uint32_t *)buffer;
     *int_buffer++ = htonl(source_id_);
     *int_buffer = htonl(payload_length_);
 }
 
 void header::deserialize(unsigned char *buffer) {
-    message_type_ = (MESSAGE_TYPE)(*buffer++);
+    message_type_ = (message_type)(*buffer++);
     auto *int_buffer = (uint32_t *)buffer;
     source_id_ = ntohl(*int_buffer++);
     payload_length_ = ntohl(*int_buffer);
@@ -117,8 +117,8 @@ void payload::serialize(unsigned char *buffer) {
     }
 }
 
-void payload::deserialize(unsigned char *buffer, uint32_t buffer_size, unsigned char message_type) {
-    if(message_type == 0) { //UPLOAD IMAGE
+void payload::deserialize(unsigned char *buffer, uint32_t buffer_size, message_type msg_type) {
+    if(msg_type == message_type::UPLOAD_IMAGE) {
         uint32_t *int_buffer;
         unsigned char *byte_buffer;
         uint32_t image_size, category_size;

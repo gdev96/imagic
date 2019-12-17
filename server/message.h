@@ -7,20 +7,25 @@
 #include <string>
 #include <variant>
 #include <vector>
-#include "constants.h"
 #include "image.h"
+
+enum class message_type : unsigned char {
+    UPLOAD_IMAGE = 0,
+    VIEW_THUMBS = 1,
+    DOWNLOAD_IMAGE = 2
+};
 
 class header {
     private:
-        MESSAGE_TYPE message_type_;
+        message_type message_type_;
         uint32_t source_id_;
         uint32_t payload_length_;
     public:
         header();
-        MESSAGE_TYPE get_message_type() const;
+        message_type get_message_type() const;
         uint32_t get_source_id() const;
         uint32_t get_payload_length() const;
-        void set_message_type(MESSAGE_TYPE message_type);
+        void set_message_type(message_type msg_type);
         void set_source_id(uint32_t source_id);
         void set_payload_length(uint32_t payload_length);
         void serialize(unsigned char *buffer);
@@ -43,7 +48,7 @@ class payload {
             const std::variant<image *, std::string *, std::vector<unsigned char> *,
                     std::map<std::vector<unsigned char>, std::string> *> &content);
         void serialize(unsigned char *buffer);
-        void deserialize(unsigned char *buffer, uint32_t buffer_size, unsigned char message_type);
+        void deserialize(unsigned char *buffer, uint32_t buffer_size, message_type msg_type);
 };
 
 class message {

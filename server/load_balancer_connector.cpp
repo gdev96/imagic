@@ -47,24 +47,24 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     auto message_header = new header();
     message_header->deserialize(header_buffer);
     uint32_t payload_length = message_header->get_payload_length();
-    MESSAGE_TYPE message_type = message_header->get_message_type();
+    message_type msg_type = message_header->get_message_type();
     auto message_payload = new payload();
     unsigned char payload_buffer[payload_length];
     read(lb_sockfd, payload_buffer, payload_length);
-    message_payload->deserialize(payload_buffer, payload_length, message_type);
+    message_payload->deserialize(payload_buffer, payload_length, msg_type);
     temporary_message_ = new message(message_header, message_payload);
     std::cout << "Message received...Processing request..." << std::endl;
 
     //MANAGE REQUEST
     storage_manager_ = new storage_manager(temporary_message_, server_id_);
-    switch(message_type) {
-        case UPLOAD_IMAGE:
+    switch(msg_type) {
+        case message_type::UPLOAD_IMAGE:
             storage_manager_->upload_request();
             break;
-        case VIEW_THUMBS:
+        case message_type::VIEW_THUMBS:
             storage_manager_->view_thumbs();
             break;
-        case DOWNLOAD_IMAGE:
+        case message_type::DOWNLOAD_IMAGE:
             storage_manager_->download_image();
             break;
     }
