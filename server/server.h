@@ -9,6 +9,8 @@ class server {
         unsigned int id_;
     public:
         server(char *address, int port, unsigned int id);
+
+    const load_balancer_connector &getLbConnector() const;
 };
 
 #endif //SERVER_SERVER_H

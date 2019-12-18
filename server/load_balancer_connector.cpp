@@ -27,7 +27,7 @@ void load_balancer_connector::receive_requests() {
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address_, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
-    std::cout << "Client connector is waiting for connections..." << std::endl;
+    std::cout << "Load Balancer[" << server_id_ << "] connector is waiting for connections..." << std::endl;
 
     while (true) {
         int lb_length = sizeof(lb_address);
