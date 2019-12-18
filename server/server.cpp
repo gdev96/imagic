@@ -6,9 +6,8 @@ server::server(char *address, int port, unsigned int id) {
     std::cout << "Server[" << id <<"] created.." << std::endl;
     lb_connector_ = load_balancer_connector(address, port, id);
     std::cout << "Load balancer connector[" << id << "] created.." << std::endl;
-   // lb_connector_.receive_requests();
 }
 
-const load_balancer_connector &server::getLbConnector() const {
+const load_balancer_connector &server::get_lb_connector() const {
     return lb_connector_;
 }

@@ -10,7 +10,7 @@ class server {
     public:
         server(char *address, int port, unsigned int id);
 
-    const load_balancer_connector &getLbConnector() const;
+    const load_balancer_connector &get_lb_connector() const;
 };
 
 #endif //SERVER_SERVER_H

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 #include "image.h"
 #include "storage_manager.h"
 
@@ -58,10 +59,7 @@ void storage_manager::upload_request() {
     current_request_->get_payload()->set_content(response);
 }
 
-void storage_manager::view_thumbs() { //VIEW THUMBS -> get thumbs map and send response
-    //1.Prelevo i percorsi delle miniature appartenenti ad una categoria
-    //2.Prelevo i rispettivi file delle miniature dalla memoria
-    //3.Creo la mappa di miniature, la serializzo e la invio.
+void storage_manager::view_thumbs() {
 
     //GET THUMB_PATH FROM MESSAGE
     std::string *category = std::get<std::string *>(current_request_->get_payload()->get_content());
@@ -70,23 +68,22 @@ void storage_manager::view_thumbs() { //VIEW THUMBS -> get thumbs map and send r
     mysqlx::Table image_table = connect("mysqlx://root@127.0.0.1", "imagic", "image");
 
     //CREATE THUMBS MAP
-    std::map<std::vector<unsigned char>, std::string> *thumbs_map;
+    auto thumbs_map = new std::map<std::vector<unsigned char>, std::string>;
 
     //GET THUMB_PATHS FROM DB
     mysqlx::RowResult rows = image_table.select("thumb_path").where("category like: category")
             .bind("category", *category).execute();
-    for (mysqlx::Row row : rows.fetchAll())
-    {
+    for (mysqlx::Row row : rows.fetchAll()) {
         //GET THUMB PATH FROM ROW
         mysqlx::string thumb_path = row[0];
 
         //GET PATH_FILE FROM DISK
-        auto *thumb_file = new std::vector<unsigned char>;
+        auto thumb_file = new std::vector<unsigned char>;
         std::ifstream input_thumb_file(thumb_path, std::ios::binary);
         input_thumb_file.seekg(0, std::ifstream::end);
-        uint32_t image_size = input_thumb_file.tellg();
+        uint32_t thumb_size = input_thumb_file.tellg();
         input_thumb_file.seekg(0, std::ifstream::beg);
-        input_thumb_file.read((char*)thumb_file->data(), image_size);
+        input_thumb_file.read((char*)thumb_file->data(), thumb_size);
         input_thumb_file.close();
 
         //CREATE THE ENTRY IN THE THUMB'S MAP
