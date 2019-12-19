@@ -9,7 +9,7 @@
 #define N_SERVER 1
 
 //MESSAGE
-#define CHUNK_SIZE 4096
+#define CHUNK_SIZE 8192
 
 //HEADER
 #define HEADER_LENGTH 9

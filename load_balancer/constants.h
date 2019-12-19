@@ -26,7 +26,7 @@ using  namespace std;
 #define QUEUE_LENGTH_CONNECTIONS 5
 
 //MESSAGE
-#define CHUNK_SIZE 4096
+#define CHUNK_SIZE 8192
 
 //HEADER
 #define HEADER_LENGTH 9
