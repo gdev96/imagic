@@ -29,14 +29,41 @@ For further details, see:
 
 https://dev.mysql.com/doc/connector-cpp/8.0/en/connector-cpp-apps-general-considerations.html
 
-## SQL command to create the DB
+## SQL command to create user and DB
+
+Open terminal and start mysql service:
 
 ```
-CREATE TABLE IF NOT EXISTS `mydb`.`image` (
-  `idimage` INT NOT NULL AUTO_INCREMENT,
-  `image_file_path` VARCHAR(45) NULL,
-  `thumb_file_path` VARCHAR(45) NULL,
-  `category` VARCHAR(45) NULL,
-  PRIMARY KEY (`idimage`))
-ENGINE = InnoDB
+sudo service mysql start
+```
+
+Access mysql as root user:
+
+```
+sudo mysql -u root
+```
+
+Now, type the following commands in order to create `imagic` database and `imagicuser` user, granting him complete access to DB:
+
+```
+CREATE DATABASE imagic;
+```
+
+```
+CREATE USER 'imagicuser'@'%' identified by 'ImgApp2020!';
+```
+
+```
+GRANT ALL ON imagic.* TO 'imagicuser'@'%';
+```
+
+Finally, create `image` table:
+
+```
+CREATE TABLE imagic.image (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  image_file_path VARCHAR(45) NULL,
+  thumb_file_path VARCHAR(45) NULL,
+  category VARCHAR(45) NULL
+) ENGINE = InnoDB;
 ```

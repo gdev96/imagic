@@ -4,6 +4,10 @@
 #include "message.h"
 #include "constants.h"
 
+uint32_t min(uint32_t a, uint32_t b);
+void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
+void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
+
 class client_connector {
     private:
         queue<message *> *message_queue_;

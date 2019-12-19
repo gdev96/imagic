@@ -121,7 +121,7 @@ void payload::deserialize(unsigned char *buffer, uint32_t buffer_size, message_t
     if(msg_type == message_type::UPLOAD_IMAGE) {
         uint32_t *int_buffer;
         unsigned char *byte_buffer;
-        uint32_t image_size, category_size;
+        uint32_t image_size, category_length;
 
         //GET IMAGE FILE FROM PAYLOAD
         int_buffer = (uint32_t *)buffer;
@@ -132,9 +132,9 @@ void payload::deserialize(unsigned char *buffer, uint32_t buffer_size, message_t
 
         //GET CATEGORY FROM PAYLOAD
         int_buffer = (uint32_t *)(byte_buffer + image_size);
-        category_size = ntohl(*int_buffer++);
+        category_length = ntohl(*int_buffer++);
         byte_buffer = (unsigned char *)int_buffer;
-        auto category = new std::string((char *)byte_buffer, category_size);
+        auto category = new std::string((char *)byte_buffer, category_length);
 
         //PUT IMAGE FILE AND CATEGORY IN IMAGE
         content_ = new image(image_file, category);

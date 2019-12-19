@@ -8,9 +8,45 @@
 #include "message.h"
 #include "load_balancer_connector.h"
 
+uint32_t min(uint32_t a, uint32_t b) {
+    return (a<b)?a:b;
+}
+
+void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
+    uint32_t offset = 0;
+    int bytes_received;
+    do {
+        bytes_received = read(sockfd, buffer + offset, min(message_length - offset, CHUNK_SIZE));
+        switch(bytes_received) {
+            case -1:
+                throw std::runtime_error("Socket connection error");
+            case 0:
+                throw std::runtime_error("Socket connection closed");
+            default:
+                offset += bytes_received;
+        }
+    } while(offset < message_length);
+}
+
+void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
+    uint32_t offset = 0;
+    int bytes_sent;
+    do {
+        bytes_sent = write(sockfd, buffer + offset, message_length);
+        switch(bytes_sent) {
+            case -1:
+                throw std::runtime_error("Socket connection error");
+            case 0:
+                throw std::runtime_error("Socket connection closed");
+            default:
+                offset += bytes_sent;
+        }
+    } while(offset < message_length);
+}
+
 load_balancer_connector::load_balancer_connector() {};
 
-load_balancer_connector::load_balancer_connector(char *address, int port, unsigned int server_id) {
+load_balancer_connector::load_balancer_connector(const char *address, int port, unsigned int server_id) {
     server_address_.sin_family = AF_INET;
     server_address_.sin_addr.s_addr = inet_addr(address);
     server_address_.sin_port = htons(port);
@@ -23,7 +59,7 @@ void load_balancer_connector::receive_requests() {
     //CREATE SOCKET
     int server_length = sizeof(server_address_);
 
-    //CONNECTION WITH CLIENT
+    //CONNECTION WITH LOAD BALANCER
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address_, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
@@ -43,14 +79,14 @@ void load_balancer_connector::receive_requests() {
 void load_balancer_connector::manage_request(int lb_sockfd){
     //READ REQUEST FROM SOCKET AND CREATE MESSAGE
     unsigned char header_buffer[HEADER_LENGTH];
-    read(lb_sockfd, header_buffer, HEADER_LENGTH);
+    read_bytes(lb_sockfd, header_buffer, HEADER_LENGTH);
     auto message_header = new header();
     message_header->deserialize(header_buffer);
     uint32_t payload_length = message_header->get_payload_length();
     message_type msg_type = message_header->get_message_type();
     auto message_payload = new payload();
     unsigned char payload_buffer[payload_length];
-    read(lb_sockfd, payload_buffer, payload_length);
+    read_bytes(lb_sockfd, payload_buffer, payload_length);
     message_payload->deserialize(payload_buffer, payload_length, msg_type);
     temporary_message_ = new message(message_header, message_payload);
     std::cout << "Message received...Processing request..." << std::endl;
@@ -76,7 +112,7 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     temporary_message_->get_header()->serialize(response_header_buffer);
 
     //SEND HEADER
-    write(lb_sockfd, response_header_buffer, HEADER_LENGTH);
+    write_bytes(lb_sockfd, response_header_buffer, HEADER_LENGTH);
 
     //SERIALIZE RESPONSE PAYLOAD
     uint32_t response_payload_length = temporary_message_->get_header()->get_payload_length();
@@ -84,7 +120,7 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     temporary_message_->get_payload()->serialize(response_payload_buffer);
 
     //SEND PAYLOAD
-    write(lb_sockfd, response_payload_buffer, response_payload_length);
+    write_bytes(lb_sockfd, response_payload_buffer, response_payload_length);
 
     //DELETE MESSAGE
     delete temporary_message_;

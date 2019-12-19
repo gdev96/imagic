@@ -1,7 +1,7 @@
 #include <iostream>
 #include "server.h"
 
-server::server(char *address, int port, unsigned int id) {
+server::server(const char *address, int port, unsigned int id) {
     //CREATE LOAD BALANCER CONNECTOR
     std::cout << "Server[" << id <<"] created.." << std::endl;
     lb_connector_ = load_balancer_connector(address, port, id);

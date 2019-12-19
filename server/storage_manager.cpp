@@ -14,9 +14,9 @@ storage_manager::~storage_manager() {
     delete db_session_;
 }
 
-mysqlx::Table storage_manager::connect(const std::string &url, const std::string &database, const std::string &table) {
+mysqlx::Table storage_manager::connect(const std::string &connection, const std::string &database, const std::string &table) {
     //CREATE A NEW DB SESSION TO ACCESS DATA
-    db_session_ = new mysqlx::Session(url);
+    db_session_ = new mysqlx::Session(connection);
 
     //OBTAIN SCHEMA/DATABASE FROM SESSION
     mysqlx::Schema schema = db_session_->getSchema(database, true);
@@ -32,22 +32,25 @@ void storage_manager::upload_request() {
     std::string *category = image->getCategory();
 
     //SAVE IMAGE FILE TO DISK
-    std::string image_path = "resources/" + std::to_string(server_id_) + "/image.jpg";
-    std::ofstream output_image_file(image_path, std::ios::binary);
+    std::string image_file_path = "../resources/" + std::to_string(server_id_) + "/image.jpg";
+    std::ofstream output_image_file(image_file_path, std::ios::binary);
     output_image_file.write((const char*)image_file->data(), image_file->size());
     output_image_file.close();
 
     //SAVE THUMB FILE TO DISK
-    std::string thumb_path = "resources/" + std::to_string(server_id_) + "/image_thumb.jpg";
-    std::ofstream output_thumb_file(thumb_path, std::ios::binary);
+    std::string thumb_file_path = "../resources/" + std::to_string(server_id_) + "/image_thumb.jpg";
+    std::ofstream output_thumb_file(thumb_file_path, std::ios::binary);
     output_thumb_file.write((const char*)image_file->data(), image_file->size());
     output_thumb_file.close();
 
     //CONNECT TO DB
-    mysqlx::Table image_table = connect("mysqlx://root@127.0.0.1", "imagic", "image");
+    mysqlx::Table image_table = connect("mysqlx://imagicuser:ImgApp2020!@127.0.0.1", "imagic", "image");
 
     //CREATE QUERY TO INSERT PATH AND CATEGORY IN DB
-    mysqlx::Result result = image_table.insert("category", "image_path", "thumb_path").values(*category, image_path, thumb_path).execute();
+    mysqlx::Result result = image_table
+            .insert("category", "image_file_path", "thumb_file_path")
+            .values((mysqlx::string)*category, (mysqlx::string)image_file_path, (mysqlx::string)thumb_file_path)
+            .execute();
     std::cout << "Image added to database (" << result.getWarningsCount() << " warnings generated)" << std::endl;
 
     auto response = new std::string("Uploaded");
@@ -62,24 +65,27 @@ void storage_manager::upload_request() {
 void storage_manager::view_thumbs() {
 
     //GET THUMB_PATH FROM MESSAGE
-    std::string *category = std::get<std::string *>(current_request_->get_payload()->get_content());
+    std::string *category = std::get<1>(current_request_->get_payload()->get_content());
 
     //CONNECT TO DB
-    mysqlx::Table image_table = connect("mysqlx://root@127.0.0.1", "imagic", "image");
+    mysqlx::Table image_table = connect("mysqlx://imagicuser:ImgApp2020!@127.0.0.1", "imagic", "image");
 
     //CREATE THUMBS MAP
     auto thumbs_map = new std::map<std::vector<unsigned char>, std::string>;
 
     //GET THUMB_PATHS FROM DB
-    mysqlx::RowResult rows = image_table.select("thumb_path").where("category like: category")
-            .bind("category", *category).execute();
+    mysqlx::RowResult rows = image_table
+            .select("thumb_file_path")
+            .where("category like :category")
+            .bind("category", (mysqlx::string)*category)
+            .execute();
     for (mysqlx::Row row : rows.fetchAll()) {
         //GET THUMB PATH FROM ROW
-        mysqlx::string thumb_path = row[0];
+        mysqlx::string thumb_file_path = row[0];
 
         //GET PATH_FILE FROM DISK
         auto thumb_file = new std::vector<unsigned char>;
-        std::ifstream input_thumb_file(thumb_path, std::ios::binary);
+        std::ifstream input_thumb_file(thumb_file_path, std::ios::binary);
         input_thumb_file.seekg(0, std::ifstream::end);
         uint32_t thumb_size = input_thumb_file.tellg();
         input_thumb_file.seekg(0, std::ifstream::beg);
@@ -87,7 +93,7 @@ void storage_manager::view_thumbs() {
         input_thumb_file.close();
 
         //CREATE THE ENTRY IN THE THUMB'S MAP
-        thumbs_map->insert({*thumb_file,thumb_path});
+        thumbs_map->insert({*thumb_file,thumb_file_path});
 
         //SET PAYLOAD LENGTH IN MESSAGE HEADER
         current_request_->get_header()->set_payload_length(thumbs_map->size());
@@ -99,20 +105,23 @@ void storage_manager::view_thumbs() {
 
 void storage_manager::download_image() {
     //GET THUMB_PATH FROM MESSAGE
-    std::string *thumb_path = std::get<std::string *>(current_request_->get_payload()->get_content());
+    std::string *thumb_file_path = std::get<1>(current_request_->get_payload()->get_content());
 
     //CONNECT TO DB
-    mysqlx::Table image_table = connect("mysqlx://root@127.0.0.1", "imagic", "image");
+    mysqlx::Table image_table = connect("mysqlx://imagicuser:ImgApp2020!@127.0.0.1", "imagic", "image");
 
     //CREATE QUERY TO GET THE IMAGE_PATH FROM THUMB_PATH
-    mysqlx::RowResult rows = image_table.select("image_path").where("thumb_path like: thumb_path")
-            .bind("thumb_path", *thumb_path).execute();
+    mysqlx::RowResult rows = image_table
+            .select("image_file_path")
+            .where("thumb_file_path like :thumb_file_path")
+            .bind("thumb_file_path", *thumb_file_path)
+            .execute();
     mysqlx::Row row = rows.fetchOne();
-    mysqlx::string image_path = row[0];
+    mysqlx::string image_file_path = row[0];
 
     //GET IMAGE_FILE FROM DISK
     auto *image_file = new std::vector<unsigned char>;
-    std::ifstream input_image_file(image_path, std::ios::binary);
+    std::ifstream input_image_file(image_file_path, std::ios::binary);
     input_image_file.seekg(0, std::ifstream::end);
     uint32_t image_size = input_image_file.tellg();
     input_image_file.seekg(0, std::ifstream::beg);

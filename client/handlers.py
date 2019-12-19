@@ -8,20 +8,34 @@ class LoadBalancerConnector:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+    def send_bytes(self, message, message_length):
+        offset = 0
+        while offset < message_length:
+            bytes_sent = self.sock.send(message[offset:])
+            if bytes_sent == 0:
+                raise RuntimeError("socket connection broken")
+            offset += bytes_sent
+
+    def receive_bytes(self, message_length):
+        chunks = []
+        bytes_received = 0
+        while bytes_received < message_length:
+            chunk = self.sock.recv(min(message_length - bytes_received, PACKET_LENGTH))
+            if chunk == b'':
+                raise RuntimeError("socket connection closed")
+            chunks.append(chunk)
+            bytes_received += len(chunk)
+        return b''.join(chunks)
+
     def send(self, message):
         self.sock.connect((HOST_ADDRESS, PORT))
-        self.sock.send(message.header)
+        self.send_bytes(message.header, HEADER_LENGTH)
         if isinstance(message.payload, str):
             message.payload = message.payload.encode("raw_unicode_escape")
-        bytes_to_send = len(message.payload)
-        times_to_send = bytes_to_send / PACKET_LENGTH
-        while times_to_send >= 0:
-            self.sock.send(message.payload)
-            times_to_send -= 1
-
-        received_header = self.sock.recv(struct.calcsize('!BII'))
+        self.send_bytes(message.payload, len(message.payload))
+        received_header = self.receive_bytes(struct.calcsize('!BII'))
         payload_length = struct.unpack('!BII', received_header)[2]
-        received_payload = self.sock.recv(payload_length)
+        received_payload = self.receive_bytes(payload_length)
         self.sock.close()
         return received_header, received_payload
 
@@ -32,13 +46,8 @@ class MessageHandler:
         self.load_balancer_connector = LoadBalancerConnector()
 
     def send_message(self, message_type, payload):
-        self.current_message.header = struct.pack(
-            '!BII',
-            message_type,
-            0,
-            len(payload)
-        )
         if message_type == UPLOAD_IMAGE:
+            payload.category = payload.category.encode("raw_unicode_escape")
             image_file_length = len(payload.image_file)
             category_length = len(payload.category)
             payload = struct.pack(
@@ -46,15 +55,21 @@ class MessageHandler:
                 image_file_length,
                 payload.image_file,
                 category_length,
-                payload.category.encode("raw_unicode_escape")
+                payload.category
             )
         else:  # FIND_THUMBS or DOWNLOAD_IMAGE
             payload = payload.encode("raw_unicode_escape")
 
+        self.current_message.header = struct.pack(
+            '!BII',
+            message_type,
+            0,
+            len(payload)
+        )
+
         self.current_message.payload = payload
 
-        self.current_message.header, self.current_message.payload = \
-            self.load_balancer_connector.send(self.current_message)
+        self.current_message.header, self.current_message.payload = self.load_balancer_connector.send(self.current_message)
 
         message_type = struct.unpack('!BII', self.current_message.header)[0]
 

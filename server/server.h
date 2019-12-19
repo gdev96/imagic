@@ -8,9 +8,8 @@ class server {
         load_balancer_connector lb_connector_;
         unsigned int id_;
     public:
-        server(char *address, int port, unsigned int id);
-
-    const load_balancer_connector &get_lb_connector() const;
+        server(const char *address, int port, unsigned int id);
+        const load_balancer_connector &get_lb_connector() const;
 };
 
 #endif //SERVER_SERVER_H

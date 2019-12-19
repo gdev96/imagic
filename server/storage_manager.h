@@ -12,7 +12,7 @@ private:
 public:
     storage_manager(message *current_request, unsigned int server_id);
     ~storage_manager();
-    mysqlx::Table connect(const std::string &url, const std::string &database, const std::string &table);
+    mysqlx::Table connect(const std::string &connection, const std::string &database, const std::string &table);
     void upload_request();
     void view_thumbs();
     void download_image();

@@ -16,7 +16,7 @@ load_balancer::load_balancer() {
 void load_balancer::initialize_server_addresses() {
     server_address_[0].sin_family = AF_INET;
     server_address_[0].sin_addr.s_addr = inet_addr(CONNECTOR_SERVER_ADDRESS);
-    server_address_[0].sin_port = htons(CONNECTOR_SERVER_FIRST_PORT);
+    server_address_[0].sin_port = htons(CONNECTOR_SERVER_FIRST_PORT + CONNECTOR_SERVER_PORT_STRIDE);
     for(int i=1; i<N_SERVER; i++) {
         server_address_[i].sin_family = AF_INET;
         server_address_[i].sin_addr.s_addr = inet_addr(CONNECTOR_SERVER_ADDRESS);
@@ -37,7 +37,6 @@ void load_balancer::initialize_server_connectors() {
         cout << "Server connector " << i << " created..." << endl;
     }
 }
-
 
 int load_balancer::balance() {
 
