@@ -7,4 +7,5 @@ load_balancer/cmake-build-debug/
 
 server/.idea/
 server/cmake-build-debug/
+server/resources/
 
