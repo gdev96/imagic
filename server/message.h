@@ -11,7 +11,7 @@
 
 enum class message_type : unsigned char {
     UPLOAD_IMAGE = 0,
-    VIEW_THUMBS = 1,
+    FIND_THUMBS = 1,
     DOWNLOAD_IMAGE = 2
 };
 

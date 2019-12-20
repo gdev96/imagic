@@ -1,6 +1,6 @@
 from image import Image, ImageValidator
 from handlers import MessageHandler
-from constants import UPLOAD_IMAGE, FIND_THUMBS, DOWNLOAD_IMAGE
+from message import MessageType
 
 
 class Imagic:
@@ -19,16 +19,16 @@ class Imagic:
         self.current_image.category = category
 
     def upload_image(self):
-        received_payload = self.message_handler.send_message(UPLOAD_IMAGE, self.current_image)[1]
+        received_payload = self.message_handler.send_message(MessageType.UPLOAD_IMAGE, self.current_image)[1]
         return received_payload
 
     def find_thumbs(self, category):
-        received_payload = self.message_handler.send_message(FIND_THUMBS, category)[1]
+        received_payload = self.message_handler.send_message(MessageType.FIND_THUMBS, category)[1]
         self.current_thumbs = received_payload
 
     def show_image(self, thumb_file):
         thumb_file_path = self.current_thumbs[thumb_file]
-        received_payload = self.message_handler.send_message(DOWNLOAD_IMAGE, thumb_file_path)[1]
+        received_payload = self.message_handler.send_message(MessageType.DOWNLOAD_IMAGE, thumb_file_path)[1]
         self.current_image.image_file = received_payload
 
     def download_image(self, dir_path):

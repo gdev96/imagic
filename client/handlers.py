@@ -1,7 +1,7 @@
-from message import Message
 import socket
 import struct
 from constants import *
+from message import Message, MessageType
 
 
 class LoadBalancerConnector:
@@ -17,7 +17,7 @@ class LoadBalancerConnector:
             offset += bytes_sent
 
     def receive_bytes(self, message_length):
-        chunks = []
+        chunks = list()
         bytes_received = 0
         while bytes_received < message_length:
             chunk = self.sock.recv(min(message_length - bytes_received, CHUNK_SIZE))
@@ -46,7 +46,7 @@ class MessageHandler:
         self.load_balancer_connector = LoadBalancerConnector()
 
     def send_message(self, message_type, payload):
-        if message_type == UPLOAD_IMAGE:
+        if message_type == MessageType.UPLOAD_IMAGE:
             payload.category = payload.category.encode("raw_unicode_escape")
             image_file_length = len(payload.image_file)
             category_length = len(payload.category)
@@ -62,7 +62,7 @@ class MessageHandler:
 
         self.current_message.header = struct.pack(
             '!BII',
-            message_type,
+            message_type.value[0],
             0,
             len(payload)
         )
@@ -73,7 +73,7 @@ class MessageHandler:
 
         message_type = struct.unpack('!BII', self.current_message.header)[0]
 
-        if message_type == FIND_THUMBS:
+        if message_type == MessageType.FIND_THUMBS:
             thumbs_dict = dict()
             offset = 0
             while True:

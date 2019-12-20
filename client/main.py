@@ -1,5 +1,5 @@
-from imagic import Imagic
 from PyQt5 import QtCore, QtGui, QtWidgets
+from imagic import Imagic
 
 
 class Ui_MainWindow(object):

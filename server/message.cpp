@@ -79,41 +79,50 @@ void payload::set_content(
 }
 
 void payload::serialize(unsigned char *buffer) {
-    if(content_.index() == 3) { //SERIALIZE MAP
-        //GET MAP FROM VARIANT
-        std::map<std::vector<unsigned char>, std::string> *thumbs_map = std::get<3>(content_);
+    switch(content_.index()) {
+        case 1: //SERIALIZE STRING
+            //GET STRING FROM VARIANT
+            std::string *str_message;
+            str_message = std::get<1>(content_);
+            //POPULATE BUFFER
+            str_message->copy((char *)buffer, str_message->length());
+            break;
+        case 2: //SERIALIZE BYTE VECTOR
+            //GET BYTE VECTOR FROM VARIANT
+            std::vector<unsigned char> *byte_vector;
+            byte_vector = std::get<2>(content_);
+            //POPULATE BUFFER
+            std::copy(byte_vector->begin(), byte_vector->end(), buffer);
+            break;
+        case 3: //SERIALIZE MAP
+            //GET MAP FROM VARIANT
+            std::map<std::vector<unsigned char>, std::string> *thumbs_map;
+            thumbs_map = std::get<3>(content_);
 
-        uint32_t *int_buffer;
-        unsigned char *byte_buffer = buffer;
-        uint32_t next_length;
+            uint32_t *int_buffer;
+            unsigned char *byte_buffer = buffer;
+            uint32_t next_length;
 
-        //ITERATE OVER MAP
-        for(const auto& [key, value] : *thumbs_map) {
-            //COPY THUMB LENGTH AND THUMB FILE
-            int_buffer = (uint32_t *)buffer;
-            next_length = key.size();
-            *int_buffer++ = htonl(next_length);
-            byte_buffer = (unsigned char *)int_buffer;
-            std::copy(key.begin(), key.end(), byte_buffer);
-            byte_buffer += next_length;
+            //ITERATE OVER MAP
+            for(const auto& [key, value] : *thumbs_map) {
+                //COPY THUMB LENGTH AND THUMB FILE
+                int_buffer = (uint32_t *)buffer;
+                next_length = key.size();
+                *int_buffer++ = htonl(next_length);
+                byte_buffer = (unsigned char *)int_buffer;
+                std::copy(key.begin(), key.end(), byte_buffer);
+                byte_buffer += next_length;
 
-            //COPY PATH LENGTH AND PATH
+                //COPY PATH LENGTH AND PATH
+                int_buffer = (uint32_t *)byte_buffer;
+                next_length = value.length();
+                *int_buffer++ = htonl(next_length);
+                byte_buffer = (unsigned char *)int_buffer;
+                std::copy(key.begin(), key.end(), byte_buffer);
+                byte_buffer += next_length;
+            }
             int_buffer = (uint32_t *)byte_buffer;
-            next_length = value.length();
-            *int_buffer++ = htonl(next_length);
-            byte_buffer = (unsigned char *)int_buffer;
-            std::copy(key.begin(), key.end(), byte_buffer);
-            byte_buffer += next_length;
-        }
-        int_buffer = (uint32_t *)byte_buffer;
-        *int_buffer = htonl(0);
-    }
-    else { //SERIALIZE BYTE VECTOR
-        //GET BYTE VECTOR FROM VARIANT
-        std::vector<unsigned char> *byte_vector = std::get<2>(content_);
-
-        //POPULATE BUFFER
-        std::copy(byte_vector->begin(), byte_vector->end(), buffer);
+            *int_buffer = htonl(0);
     }
 }
 

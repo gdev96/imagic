@@ -63,13 +63,13 @@ void load_balancer_connector::receive_requests() {
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address_, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
-    std::cout << "Load Balancer[" << server_id_ << "] connector is waiting for connections..." << std::endl;
+    std::cout << "Waiting for connections from load balancer..." << std::endl;
 
     while (true) {
         int lb_length = sizeof(lb_address);
         int lb_sockfd = accept(server_sockfd, (struct sockaddr *) &lb_address, //every connector has a sockfd
                            reinterpret_cast<socklen_t *>(&lb_length));
-        std::cout << "Connection accepted...Elaborating request..." << std::endl;
+        std::cout << "Connection from load balancer accepted..." << std::endl;
 
         std::thread t(&load_balancer_connector::manage_request, this, lb_sockfd);
         t.detach();
@@ -89,7 +89,9 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     read_bytes(lb_sockfd, payload_buffer, payload_length);
     message_payload->deserialize(payload_buffer, payload_length, msg_type);
     temporary_message_ = new message(message_header, message_payload);
-    std::cout << "Message received...Processing request..." << std::endl;
+
+    std::cout << "NEW MESSAGE RECEIVED!" << std::endl;
+    std::cout << *message_header << std::endl;
 
     //MANAGE REQUEST
     storage_manager_ = new storage_manager(temporary_message_, server_id_);
@@ -97,7 +99,7 @@ void load_balancer_connector::manage_request(int lb_sockfd){
         case message_type::UPLOAD_IMAGE:
             storage_manager_->upload_request();
             break;
-        case message_type::VIEW_THUMBS:
+        case message_type::FIND_THUMBS:
             storage_manager_->view_thumbs();
             break;
         case message_type::DOWNLOAD_IMAGE:
@@ -121,6 +123,9 @@ void load_balancer_connector::manage_request(int lb_sockfd){
 
     //SEND PAYLOAD
     write_bytes(lb_sockfd, response_payload_buffer, response_payload_length);
+
+    std::cout << "RESPONSE SENT!" << std::endl;
+    std::cout << *(temporary_message_->get_header()) << std::endl;
 
     //DELETE MESSAGE
     delete temporary_message_;

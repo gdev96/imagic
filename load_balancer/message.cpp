@@ -1,5 +1,5 @@
+#include <netinet/in.h>
 #include "message.h"
-#include "constants.h"
 
 header::header() {}
 
@@ -41,7 +41,7 @@ void header::deserialize(unsigned char *buffer) {
     payload_length_ = ntohl(*int_buffer);
 }
 
-ostream &operator<<(ostream &os, const header &header) {
+std::ostream &operator<<(std::ostream &os, const header &header) {
     os << "message_type: " << (unsigned int)header.message_type_ << " source_id: " << header.source_id_
         << " payload_length: " << header.payload_length_;
     return os;

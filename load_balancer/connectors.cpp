@@ -1,5 +1,10 @@
+#include <arpa/inet.h>
 #include <stdexcept>
+#include <iostream>
+#include <sys/socket.h>
+#include <unistd.h>
 #include "connectors.h"
+#include "constants.h"
 
 uint32_t min(uint32_t a, uint32_t b) {
     return (a<b)?a:b;
@@ -39,7 +44,7 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
 
 //CONNECTOR CLIENT SIDE
 
-client_connector::client_connector(queue<message *> *message_queue) : message_queue_(message_queue) {}
+client_connector::client_connector(std::queue<message *> *message_queue) : message_queue_(message_queue) {}
 
 void client_connector::manage_requests() {
     //CREATE SOCKET
@@ -54,13 +59,13 @@ void client_connector::manage_requests() {
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
-    cout << "Client connector is waiting for connections..." << endl;
+    std::cout << "Waiting for connections from client..." << std::endl;
 
     while (true) {
         int client_length = sizeof(client_address);
         client_sockfd_ = accept(server_sockfd, (struct sockaddr *) &client_address, //every connector has a sockfd
                                reinterpret_cast<socklen_t *>(&client_length));
-        cout << "Connection accepted...Elaborating request..." << endl;
+        std::cout << "Connection from client accepted..." << std::endl;
 
         //READ AND PUSH REQUEST
         unsigned char buffer[HEADER_LENGTH];
@@ -70,15 +75,18 @@ void client_connector::manage_requests() {
         message_header->set_source_id(client_sockfd_);
         uint32_t payload_length = message_header->get_payload_length();
         auto message_payload = new unsigned char[payload_length];
-        int received_bytes, total = 0;
         read_bytes(client_sockfd_, message_payload, payload_length);
         auto received_message = new message(message_header, message_payload);
         message_queue_->push(received_message);
+
+        std::cout << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
+        std::cout << *message_header << std::endl;
     }
 }
 
 //CONNECTOR SERVER-SIDE
-server_connector::server_connector(){};
+server_connector::server_connector() {};
+
 server_connector::server_connector(sockaddr_in *server_address) : server_address_(server_address) {
     server_load_ = 0;
 

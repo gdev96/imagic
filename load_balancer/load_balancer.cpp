@@ -1,3 +1,5 @@
+#include <arpa/inet.h>
+#include <iostream>
 #include "constants.h"
 #include "load_balancer.h"
 
@@ -22,30 +24,31 @@ void load_balancer::initialize_server_addresses() {
         server_address_[i].sin_addr.s_addr = inet_addr(CONNECTOR_SERVER_ADDRESS);
         server_address_[i].sin_port = htons(server_address_[i-1].sin_port + CONNECTOR_SERVER_PORT_STRIDE);
     }
-    cout << "Server addresses initialized..." << endl;
+    std::cout << "Server addresses initialized..." << std::endl;
 }
 
 void load_balancer::initialize_client_connector() {
     client_connector_ = new client_connector(&message_queue_);
-    cout << "Client connector created..." << endl;
-    threads_[0] = thread(&client_connector::manage_requests, client_connector_);
+    std::cout << "Client connector created..." << std::endl;
+    threads_[0] = std::thread(&client_connector::manage_requests, client_connector_);
 }
 
 void load_balancer::initialize_server_connectors() {
     for(int i=0; i<N_SERVER; i++) {
         server_connector_[i] = server_connector(&server_address_[i]);
-        cout << "Server connector " << i << " created..." << endl;
+        std::cout << "Server connector " << i << " created..." << std::endl;
     }
 }
 
 int load_balancer::balance() {
 
-    int server_low_load=0, low_load=0;
+    int lowest_load_server = 0, lowest_load = 0;
     for(int i=0; i<N_SERVER; i++) {
-        if (server_connector_[i].get_server_load() <= low_load)
-            server_low_load = i;
+        if(server_connector_[i].get_server_load() <= lowest_load)
+            lowest_load_server = i;
     }
-    return server_low_load;
+    std::cout << "SENDING MESSAGE TO SERVER: " << lowest_load_server << std::endl;
+    return lowest_load_server;
 };
 
 void load_balancer::manage_requests() {
@@ -54,20 +57,18 @@ void load_balancer::manage_requests() {
             //GET MESSAGE FROM QUEUE
             current_message_ = message_queue_.front();
             message_queue_.pop();
-            cout << "message received:" << endl;
-            cout << *current_message_->get_header() << endl;
 
             if(!current_message_->get_header()->get_message_type()) { //message must be sent in broadcast
                 for(int i=0; i<N_SERVER; i++){
                     server_connector_[i].set_server_load(server_connector_[i].get_server_load()+1);
-                    threads_[i+1] = thread(&server_connector::manage_response, server_connector_[i], current_message_);
+                    threads_[i+1] = std::thread(&server_connector::manage_response, server_connector_[i], current_message_);
                     threads_[i+1].detach();
                 }
             }
             else { //message must be sent to one server only
                 int chosen_server = balance();
                 server_connector_[chosen_server].set_server_load(server_connector_[chosen_server].get_server_load()+1);
-                threads_[chosen_server+1] = thread(&server_connector::manage_response, server_connector_[chosen_server], current_message_);
+                threads_[chosen_server+1] = std::thread(&server_connector::manage_response, server_connector_[chosen_server], current_message_);
                 threads_[chosen_server+1].detach();
             }
         }
