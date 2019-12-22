@@ -7,12 +7,14 @@ from message import Message, MessageType
 class LoadBalancerConnector:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((HOST_ADDRESS, PORT))
 
     def send_bytes(self, message, message_length):
         offset = 0
         while offset < message_length:
             bytes_sent = self.sock.send(message[offset:])
             if bytes_sent == 0:
+                self.sock.close()
                 raise RuntimeError("socket connection broken")
             offset += bytes_sent
 
@@ -22,13 +24,13 @@ class LoadBalancerConnector:
         while bytes_received < message_length:
             chunk = self.sock.recv(min(message_length - bytes_received, CHUNK_SIZE))
             if chunk == b'':
+                self.sock.close()
                 raise RuntimeError("socket connection closed")
             chunks.append(chunk)
             bytes_received += len(chunk)
         return b''.join(chunks)
 
     def send(self, message):
-        self.sock.connect((HOST_ADDRESS, PORT))
         self.send_bytes(message.header, HEADER_LENGTH)
         if isinstance(message.payload, str):
             message.payload = message.payload.encode("raw_unicode_escape")
@@ -36,7 +38,6 @@ class LoadBalancerConnector:
         received_header = self.receive_bytes(struct.calcsize('!BII'))
         payload_length = struct.unpack('!BII', received_header)[2]
         received_payload = self.receive_bytes(payload_length)
-        self.sock.close()
         return received_header, received_payload
 
 

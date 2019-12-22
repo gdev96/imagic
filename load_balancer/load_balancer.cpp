@@ -24,19 +24,19 @@ void load_balancer::initialize_server_addresses() {
         server_address_[i].sin_addr.s_addr = inet_addr(CONNECTOR_SERVER_ADDRESS);
         server_address_[i].sin_port = htons(server_address_[i-1].sin_port + CONNECTOR_SERVER_PORT_STRIDE);
     }
-    std::cout << "Server addresses initialized..." << std::endl;
+    std::cout << "\033[1;33mServer addresses initialized...\033[m" << std::endl;
 }
 
 void load_balancer::initialize_client_connector() {
     client_connector_ = new client_connector(&message_queue_);
-    std::cout << "Client connector created..." << std::endl;
+    std::cout << "\033[1;33mClient connector created...\033[m" << std::endl;
     threads_[0] = std::thread(&client_connector::manage_requests, client_connector_);
 }
 
 void load_balancer::initialize_server_connectors() {
     for(int i=0; i<N_SERVER; i++) {
         server_connector_[i] = server_connector(&server_address_[i]);
-        std::cout << "Server connector " << i << " created..." << std::endl;
+        std::cout << "\033[1;33mServer connector " << i << " created...\033[m" << std::endl;
     }
 }
 
