@@ -65,7 +65,7 @@ void client_connector::manage_requests() {
         int client_length = sizeof(client_address);
         client_sockfd_ = accept(server_sockfd, (struct sockaddr *) &client_address, //every connector has a sockfd
                                reinterpret_cast<socklen_t *>(&client_length));
-        std::cout << LOAD_BALANCER << "Connection from client accepted..." << std::endl;
+        std::cout << LOAD_BALANCER << "Connection from client accepted" << std::endl;
 
         //READ AND PUSH REQUEST
         unsigned char buffer[HEADER_LENGTH];
