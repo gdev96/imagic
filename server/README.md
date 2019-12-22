@@ -46,11 +46,12 @@ sudo mysql -u root
 Now, type the following commands in order to create `imagic` database and `imagicuser` user, granting him complete access to DB:
 
 ```
-CREATE DATABASE imagic;
+CREATE DATABASE IF NOT EXISTS imagic;
 ```
 
 ```
-CREATE USER 'imagicuser'@'%' identified by 'ImgApp2020!';
+CREATE USER IF NOT EXISTS
+  'imagicuser'@'%' identified by 'ImgApp2020!';
 ```
 
 ```
@@ -60,7 +61,7 @@ GRANT ALL ON imagic.* TO 'imagicuser'@'%';
 Finally, create `image` table:
 
 ```
-CREATE TABLE imagic.image (
+CREATE TABLE IF NOT EXISTS imagic.image (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   image_file_path VARCHAR(45) NULL,
   thumb_file_path VARCHAR(45) NULL,

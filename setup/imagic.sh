@@ -1,41 +1,33 @@
 #!/bin/bash
 
-# compile server
+cd ..
 
-cd ../server
-mkdir -p build
-cd build
-cmake ..
-make
+echo "Compiling server..."
+mkdir -p server/build
+cmake -S server -B server/build
+make -C server/build
 
-# compile load balancer
+echo "Creating database..."
+sudo service mysql start
+sudo mysql -u root < setup/imagic.sql
 
-cd ../../load_balancer
-mkdir -p build
-cd build
-cmake ..
-make
+echo "Compiling load balancer..."
+mkdir -p load_balancer/build
+cmake -S load_balancer -B load_balancer/build
+make -C load_balancer/build
 
-# start server
+echo "Starting server..."
+./server/build/server &
 
-cd ../../server/build
-./server &
-
-# wait for server to be ready
-
+echo "Waiting for server to be ready..."
 sleep 2
 
-# start load balancer
+echo "Starting load balancer..."
+./load_balancer/build/load_balancer &
 
-cd ../../load_balancer/build
-./load_balancer &
-
-# wait for load balancer to be ready
-
+echo "Waiting for load balancer to be ready..."
 sleep 2
 
-# execute client
-
-cd ../../client
-python3 main.py
+echo "Executing client..."
+python3 client/main.py
 
