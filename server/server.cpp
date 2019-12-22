@@ -8,6 +8,6 @@ server::server(const char *address, int port, unsigned int id) {
     std::cout << "Load balancer connector " << id << " created.." << std::endl;
 }
 
-const load_balancer_connector &server::get_lb_connector() const {
-    return lb_connector_;
-}
+void server::receive_requests(){
+    lb_connector_.receive_requests();
+};
