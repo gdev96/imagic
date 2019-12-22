@@ -59,13 +59,13 @@ void client_connector::manage_requests() {
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
-    std::cout << "\033[1;33mWaiting for connections from client...\033[m" << std::endl;
+    std::cout << LOAD_BALANCER << "Waiting for connections from client..." << std::endl;
 
     while (true) {
         int client_length = sizeof(client_address);
         client_sockfd_ = accept(server_sockfd, (struct sockaddr *) &client_address, //every connector has a sockfd
                                reinterpret_cast<socklen_t *>(&client_length));
-        std::cout << "\033[1;33mConnection from client accepted...\033[m" << std::endl;
+        std::cout << LOAD_BALANCER << "Connection from client accepted..." << std::endl;
 
         //READ AND PUSH REQUEST
         unsigned char buffer[HEADER_LENGTH];
@@ -79,7 +79,7 @@ void client_connector::manage_requests() {
         auto received_message = new message(message_header, message_payload);
         message_queue_->push(received_message);
 
-        std::cout << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
+        std::cout << LOAD_BALANCER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
         std::cout << *message_header << std::endl;
     }
 }

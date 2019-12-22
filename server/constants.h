@@ -1,6 +1,9 @@
 #ifndef SERVER_CONSTANTS_H
 #define SERVER_CONSTANTS_H
 
+//MACROS
+#define SERVER "\033[36mserver 0      |\033[m "
+
 //CONNECTOR
 #define SERVER_ADDRESS "127.0.0.1"
 #define SERVER_PORT 40000

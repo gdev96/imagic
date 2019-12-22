@@ -63,13 +63,13 @@ void load_balancer_connector::receive_requests() {
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address_, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
-    std::cout << "Waiting for connections from load balancer..." << std::endl;
+    std::cout << SERVER << "Waiting for connections from load balancer..." << std::endl;
 
     while (true) {
         int lb_length = sizeof(lb_address);
         int lb_sockfd = accept(server_sockfd, (struct sockaddr *) &lb_address, //every connector has a sockfd
                            reinterpret_cast<socklen_t *>(&lb_length));
-        std::cout << "Connection from load balancer accepted..." << std::endl;
+        std::cout << SERVER << "Connection from load balancer accepted..." << std::endl;
 
         std::thread t(&load_balancer_connector::manage_request, this, lb_sockfd);
         t.detach();
@@ -90,7 +90,7 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     message_payload->deserialize(payload_buffer, payload_length, msg_type);
     temporary_message_ = new message(message_header, message_payload);
 
-    std::cout << "NEW MESSAGE RECEIVED!" << std::endl;
+    std::cout << SERVER << "NEW MESSAGE RECEIVED!" << std::endl;
     std::cout << *message_header << std::endl;
 
     //MANAGE REQUEST
@@ -124,7 +124,7 @@ void load_balancer_connector::manage_request(int lb_sockfd){
     //SEND PAYLOAD
     write_bytes(lb_sockfd, response_payload_buffer, response_payload_length);
 
-    std::cout << "RESPONSE SENT!" << std::endl;
+    std::cout << SERVER << "RESPONSE SENT!" << std::endl;
     std::cout << *(temporary_message_->get_header()) << std::endl;
 
     //DELETE MESSAGE
