@@ -3,7 +3,6 @@
 cd ..
 
 echo "Compiling server..."
-mkdir -p server/build
 cmake -S server -B server/build
 make -C server/build
 
@@ -12,7 +11,6 @@ sudo service mysql start
 sudo mysql -u root < setup/imagic.sql
 
 echo "Compiling load balancer..."
-mkdir -p load_balancer/build
 cmake -S load_balancer -B load_balancer/build
 make -C load_balancer/build
 
