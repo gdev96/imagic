@@ -2,13 +2,16 @@
 
 cd ..
 
-echo "Compiling server..."
-cmake -S server -B server/build
-make -C server/build
-
 echo "Creating database..."
 sudo service mysql start
 sudo mysql -u root < setup/imagic.sql
+
+echo "Preparing server environment..."
+mkdir -p server/resources/0
+
+echo "Compiling server..."
+cmake -S server -B server/build
+make -C server/build
 
 echo "Compiling load balancer..."
 cmake -S load_balancer -B load_balancer/build

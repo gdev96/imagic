@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "constants.h"
 #include "image.h"
 #include "storage_manager.h"
 
@@ -32,16 +33,18 @@ void storage_manager::upload_request() {
     std::string *category = image->getCategory();
 
     //SAVE IMAGE FILE TO DISK
-    std::string image_file_path = "../resources/" + std::to_string(server_id_) + "/image.jpg";
-    std::ofstream output_image_file(image_file_path, std::ios::binary);
+    std::string image_file_path = "server/resources/" + std::to_string(server_id_) + "/image.jpg";
+    std::ofstream output_image_file("./" + image_file_path, std::ios::binary);
     output_image_file.write((const char*)image_file->data(), image_file->size());
     output_image_file.close();
+    std::cout << SERVER << "Image saved in: " + image_file_path << std::endl;
 
     //SAVE THUMB FILE TO DISK
-    std::string thumb_file_path = "../resources/" + std::to_string(server_id_) + "/image_thumb.jpg";
-    std::ofstream output_thumb_file(thumb_file_path, std::ios::binary);
+    std::string thumb_file_path = "server/resources/" + std::to_string(server_id_) + "/image_thumb.jpg";
+    std::ofstream output_thumb_file("./" + thumb_file_path, std::ios::binary);
     output_thumb_file.write((const char*)image_file->data(), image_file->size());
     output_thumb_file.close();
+    std::cout << SERVER << "Thumb saved in: " + image_file_path << std::endl;
 
     //CONNECT TO DB
     mysqlx::Table image_table = connect("mysqlx://imagicuser:ImgApp2020!@127.0.0.1", "imagic", "image");
@@ -51,7 +54,7 @@ void storage_manager::upload_request() {
             .insert("category", "image_file_path", "thumb_file_path")
             .values((mysqlx::string)*category, (mysqlx::string)image_file_path, (mysqlx::string)thumb_file_path)
             .execute();
-    std::cout << "Image added to database (" << result.getWarningsCount() << " warnings generated)" << std::endl;
+    std::cout << SERVER << "Image added to database (" << result.getWarningsCount() << " warnings generated)" << std::endl;
 
     auto response = new std::string("Uploaded");
 
@@ -85,7 +88,7 @@ void storage_manager::view_thumbs() {
 
         //GET PATH_FILE FROM DISK
         auto thumb_file = new std::vector<unsigned char>;
-        std::ifstream input_thumb_file(thumb_file_path, std::ios::binary);
+        std::ifstream input_thumb_file("./" + (std::string)thumb_file_path, std::ios::binary);
         input_thumb_file.seekg(0, std::ifstream::end);
         uint32_t thumb_size = input_thumb_file.tellg();
         input_thumb_file.seekg(0, std::ifstream::beg);
@@ -121,7 +124,7 @@ void storage_manager::download_image() {
 
     //GET IMAGE_FILE FROM DISK
     auto *image_file = new std::vector<unsigned char>;
-    std::ifstream input_image_file(image_file_path, std::ios::binary);
+    std::ifstream input_image_file("./" + (std::string)image_file_path, std::ios::binary);
     input_image_file.seekg(0, std::ifstream::end);
     uint32_t image_size = input_image_file.tellg();
     input_image_file.seekg(0, std::ifstream::beg);
