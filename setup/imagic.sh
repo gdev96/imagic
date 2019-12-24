@@ -16,9 +16,12 @@ make -C load_balancer/build
 # export environment variables
 set -a
 . ./setup/imagic.env
+SERVER_ID=0
+
+# avoid exporting other environment variables
+set +a
 
 echo "Starting $N_SERVER servers..."
-SERVER_ID=0
 while [ $SERVER_ID -lt $N_SERVER ]
 do
     # source SQL statements
@@ -34,9 +37,6 @@ do
 
     sleep 1
 done
-
-# stop exporting environment variables
-set +a
 
 echo "Starting load balancer..."
 ./load_balancer/build/load_balancer &
