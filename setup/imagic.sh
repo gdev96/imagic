@@ -2,9 +2,8 @@
 
 cd ..
 
-echo "Creating database..."
+echo "Starting MySQL service..."
 sudo service mysql start
-sudo mysql -u root < setup/imagic.sql
 
 echo "Compiling server..."
 cmake -S server -B server/build
@@ -20,12 +19,23 @@ set -a
 set +a
 
 echo "Starting $N_SERVER servers..."
-VAR=0
-while [ "$VAR" -lt "$N_SERVER" ]
+mkdir -p setup/generated_files
+rm -f setup/generated_files/*.sql
+ID=0
+while [ $ID -lt $N_SERVER ]
 do
-    mkdir -p server/resources/"$VAR"
-    ./server/build/server "$VAR" &
-    ((VAR++))
+    # source SQL statements
+    . ./setup/imagic.sql
+
+    echo "Creating database for server $ID..."
+    echo "$STATEMENTS" > setup/generated_files/$ID.sql
+    sudo mysql -u root < setup/generated_files/$ID.sql
+
+    echo "Creating directory for server $ID..."
+    mkdir -p server/resources/$ID
+    ./server/build/server $ID &
+    ((ID++))
+
     sleep 1
 done
 
