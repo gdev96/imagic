@@ -37,4 +37,3 @@ sleep 2
 
 echo "Executing client..."
 python3 client/main.py
-

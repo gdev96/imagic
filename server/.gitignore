@@ -1,0 +1,6 @@
+/build/
+/resources/
+
+### CLion ###
+/cmake-build-debug/
+/.idea/

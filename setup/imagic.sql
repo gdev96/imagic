@@ -11,4 +11,3 @@ CREATE TABLE IF NOT EXISTS imagic.image (
   thumb_file_path VARCHAR(45) NULL,
   category VARCHAR(45) NULL
 ) ENGINE = InnoDB;
-
