@@ -37,14 +37,14 @@ void storage_manager::upload_request() {
     std::ofstream output_image_file("./" + image_file_path, std::ios::binary);
     output_image_file.write((const char*)image_file->data(), image_file->size());
     output_image_file.close();
-    std::cout << SERVER << "Image saved in: " + image_file_path << std::endl;
+    std::cout << *message_identifier << "Image saved in: " + image_file_path << std::endl;
 
     //SAVE THUMB FILE TO DISK
     std::string thumb_file_path = "server/resources/" + std::to_string(server_id_) + "/image_thumb.jpg";
     std::ofstream output_thumb_file("./" + thumb_file_path, std::ios::binary);
     output_thumb_file.write((const char*)image_file->data(), image_file->size());
     output_thumb_file.close();
-    std::cout << SERVER << "Thumb saved in: " + image_file_path << std::endl;
+    std::cout << *message_identifier << "Thumb saved in: " + image_file_path << std::endl;
 
     //CONNECT TO DB
     mysqlx::Table image_table = connect("mysqlx://imagicuser:ImgApp2020!@127.0.0.1", "imagic", "image");
@@ -54,7 +54,7 @@ void storage_manager::upload_request() {
             .insert("category", "image_file_path", "thumb_file_path")
             .values((mysqlx::string)*category, (mysqlx::string)image_file_path, (mysqlx::string)thumb_file_path)
             .execute();
-    std::cout << SERVER << "Image added to database (" << result.getWarningsCount() << " warnings generated)" << std::endl;
+    std::cout << *message_identifier << "Image added to database (" << result.getWarningsCount() << " warnings generated)" << std::endl;
 
     auto response = new std::string("Uploaded");
 

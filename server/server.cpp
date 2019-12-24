@@ -2,11 +2,13 @@
 #include "constants.h"
 #include "server.h"
 
-server::server(const char *address, int port, unsigned int id) {
+server::server(std::string &address, int port, int id) : id_(id) {
+    //SET MESSAGE IDENTIFIER
+    message_identifier = new std::string("\033[36mserver " + std::to_string(id_) + "      |\033[m ");
     //CREATE LOAD BALANCER CONNECTOR
-    std::cout << SERVER << "Server " << id <<" created" << std::endl;
+    std::cout << *message_identifier << "Server " << id_ <<" created" << std::endl;
     lb_connector_ = load_balancer_connector(address, port, id);
-    std::cout << SERVER << "Load balancer connector " << id << " created" << std::endl;
+    std::cout << *message_identifier << "Load balancer connector " << id << " created" << std::endl;
 }
 
 void server::receive_requests(){

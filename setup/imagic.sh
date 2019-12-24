@@ -6,9 +6,6 @@ echo "Creating database..."
 sudo service mysql start
 sudo mysql -u root < setup/imagic.sql
 
-echo "Preparing server environment..."
-mkdir -p server/resources/0
-
 echo "Compiling server..."
 cmake -S server -B server/build
 make -C server/build
@@ -17,11 +14,20 @@ echo "Compiling load balancer..."
 cmake -S load_balancer -B load_balancer/build
 make -C load_balancer/build
 
-echo "Starting server..."
-./server/build/server &
+# export environment variables
+set -a
+. ./setup/imagic.env
+set +a
 
-echo "Waiting for server to be ready..."
-sleep 2
+echo "Starting $N_SERVER servers..."
+VAR=0
+while [ "$VAR" -lt "$N_SERVER" ]
+do
+    mkdir -p server/resources/"$VAR"
+    ./server/build/server "$VAR" &
+    ((VAR++))
+    sleep 1
+done
 
 echo "Starting load balancer..."
 ./load_balancer/build/load_balancer &
