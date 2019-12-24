@@ -16,28 +16,27 @@ make -C load_balancer/build
 # export environment variables
 set -a
 . ./setup/imagic.env
-set +a
 
 echo "Starting $N_SERVER servers..."
-mkdir -p setup/generated_files
-rm -f setup/generated_files/*.sql
-ID=0
-while [ $ID -lt $N_SERVER ]
+SERVER_ID=0
+while [ $SERVER_ID -lt $N_SERVER ]
 do
     # source SQL statements
     . ./setup/imagic.sql
 
-    echo "Creating database for server $ID..."
-    echo "$STATEMENTS" > setup/generated_files/$ID.sql
-    sudo mysql -u root < setup/generated_files/$ID.sql
+    echo "Creating database for server $SERVER_ID..."
+    sudo mysql -u root -e "$STATEMENTS"
 
-    echo "Creating directory for server $ID..."
-    mkdir -p server/resources/$ID
-    ./server/build/server $ID &
-    ((ID++))
+    echo "Creating directory for server $SERVER_ID..."
+    mkdir -p server/resources/$SERVER_ID
+    ./server/build/server &
+    ((SERVER_ID++))
 
     sleep 1
 done
+
+# stop exporting environment variables
+set +a
 
 echo "Starting load balancer..."
 ./load_balancer/build/load_balancer &
