@@ -64,6 +64,19 @@ fi
 echo "Waiting for load balancer to be ready..."
 sleep 2
 
-echo "Executing client..."
+echo "Executing $N_CLIENT clients..."
+
 #pip3 install -r client/requirements.txt
-python3 client/main.py
+
+CLIENT_ID=0
+
+while [ $CLIENT_ID -lt $N_CLIENT ]
+do
+    python3 client/main.py &
+    ((CLIENT_ID++))
+
+    sleep 1
+done
+
+# wait for processes termination
+wait

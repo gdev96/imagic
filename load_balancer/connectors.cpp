@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <sys/socket.h>
+#include <thread>
 #include <unistd.h>
 #include "connectors.h"
 #include "constants.h"
@@ -47,7 +48,7 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
 
 client_connector::client_connector(std::queue<message *> *message_queue) : message_queue_(message_queue) {}
 
-void client_connector::manage_requests() {
+void client_connector::accept_requests() {
     //CREATE SOCKET
     struct sockaddr_in server_address, client_address;
 
@@ -66,25 +67,37 @@ void client_connector::manage_requests() {
     std::cout << *OUTPUT_IDENTIFIER << "Waiting for connections from client..." << std::endl;
 
     while (true) {
-        int client_length = sizeof(client_address);
-        client_sockfd_ = accept(server_sockfd, (struct sockaddr *) &client_address, //every connector has a sockfd
-                               reinterpret_cast<socklen_t *>(&client_length));
+        socklen_t client_length = sizeof(client_address);
+        int client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_length); //every connector has a sockfd
+
+        std::thread t(&client_connector::queue_request, this, client_sockfd);
+        t.detach();
+    }
+}
+
+void client_connector::queue_request(int client_sockfd) {
+    try {
         std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
 
         //READ AND PUSH REQUEST
         unsigned char buffer[HEADER_LENGTH];
-        read_bytes(client_sockfd_, buffer, HEADER_LENGTH);
+        read_bytes(client_sockfd, buffer, HEADER_LENGTH);
         auto message_header = new header();
         message_header->deserialize(buffer);
-        message_header->set_source_id(client_sockfd_);
+        message_header->set_source_id(client_sockfd);
         uint32_t payload_length = message_header->get_payload_length();
         auto message_payload = new unsigned char[payload_length];
-        read_bytes(client_sockfd_, message_payload, payload_length);
+        read_bytes(client_sockfd, message_payload, payload_length);
         auto received_message = new message(message_header, message_payload);
         message_queue_->push(received_message);
 
         std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
         std::cout << *message_header << std::endl;
+    }
+    catch (const std::runtime_error& e) {
+        close(client_sockfd);
+        std::cout << e.what() << std::endl;
+        return;
     }
 }
 
@@ -138,7 +151,4 @@ void server_connector::manage_response(message *message) { //Connector server kn
 
     //DECREMENT SERVER LOAD
     server_load_--;
-
-    //CLOSE CONNECTION TO CLIENT
-    close(client_sockfd);
 }

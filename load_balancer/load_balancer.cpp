@@ -39,7 +39,7 @@ void load_balancer::initialize_server_addresses() {
 void load_balancer::initialize_client_connector() {
     client_connector_ = new client_connector(&message_queue_);
     std::cout << *OUTPUT_IDENTIFIER << "Client connector created" << std::endl;
-    threads_[0] = std::thread(&client_connector::manage_requests, client_connector_);
+    threads_[0] = std::thread(&client_connector::accept_requests, client_connector_);
     threads_[0].detach();
 }
 

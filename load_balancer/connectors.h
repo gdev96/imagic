@@ -13,10 +13,10 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
 class client_connector {
     private:
         std::queue<message *> *message_queue_;
-        int client_sockfd_;
     public:
         client_connector(std::queue<message *> *message_queue);
-        void manage_requests();
+        void accept_requests();
+        void queue_request(int client_sockfd);
 };
 
 class server_connector {
