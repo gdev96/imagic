@@ -1,15 +1,18 @@
 #ifndef SERVER_CONSTANTS_H
 #define SERVER_CONSTANTS_H
 
-inline std::string *message_identifier;
+#include <string>
+
+//OUTPUT MESSAGE
+inline const std::string *OUTPUT_IDENTIFIER;
 
 //CONNECTOR
-#define QUEUE_LENGTH_CONNECTIONS 5
+inline const unsigned int QUEUE_LENGTH_CONNECTIONS = 5;
 
 //MESSAGE
-#define CHUNK_SIZE 8192
+inline const unsigned int CHUNK_SIZE = 8192;
 
 //HEADER
-#define HEADER_LENGTH 9
+inline const unsigned int HEADER_LENGTH = 9;
 
 #endif //SERVER_CONSTANTS_H

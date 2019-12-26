@@ -17,7 +17,7 @@ class load_balancer_connector {
 
     public:
         load_balancer_connector();
-        load_balancer_connector(std::string &address, int port, unsigned int server_id);
+        load_balancer_connector(const char *address, int port, unsigned int server_id);
         void receive_requests();
         void manage_request(int lb_sockfd);
 };

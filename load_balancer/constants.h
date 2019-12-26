@@ -1,25 +1,18 @@
 #ifndef IMAGIC_BACKEND_CONSTANTS_H
 #define IMAGIC_BACKEND_CONSTANTS_H
 
+#include <string>
+
 //MACROS
-#define LOAD_BALANCER "\033[33mload_balancer |\033[m "
+inline const std::string *OUTPUT_IDENTIFIER;
 
 //CONNECTORS
-#define CONNECTOR_CLIENT_ADDRESS "127.0.0.1"
-#define CONNECTOR_CLIENT_PORT 5000
-#define CONNECTOR_SERVER_ADDRESS "127.0.0.1"
-#define CONNECTOR_SERVER_FIRST_PORT 39990
-#define CONNECTOR_SERVER_PORT_STRIDE 10
-#define QUEUE_LENGTH_CONNECTIONS 5
+inline const unsigned int QUEUE_LENGTH_CONNECTIONS = 5;
 
 //MESSAGE
-#define CHUNK_SIZE 8192
+inline const unsigned int CHUNK_SIZE = 8192;
 
 //HEADER
-#define HEADER_LENGTH 9
-
-//LOAD BALANCER
-#define N_SERVER 1
-#define MAX_SERVER 10
+inline const unsigned int HEADER_LENGTH = 9;
 
 #endif //IMAGIC_BACKEND_CONSTANTS_H

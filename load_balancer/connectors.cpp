@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <cstdlib>
 #include <stdexcept>
 #include <iostream>
 #include <sys/socket.h>
@@ -50,22 +51,25 @@ void client_connector::manage_requests() {
     //CREATE SOCKET
     struct sockaddr_in server_address, client_address;
 
+    const char *load_balancer_address(std::getenv("LOAD_BALANCER_ADDRESS"));
+    int load_balancer_port = std::stoi(std::getenv("LOAD_BALANCER_PORT"));
+
     server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = inet_addr(CONNECTOR_CLIENT_ADDRESS);
-    server_address.sin_port = htons(CONNECTOR_CLIENT_PORT);
+    server_address.sin_addr.s_addr = inet_addr(load_balancer_address);
+    server_address.sin_port = htons(load_balancer_port);
     int server_length = sizeof(server_address);
 
     //CONNECTION WITH CLIENT
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
-    std::cout << LOAD_BALANCER << "Waiting for connections from client..." << std::endl;
+    std::cout << *OUTPUT_IDENTIFIER << "Waiting for connections from client..." << std::endl;
 
     while (true) {
         int client_length = sizeof(client_address);
         client_sockfd_ = accept(server_sockfd, (struct sockaddr *) &client_address, //every connector has a sockfd
                                reinterpret_cast<socklen_t *>(&client_length));
-        std::cout << LOAD_BALANCER << "Connection from client accepted" << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
 
         //READ AND PUSH REQUEST
         unsigned char buffer[HEADER_LENGTH];
@@ -79,7 +83,7 @@ void client_connector::manage_requests() {
         auto received_message = new message(message_header, message_payload);
         message_queue_->push(received_message);
 
-        std::cout << LOAD_BALANCER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
         std::cout << *message_header << std::endl;
     }
 }

@@ -11,10 +11,11 @@ class load_balancer {
     private:
         message *current_message_;
         std::queue<message *> message_queue_;
+        unsigned int n_server_;
         client_connector *client_connector_;
-        server_connector server_connector_[N_SERVER];
-        struct sockaddr_in server_address_[MAX_SERVER];
-        std::thread threads_[N_SERVER+1];
+        server_connector *server_connectors_;
+        struct sockaddr_in *server_addresses_;
+        std::thread *threads_;
     public:
         load_balancer();
         void initialize_server_addresses();

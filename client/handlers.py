@@ -1,3 +1,4 @@
+import os
 import socket
 import struct
 from constants import *
@@ -7,7 +8,9 @@ from message import Message, MessageType
 class LoadBalancerConnector:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((HOST_ADDRESS, PORT))
+        host_address = os.environ["LOAD_BALANCER_ADDRESS"]
+        port = int(os.environ["LOAD_BALANCER_PORT"])
+        self.sock.connect((host_address, port))
 
     def send_bytes(self, message, message_length):
         offset = 0
