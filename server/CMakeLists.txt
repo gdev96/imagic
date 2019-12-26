@@ -9,7 +9,7 @@ include_directories(.
 
 set(PROJECT_LINK_LIBS libmysqlcppconn8.so)
 
-add_executable(imagic_server
+add_executable(imagic_srv
         constants.h
         image.cpp
         image.h
@@ -23,4 +23,4 @@ add_executable(imagic_server
         storage_manager.cpp
         storage_manager.h)
 
-target_link_libraries(imagic_server ${PROJECT_LINK_LIBS})
+target_link_libraries(imagic_srv ${PROJECT_LINK_LIBS})

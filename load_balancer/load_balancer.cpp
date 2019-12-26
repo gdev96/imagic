@@ -26,7 +26,7 @@ load_balancer::load_balancer() {
 
 void load_balancer::initialize_server_addresses() {
     const char *server_address(std::getenv("SERVER_ADDRESS"));
-    int server_port = std::stoi(std::getenv("SERVER_PORT"));
+    int server_port = std::stoi(std::getenv("SERVER_START_PORT"));
 
     for(int i=0; i<n_server_; i++) {
         server_addresses_[i].sin_family = AF_INET;

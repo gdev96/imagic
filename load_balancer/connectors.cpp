@@ -96,7 +96,7 @@ void client_connector::queue_request(int client_sockfd) {
     }
     catch (const std::runtime_error& e) {
         close(client_sockfd);
-        std::cout << e.what() << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << e.what() << std::endl;
         return;
     }
 }
