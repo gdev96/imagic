@@ -1,7 +1,8 @@
 #include <arpa/inet.h>
 #include <cstdlib>
-#include <stdexcept>
 #include <iostream>
+#include <mutex>
+#include <stdexcept>
 #include <sys/socket.h>
 #include <thread>
 #include <unistd.h>
@@ -48,9 +49,13 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     } while(offset < message_length);
 }
 
+
 //CONNECTOR CLIENT SIDE
 
-client_connector::client_connector(std::queue<message *> *message_queue) : message_queue_(message_queue) {}
+client_connector::client_connector(std::queue<message *> *message_queue, std::mutex *read_mutex, std::mutex *write_mutex,
+                                   std::mutex *write_count_mutex) : message_queue_(message_queue), read_mutex_(read_mutex),
+                                                                  write_mutex_(write_mutex),
+                                                                  write_count_mutex(write_count_mutex) {}
 
 void client_connector::accept_requests() {
     //CREATE SOCKET
@@ -73,13 +78,13 @@ void client_connector::accept_requests() {
     while (true) {
         socklen_t client_length = sizeof(client_address);
         int client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_length); //every connector has a sockfd
-
         std::thread t(&client_connector::queue_request, this, client_sockfd);
         t.detach();
     }
 }
 
 void client_connector::queue_request(int client_sockfd) {
+
     try {
         std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
 
@@ -94,7 +99,25 @@ void client_connector::queue_request(int client_sockfd) {
             auto message_payload = new unsigned char[payload_length];
             read_bytes(client_sockfd, message_payload, payload_length);
             auto received_message = new message(message_header, message_payload);
+
+            //Increase write_counter
+            write_count_mutex->lock();
+            write_count_++;
+            write_count_mutex->unlock();
+
+            write_mutex_->lock();
+
+            //Write operation
             message_queue_->push(received_message);
+
+            write_mutex_->unlock();
+
+            //Decrease write_counter
+            write_count_mutex->lock();
+            write_count_--;
+            if (write_count_==0)
+                read_mutex_->unlock();
+            write_count_mutex->unlock();
 
             std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
             std::cout << *message_header << std::endl;
@@ -106,6 +129,7 @@ void client_connector::queue_request(int client_sockfd) {
         return;
     }
 }
+
 
 //CONNECTOR SERVER-SIDE
 server_connector::server_connector() {};
