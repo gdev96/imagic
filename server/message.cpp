@@ -118,7 +118,7 @@ void payload::serialize(unsigned char *buffer) {
                 next_length = value.length();
                 *int_buffer++ = htonl(next_length);
                 byte_buffer = (unsigned char *)int_buffer;
-                std::copy(key.begin(), key.end(), byte_buffer);
+                std::copy(value.begin(), value.end(), byte_buffer);
                 byte_buffer += next_length;
             }
             int_buffer = (uint32_t *)byte_buffer;

@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class MessageType(Enum):
-    UPLOAD_IMAGE = 0,
-    FIND_THUMBS = 1,
+    UPLOAD_IMAGE = 0
+    FIND_THUMBS = 1
     DOWNLOAD_IMAGE = 2
 
 

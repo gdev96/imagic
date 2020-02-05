@@ -66,7 +66,7 @@ class MessageHandler:
 
         self.current_message.header = struct.pack(
             '!BII',
-            message_type.value[0],
+            message_type.value,
             0,
             len(payload)
         )
@@ -76,8 +76,11 @@ class MessageHandler:
         self.current_message.header, self.current_message.payload = self.load_balancer_connector.send(self.current_message)
 
         message_type = struct.unpack('!BII', self.current_message.header)[0]
+        received_message_type = MessageType(message_type)
 
-        if message_type == MessageType.FIND_THUMBS:
+        if received_message_type == MessageType.UPLOAD_IMAGE:
+            return self.current_message.header, self.current_message.payload.decode("raw_unicode_escape")
+        if received_message_type == MessageType.FIND_THUMBS:
             thumbs_dict = dict()
             offset = 0
             while True:
@@ -93,4 +96,5 @@ class MessageHandler:
                 offset += struct.calcsize('!{}s'.format(next_length))
                 thumbs_dict[thumb_file] = thumb_path.decode("raw_unicode_escape")
             return self.current_message.header, thumbs_dict
+        # DOWNLOAD_IMAGE
         return self.current_message.header, self.current_message.payload

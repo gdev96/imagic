@@ -130,6 +130,7 @@ class Ui_MainWindow(object):
         self.downloadbutton.clicked.connect(self.downloadbutton_onclick)
         self.downloadcancelbutton.clicked.connect(self.downloadcancelbutton_onclick)
         self.searchbutton.clicked.connect(self.searchbutton_onclick)
+        self.thumbscancelbutton.clicked.connect(self.thumbscancelbutton_onclick)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -167,8 +168,18 @@ class Ui_MainWindow(object):
 
     def uploadimage_onclick(self):
         imagic.select_category(self.uploadsearchtext.text())
-        imagic.upload_image()
-        self.stackedWidget.setCurrentIndex(1)
+        result = imagic.upload_image()
+        if result is True:
+            response = "Image successfully uploaded"
+            icon = QtWidgets.QMessageBox.Information
+        else:
+            response = "Error while uploading image"
+            icon = QtWidgets.QMessageBox.Warning
+        dialog = QtWidgets.QMessageBox(self.mainpage)
+        dialog.setIcon(icon)
+        dialog.setWindowTitle("Upload result")
+        dialog.setText(response)
+        dialog.exec_()
 
     def downloadbutton_onclick(self):
         self.stackedWidget.setCurrentIndex(2)
@@ -178,17 +189,21 @@ class Ui_MainWindow(object):
 
     def searchbutton_onclick(self):
         imagic.find_thumbs(self.searchtext.text())
-        for thumb_file, thumb_path in imagic.current_thumbs:
-            image_pixmap = QtGui.QPixmap()
-            image_pixmap.loadFromData(QtCore.QByteArray(thumb_file))
+        if not imagic.current_thumbs:
             thumb_label = QtWidgets.QLabel(self.thumbspage)
-            thumb_label.setObjectName(thumb_path)
-            width = thumb_label.width()
-            height = thumb_label.height()
-            thumb_label.setPixmap(image_pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio))
-            thumb_label.clicked.connect(self.thumblabel_onclick)
-            thumb_label.hovered.connect(self.thumblabel_onhover)
-            self.gridLayout.addWidget(thumb_label)
+            thumb_label.setText("No image found")
+        else:
+            for thumb_file, thumb_path in imagic.current_thumbs.items():
+                image_pixmap = QtGui.QPixmap()
+                image_pixmap.loadFromData(QtCore.QByteArray(thumb_file))
+                thumb_label = QtWidgets.QLabel(self.thumbspage)
+                thumb_label.setObjectName(thumb_path)
+                width = thumb_label.width()
+                height = thumb_label.height()
+                thumb_label.setPixmap(image_pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio))
+                thumb_label.clicked.connect(self.thumblabel_onclick)
+                thumb_label.hovered.connect(self.thumblabel_onhover)
+                self.gridLayout.addWidget(thumb_label)
         self.stackedWidget.setCurrentIndex(3)
 
     def thumblabel_onclick(self):
@@ -198,6 +213,9 @@ class Ui_MainWindow(object):
     def thumblabel_onhover(self):
         sending_thumb = self.thumbspage.sender()
         sending_thumb.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
+    def thumbscancelbutton_onclick(self):
+        self.stackedWidget.setCurrentIndex(2)
 
 
 if __name__ == "__main__":

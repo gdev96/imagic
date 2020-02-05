@@ -19,8 +19,10 @@ void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
         bytes_received = read(sockfd, buffer + offset, min(message_length - offset, CHUNK_SIZE));
         switch(bytes_received) {
             case -1:
+                close(sockfd);
                 throw std::runtime_error("Socket connection error");
             case 0:
+                close(sockfd);
                 throw std::runtime_error("Socket connection closed");
             default:
                 offset += bytes_received;
@@ -35,8 +37,10 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
         bytes_sent = write(sockfd, buffer + offset, message_length);
         switch(bytes_sent) {
             case -1:
+                close(sockfd);
                 throw std::runtime_error("Socket connection error");
             case 0:
+                close(sockfd);
                 throw std::runtime_error("Socket connection closed");
             default:
                 offset += bytes_sent;
@@ -79,20 +83,22 @@ void client_connector::queue_request(int client_sockfd) {
     try {
         std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
 
-        //READ AND PUSH REQUEST
-        unsigned char buffer[HEADER_LENGTH];
-        read_bytes(client_sockfd, buffer, HEADER_LENGTH);
-        auto message_header = new header();
-        message_header->deserialize(buffer);
-        message_header->set_source_id(client_sockfd);
-        uint32_t payload_length = message_header->get_payload_length();
-        auto message_payload = new unsigned char[payload_length];
-        read_bytes(client_sockfd, message_payload, payload_length);
-        auto received_message = new message(message_header, message_payload);
-        message_queue_->push(received_message);
+        while(true) {
+            //READ AND PUSH REQUEST
+            unsigned char buffer[HEADER_LENGTH];
+            read_bytes(client_sockfd, buffer, HEADER_LENGTH);
+            auto message_header = new header();
+            message_header->deserialize(buffer);
+            message_header->set_source_id(client_sockfd);
+            uint32_t payload_length = message_header->get_payload_length();
+            auto message_payload = new unsigned char[payload_length];
+            read_bytes(client_sockfd, message_payload, payload_length);
+            auto received_message = new message(message_header, message_payload);
+            message_queue_->push(received_message);
 
-        std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
-        std::cout << *message_header << std::endl;
+            std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
+            std::cout << *message_header << std::endl;
+        }
     }
     catch (const std::runtime_error& e) {
         close(client_sockfd);
@@ -123,31 +129,33 @@ void server_connector::set_server_load(unsigned int server_load) {
     server_load_ = server_load;
 }
 
-void server_connector::manage_response(message *message) { //Connector server knows the current_message
-    auto header = message->get_header();
+void server_connector::manage_response(message *client_message) { //Connector server knows the current_message
+    auto client_message_header = client_message->get_header();
 
     //GET THE CLIENT_SOCKFD
-    uint32_t client_sockfd = header->get_source_id();
-    uint32_t payload_length = header->get_payload_length();
+    uint32_t client_sockfd = client_message_header->get_source_id();
+    uint32_t client_payload_length = client_message_header->get_payload_length();
 
     //SEND REQUEST TO SERVER
-    unsigned char buffer[HEADER_LENGTH];
-    header->serialize(buffer);
-    write_bytes(server_sockfd_, buffer, HEADER_LENGTH);
-    write_bytes(server_sockfd_, message->get_payload(), payload_length);
+    unsigned char header_buffer[HEADER_LENGTH];
+    client_message_header->serialize(header_buffer);
+    write_bytes(server_sockfd_, header_buffer, HEADER_LENGTH);
+    write_bytes(server_sockfd_, client_message->get_payload(), client_payload_length);
 
     //GET RESPONSE FROM SERVER
-    read_bytes(server_sockfd_, buffer, HEADER_LENGTH);
-    auto received_header = message->get_header();
-    received_header->deserialize(buffer);
-    read_bytes(server_sockfd_, message->get_payload(), received_header->get_payload_length());
+    read_bytes(server_sockfd_, header_buffer, HEADER_LENGTH);
+    header server_message_header;
+    server_message_header.deserialize(header_buffer);
+    uint32_t server_payload_length = server_message_header.get_payload_length();
+    unsigned char server_payload_buffer[server_payload_length];
+    read_bytes(server_sockfd_, server_payload_buffer, server_payload_length);
 
     //SEND RESPONSE TO CLIENT
-    write_bytes(client_sockfd, buffer, HEADER_LENGTH);
-    write_bytes(client_sockfd, message->get_payload(), received_header->get_payload_length());
+    write_bytes(client_sockfd, header_buffer, HEADER_LENGTH);
+    write_bytes(client_sockfd, server_payload_buffer, server_payload_length);
 
     //DELETE MESSAGE
-    delete message;
+    delete client_message;
 
     //DECREMENT SERVER LOAD
     server_load_--;

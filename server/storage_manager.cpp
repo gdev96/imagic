@@ -85,28 +85,34 @@ void storage_manager::view_thumbs() {
             .where("category like :category")
             .bind("category", (mysqlx::string)*category)
             .execute();
+
+    uint32_t payload_length = 4; // Minimum payload length in byte
+
     for (mysqlx::Row row : rows.fetchAll()) {
         //GET THUMB PATH FROM ROW
-        mysqlx::string thumb_file_path = row[0];
+        std::string thumb_file_path = (std::string)row[0];
 
         //GET PATH_FILE FROM DISK
-        auto thumb_file = new std::vector<unsigned char>;
-        std::ifstream input_thumb_file("./" + (std::string)thumb_file_path, std::ios::binary);
+        std::ifstream input_thumb_file("./" + thumb_file_path, std::ios::binary);
         input_thumb_file.seekg(0, std::ifstream::end);
         uint32_t thumb_size = input_thumb_file.tellg();
         input_thumb_file.seekg(0, std::ifstream::beg);
-        input_thumb_file.read((char*)thumb_file->data(), thumb_size);
+
+        auto thumb_file = new std::vector<unsigned char>(thumb_size);
+        input_thumb_file.read((char *)thumb_file->data(), thumb_size);
         input_thumb_file.close();
 
         //CREATE THE ENTRY IN THE THUMB'S MAP
-        thumbs_map->insert({*thumb_file,thumb_file_path});
+        thumbs_map->insert({*thumb_file, thumb_file_path});
 
-        //SET PAYLOAD LENGTH IN MESSAGE HEADER
-        current_request_->get_header()->set_payload_length(thumbs_map->size());
-
-        //SET NEW PAYLOAD
-        current_request_->get_payload()->set_content(thumbs_map);
+        // Update payload length
+        payload_length += 8 + thumb_size + thumb_file_path.length();
     }
+    //SET PAYLOAD LENGTH IN MESSAGE HEADER
+    current_request_->get_header()->set_payload_length(payload_length);
+
+    //SET NEW PAYLOAD
+    current_request_->get_payload()->set_content(thumbs_map);
 }
 
 void storage_manager::download_image() {
@@ -120,14 +126,15 @@ void storage_manager::download_image() {
             .bind("thumb_file_path", *thumb_file_path)
             .execute();
     mysqlx::Row row = rows.fetchOne();
-    mysqlx::string image_file_path = row[0];
+    std::string image_file_path = (std::string)row[0];
 
     //GET IMAGE_FILE FROM DISK
-    auto *image_file = new std::vector<unsigned char>;
-    std::ifstream input_image_file("./" + (std::string)image_file_path, std::ios::binary);
+    std::ifstream input_image_file("./" + image_file_path, std::ios::binary);
     input_image_file.seekg(0, std::ifstream::end);
     uint32_t image_size = input_image_file.tellg();
     input_image_file.seekg(0, std::ifstream::beg);
+
+    auto *image_file = new std::vector<unsigned char>(image_size);
     input_image_file.read((char*)image_file->data(), image_size);
     input_image_file.close();
 
