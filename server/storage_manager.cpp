@@ -15,7 +15,7 @@ storage_manager::storage_manager(message *current_request, unsigned int server_i
     std::string db_name(std::getenv("DB_NAME"));
     std::string db_table_name(std::getenv("DB_TABLE_NAME"));
 
-    //CREATE A NEW DB SESSION TO ACCESS DATA
+    //Create a new DB session to access data
     db_session_ = new mysqlx::Session(
             (mysqlx::string)db_host,
             33060,
@@ -23,10 +23,10 @@ storage_manager::storage_manager(message *current_request, unsigned int server_i
             (mysqlx::string)db_password
     );
 
-    //OBTAIN SCHEMA/DATABASE FROM SESSION
+    //Obtain schema/database from session
     mysqlx::Schema schema = db_session_->getSchema((mysqlx::string)(db_name + std::to_string(server_id_)), true);
 
-    //GET TABLE
+    //Get table
     current_table_ = new mysqlx::Table(schema.getTable((mysqlx::string)db_table_name, true));
 }
 
@@ -36,26 +36,26 @@ storage_manager::~storage_manager() {
 }
 
 void storage_manager::upload_request() {
-    //GET IMAGE AND ITS CONTENT FROM MESSAGE
+    //Get image and its content from message
     image *image = std::get<0>(current_request_->get_payload()->get_content());
     std::vector<unsigned char> *image_file = image->getImageFile();
     std::string *category = image->getCategory();
 
-    //SAVE IMAGE FILE TO DISK
+    //Save image file to disk
     std::string image_file_path = "server/resources/" + std::to_string(server_id_) + "/image.jpg";
     std::ofstream output_image_file("./" + image_file_path, std::ios::binary);
     output_image_file.write((const char*)image_file->data(), image_file->size());
     output_image_file.close();
     std::cout << *OUTPUT_IDENTIFIER << "Image saved in: " + image_file_path << std::endl;
 
-    //SAVE THUMB FILE TO DISK
+    //Save thumb file to disk
     std::string thumb_file_path = "server/resources/" + std::to_string(server_id_) + "/image_thumb.jpg";
     std::ofstream output_thumb_file("./" + thumb_file_path, std::ios::binary);
     output_thumb_file.write((const char*)image_file->data(), image_file->size());
     output_thumb_file.close();
     std::cout << *OUTPUT_IDENTIFIER << "Thumb saved in: " + image_file_path << std::endl;
 
-    //CREATE QUERY TO INSERT PATH AND CATEGORY IN DB
+    //Create query to insert path and category in DB
     mysqlx::Result result = current_table_
             ->insert("category", "image_file_path", "thumb_file_path")
             .values((mysqlx::string)*category, (mysqlx::string)image_file_path, (mysqlx::string)thumb_file_path)
@@ -64,22 +64,21 @@ void storage_manager::upload_request() {
 
     auto response = new std::string("Uploaded");
 
-    //SET PAYLOAD LENGTH IN MESSAGE HEADER
+    //Set payload length in message header
     current_request_->get_header()->set_payload_length(response->length());
 
-    //SET NEW PAYLOAD
+    //Set new payload
     current_request_->get_payload()->set_content(response);
 }
 
 void storage_manager::view_thumbs() {
-
-    //GET THUMB_PATH FROM MESSAGE
+    //Get thumb_path from message
     std::string *category = std::get<1>(current_request_->get_payload()->get_content());
 
-    //CREATE THUMBS MAP
+    //Create thumbs map
     auto thumbs_map = new std::map<std::vector<unsigned char>, std::string>;
 
-    //GET THUMB_PATHS FROM DB
+    //Get thumb_paths from DB
     mysqlx::RowResult rows = current_table_
             ->select("thumb_file_path")
             .where("category like :category")
@@ -89,10 +88,10 @@ void storage_manager::view_thumbs() {
     uint32_t payload_length = 4; // Minimum payload length in byte
 
     for (mysqlx::Row row : rows.fetchAll()) {
-        //GET THUMB PATH FROM ROW
+        //Get thumb path from row
         std::string thumb_file_path = (std::string)row[0];
 
-        //GET PATH_FILE FROM DISK
+        //Get path_file from disk
         std::ifstream input_thumb_file("./" + thumb_file_path, std::ios::binary);
         input_thumb_file.seekg(0, std::ifstream::end);
         uint32_t thumb_size = input_thumb_file.tellg();
@@ -102,24 +101,24 @@ void storage_manager::view_thumbs() {
         input_thumb_file.read((char *)thumb_file->data(), thumb_size);
         input_thumb_file.close();
 
-        //CREATE THE ENTRY IN THE THUMB'S MAP
+        //Create the entry in thumb's map
         thumbs_map->insert({*thumb_file, thumb_file_path});
 
         // Update payload length
         payload_length += 8 + thumb_size + thumb_file_path.length();
     }
-    //SET PAYLOAD LENGTH IN MESSAGE HEADER
+    //Set payload length in message header
     current_request_->get_header()->set_payload_length(payload_length);
 
-    //SET NEW PAYLOAD
+    //Set new payload
     current_request_->get_payload()->set_content(thumbs_map);
 }
 
 void storage_manager::download_image() {
-    //GET THUMB_PATH FROM MESSAGE
+    //Get thumb_path from message
     std::string *thumb_file_path = std::get<1>(current_request_->get_payload()->get_content());
 
-    //CREATE QUERY TO GET THE IMAGE_PATH FROM THUMB_PATH
+    //Create query to get the image_path from thumb_path
     mysqlx::RowResult rows = current_table_
             ->select("image_file_path")
             .where("thumb_file_path like :thumb_file_path")
@@ -128,7 +127,7 @@ void storage_manager::download_image() {
     mysqlx::Row row = rows.fetchOne();
     std::string image_file_path = (std::string)row[0];
 
-    //GET IMAGE_FILE FROM DISK
+    //Get image_file from disk
     std::ifstream input_image_file("./" + image_file_path, std::ios::binary);
     input_image_file.seekg(0, std::ifstream::end);
     uint32_t image_size = input_image_file.tellg();
@@ -138,9 +137,9 @@ void storage_manager::download_image() {
     input_image_file.read((char*)image_file->data(), image_size);
     input_image_file.close();
 
-    //SET PAYLOAD LENGTH IN MESSAGE HEADER
+    //Set payload length in message header
     current_request_->get_header()->set_payload_length(image_size);
 
-    //SET NEW PAYLOAD
+    //Set new payload
     current_request_->get_payload()->set_content(image_file);
 }

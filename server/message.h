@@ -43,7 +43,7 @@ class payload {
                > content_;
     public:
         const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
-        get_content() const;
+            get_content() const;
         void set_content(
             const std::variant<image *, std::string *, std::vector<unsigned char> *,
                     std::map<std::vector<unsigned char>, std::string> *> &content);

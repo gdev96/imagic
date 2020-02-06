@@ -16,7 +16,6 @@ class load_balancer {
         client_connector *client_connector_;
         server_connector *server_connectors_;
         struct sockaddr_in *server_addresses_;
-        std::thread *threads_;
         std::mutex read_mutex_, write_mutex_, write_count_mutex_;
 
     public:
@@ -25,7 +24,8 @@ class load_balancer {
         void initialize_client_connector();
         void initialize_server_connectors();
         unsigned int balance();
-        void manage_requests();
+        void get_requests();
+        void manage_request(message client_message);
 };
 
 #endif //IMAGIC_BACKEND_LOADBALANCER_H

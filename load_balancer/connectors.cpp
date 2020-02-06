@@ -49,8 +49,7 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     } while(offset < message_length);
 }
 
-
-//CONNECTOR CLIENT SIDE
+//Client-side connector
 
 client_connector::client_connector(std::queue<message *> *message_queue, std::mutex *read_mutex, std::mutex *write_mutex,
                                    std::mutex *write_count_mutex) : message_queue_(message_queue), read_mutex_(read_mutex),
@@ -58,7 +57,7 @@ client_connector::client_connector(std::queue<message *> *message_queue, std::mu
                                                                   write_count_mutex(write_count_mutex) {}
 
 void client_connector::accept_requests() {
-    //CREATE SOCKET
+    //Create socket
     struct sockaddr_in server_address, client_address;
 
     const char *load_balancer_address(std::getenv("LOAD_BALANCER_ADDRESS"));
@@ -69,7 +68,7 @@ void client_connector::accept_requests() {
     server_address.sin_port = htons(load_balancer_port);
     int server_length = sizeof(server_address);
 
-    //CONNECTION WITH CLIENT
+    //Connection with client
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
@@ -77,19 +76,19 @@ void client_connector::accept_requests() {
 
     while (true) {
         socklen_t client_length = sizeof(client_address);
-        int client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_length); //every connector has a sockfd
+        int client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_length);
+
         std::thread t(&client_connector::queue_request, this, client_sockfd);
         t.detach();
     }
 }
 
 void client_connector::queue_request(int client_sockfd) {
-
     try {
         std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
 
         while(true) {
-            //READ AND PUSH REQUEST
+            //Read and push request
             unsigned char buffer[HEADER_LENGTH];
             read_bytes(client_sockfd, buffer, HEADER_LENGTH);
             auto message_header = new header();
@@ -120,7 +119,7 @@ void client_connector::queue_request(int client_sockfd) {
             write_count_mutex->unlock();
 
             std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
-            std::cout << *message_header << std::endl;
+            std::cout << *OUTPUT_IDENTIFIER << *message_header << std::endl;
         }
     }
     catch (const std::runtime_error& e) {
@@ -130,14 +129,13 @@ void client_connector::queue_request(int client_sockfd) {
     }
 }
 
-
-//CONNECTOR SERVER-SIDE
+//Server-side connector
 server_connector::server_connector() {};
 
 server_connector::server_connector(sockaddr_in *server_address) : server_address_(server_address) {
     server_load_ = 0;
 
-    //CONNECTION WITH SERVER
+    //Connection with server
     server_sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
     unsigned int len = sizeof(*server_address_);
     if(connect(server_sockfd_, (struct sockaddr *)server_address_, len) == -1) {
@@ -153,20 +151,20 @@ void server_connector::set_server_load(unsigned int server_load) {
     server_load_ = server_load;
 }
 
-void server_connector::manage_response(message *client_message) { //Connector server knows the current_message
-    auto client_message_header = client_message->get_header();
+void server_connector::manage_response(const message& client_message, bool send_upload_response) {
+    auto client_message_header = client_message.get_header();
 
-    //GET THE CLIENT_SOCKFD
+    //Get the client_sockfd
     uint32_t client_sockfd = client_message_header->get_source_id();
     uint32_t client_payload_length = client_message_header->get_payload_length();
 
-    //SEND REQUEST TO SERVER
+    //Send request to server
     unsigned char header_buffer[HEADER_LENGTH];
     client_message_header->serialize(header_buffer);
     write_bytes(server_sockfd_, header_buffer, HEADER_LENGTH);
-    write_bytes(server_sockfd_, client_message->get_payload(), client_payload_length);
+    write_bytes(server_sockfd_, client_message.get_payload(), client_payload_length);
 
-    //GET RESPONSE FROM SERVER
+    //Get response from server
     read_bytes(server_sockfd_, header_buffer, HEADER_LENGTH);
     header server_message_header;
     server_message_header.deserialize(header_buffer);
@@ -174,13 +172,12 @@ void server_connector::manage_response(message *client_message) { //Connector se
     unsigned char server_payload_buffer[server_payload_length];
     read_bytes(server_sockfd_, server_payload_buffer, server_payload_length);
 
-    //SEND RESPONSE TO CLIENT
-    write_bytes(client_sockfd, header_buffer, HEADER_LENGTH);
-    write_bytes(client_sockfd, server_payload_buffer, server_payload_length);
+    if(client_message_header->get_message_type() != message_type::UPLOAD_IMAGE || send_upload_response) {
+        //Send response to client
+        write_bytes(client_sockfd, header_buffer, HEADER_LENGTH);
+        write_bytes(client_sockfd, server_payload_buffer, server_payload_length);
+    }
 
-    //DELETE MESSAGE
-    delete client_message;
-
-    //DECREMENT SERVER LOAD
+    //Decrement server load
     server_load_--;
 }

@@ -20,7 +20,7 @@ class Imagic:
 
     def upload_image(self):
         received_payload = self.message_handler.send_message(MessageType.UPLOAD_IMAGE, self.current_image)[1]
-        if received_payload == b'Uploaded':
+        if received_payload == "Uploaded":
             return True
         return False
 

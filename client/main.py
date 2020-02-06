@@ -201,8 +201,8 @@ class Ui_MainWindow(object):
                 width = thumb_label.width()
                 height = thumb_label.height()
                 thumb_label.setPixmap(image_pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio))
-                thumb_label.clicked.connect(self.thumblabel_onclick)
-                thumb_label.hovered.connect(self.thumblabel_onhover)
+                # thumb_label.clicked.connect(self.thumblabel_onclick)
+                # thumb_label.hovered.connect(self.thumblabel_onhover)
                 self.gridLayout.addWidget(thumb_label)
         self.stackedWidget.setCurrentIndex(3)
 

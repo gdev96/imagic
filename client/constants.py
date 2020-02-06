@@ -1,8 +1,8 @@
-# MESSAGE
+# Message
 CHUNK_SIZE = 8192
 
-# HEADER
+# Header
 HEADER_LENGTH = 9
 
-# VALID EXTENSIONS
+# Valid extensions
 IMAGE_EXTENSIONS = '.jpg', '.png', '.gif', '.tif'

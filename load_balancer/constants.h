@@ -3,16 +3,16 @@
 
 #include <string>
 
-//MACROS
+//Output string
 inline const std::string *OUTPUT_IDENTIFIER;
 
-//CONNECTORS
+//Connectors
 inline const unsigned int QUEUE_LENGTH_CONNECTIONS = 5;
 
-//MESSAGE
+//Message
 inline const unsigned int CHUNK_SIZE = 8192;
 
-//HEADER
+//Header
 inline const unsigned int HEADER_LENGTH = 9;
 
 #endif //IMAGIC_BACKEND_CONSTANTS_H

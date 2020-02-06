@@ -5,22 +5,21 @@
 #include "load_balancer.h"
 
 load_balancer::load_balancer() {
-    //SET OUTPUT IDENTIFIER
+    //Set output identifier
     OUTPUT_IDENTIFIER = new std::string("\033[33mload_balancer |\033[m ");
 
-    //INITIALIZE ATTRIBUTES
+    //Initialize attributes
     n_server_ = std::stoi(std::getenv("N_SERVER"));
     server_addresses_ = new struct sockaddr_in[n_server_];
     server_connectors_ = new server_connector[n_server_];
-    threads_ = new std::thread[n_server_ + 1];
 
-    //INITIALIZE SERVER ADDRESSES
+    //Initialize server addresses
     initialize_server_addresses();
 
-    //CREATE CLIENT CONNECTOR
+    //Create client connector
     initialize_client_connector();
 
-    //CREATE SERVER CONNECTORS
+    //Create server connectors
     initialize_server_connectors();
 }
 
@@ -39,8 +38,8 @@ void load_balancer::initialize_server_addresses() {
 void load_balancer::initialize_client_connector() {
     client_connector_ = new client_connector(&message_queue_, &read_mutex_, &write_mutex_, &write_count_mutex_);
     std::cout << *OUTPUT_IDENTIFIER << "Client connector created" << std::endl;
-    threads_[0] = std::thread(&client_connector::accept_requests, client_connector_);
-    threads_[0].detach();
+    std::thread t = std::thread(&client_connector::accept_requests, client_connector_);
+    t.detach();
 }
 
 void load_balancer::initialize_server_connectors() {
@@ -62,35 +61,45 @@ unsigned int load_balancer::balance() {
     }
     std::cout << *OUTPUT_IDENTIFIER << "SENDING MESSAGE TO SERVER: " << current_lowest_load_server << std::endl;
     return current_lowest_load_server;
-};
+}
 
-void load_balancer::manage_requests() {
+void load_balancer::get_requests() {
     while(true) {
-
         //Waiting for message production
         read_mutex_.lock();
+
         write_mutex_.lock();
 
         //Read operation
         while(!message_queue_.empty()) {
-            //GET MESSAGE FROM QUEUE
+            //Get messages from queue
             current_message_ = message_queue_.front();
             message_queue_.pop();
 
-            if(!current_message_->get_header()->get_message_type()) { //message must be sent in broadcast
-                for(int i=0; i<n_server_; i++){
-                    server_connectors_[i].set_server_load(server_connectors_[i].get_server_load()+1);
-                    threads_[i+1] = std::thread(&server_connector::manage_response, server_connectors_[i], current_message_);
-                    threads_[i+1].detach();
-                }
-            }
-            else { //Message must be sent to one server only
-                unsigned int chosen_server = balance();
-                server_connectors_[chosen_server].set_server_load(server_connectors_[chosen_server].get_server_load()+1);
-                threads_[chosen_server+1] = std::thread(&server_connector::manage_response, server_connectors_[chosen_server], current_message_);
-                threads_[chosen_server+1].detach();
-            }
+            //Manage request
+            std::thread t = std::thread(&load_balancer::manage_request, this, *current_message_);
+            t.detach();
         }
         write_mutex_.unlock();
     }
-};
+}
+
+void load_balancer::manage_request(message client_message) {
+    if(client_message.get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
+        //Broadcast message
+        for(int i=0; i<n_server_; i++){
+            server_connectors_[i].set_server_load(server_connectors_[i].get_server_load() + 1);
+            std::thread t = std::thread(&server_connector::manage_response, server_connectors_[i], client_message, i == n_server_ - 1);
+            t.detach();
+        }
+    }
+    else {
+        //Send message to server with less load
+        unsigned int chosen_server = balance();
+        server_connectors_[chosen_server].set_server_load(server_connectors_[chosen_server].get_server_load() + 1);
+        server_connectors_[chosen_server].manage_response(client_message);
+    }
+
+    //Delete message
+    delete &client_message;
+}

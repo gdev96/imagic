@@ -59,10 +59,10 @@ load_balancer_connector::load_balancer_connector(const char *address, int port, 
 void load_balancer_connector::receive_requests() {
     struct sockaddr_in lb_address;
 
-    //CREATE SOCKET
+    //Create socket
     int server_length = sizeof(server_address_);
 
-    //CONNECTION WITH LOAD BALANCER
+    //Connection with load balancer
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *) &server_address_, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
@@ -80,7 +80,7 @@ void load_balancer_connector::receive_requests() {
 
 void load_balancer_connector::manage_request(int lb_sockfd){
     while(true) {
-        //READ REQUEST FROM SOCKET AND CREATE MESSAGE
+        //Read request from socket and create message
         unsigned char header_buffer[HEADER_LENGTH];
         read_bytes(lb_sockfd, header_buffer, HEADER_LENGTH);
         auto message_header = new header();
@@ -94,11 +94,11 @@ void load_balancer_connector::manage_request(int lb_sockfd){
         temporary_message_ = new message(message_header, message_payload);
 
         std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED!" << std::endl;
-        std::cout << *message_header << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << *message_header << std::endl;
 
-        //MANAGE REQUEST
+        //Manage request
         storage_manager_ = new storage_manager(temporary_message_, server_id_);
-        switch (msg_type) {
+        switch(msg_type) {
             case message_type::UPLOAD_IMAGE:
                 storage_manager_->upload_request();
                 break;
@@ -109,28 +109,28 @@ void load_balancer_connector::manage_request(int lb_sockfd){
                 storage_manager_->download_image();
                 break;
         }
-        //DELETE STORAGE MANAGER
+        //Delete storage manager
         delete storage_manager_;
 
-        //SERIALIZE RESPONSE HEADER
+        //Serialize response header
         unsigned char response_header_buffer[HEADER_LENGTH];
         temporary_message_->get_header()->serialize(response_header_buffer);
 
-        //SEND HEADER
+        //Send header
         write_bytes(lb_sockfd, response_header_buffer, HEADER_LENGTH);
 
-        //SERIALIZE RESPONSE PAYLOAD
+        //Serialize response payload
         uint32_t response_payload_length = temporary_message_->get_header()->get_payload_length();
         unsigned char response_payload_buffer[response_payload_length];
         temporary_message_->get_payload()->serialize(response_payload_buffer);
 
-        //SEND PAYLOAD
+        //Send payload
         write_bytes(lb_sockfd, response_payload_buffer, response_payload_length);
 
         std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
-        std::cout << *(temporary_message_->get_header()) << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << *(temporary_message_->get_header()) << std::endl;
 
-        //DELETE MESSAGE
+        //Delete message
         delete temporary_message_;
     }
 }

@@ -53,7 +53,7 @@ message::message(header *header, payload *payload) : header_(header), payload_(p
 
 message::~message() {
     delete header_;
-    delete[] payload_;
+    delete payload_;
 }
 
 header *message::get_header() const {
@@ -80,22 +80,22 @@ void payload::set_content(
 
 void payload::serialize(unsigned char *buffer) {
     switch(content_.index()) {
-        case 1: //SERIALIZE STRING
-            //GET STRING FROM VARIANT
+        case 1: //Serialize string
+            //Get string from variant
             std::string *str_message;
             str_message = std::get<1>(content_);
-            //POPULATE BUFFER
+            //Populate buffer
             str_message->copy((char *)buffer, str_message->length());
             break;
-        case 2: //SERIALIZE BYTE VECTOR
-            //GET BYTE VECTOR FROM VARIANT
+        case 2: //Serialize byte vector
+            //Get byte vector from variant
             std::vector<unsigned char> *byte_vector;
             byte_vector = std::get<2>(content_);
-            //POPULATE BUFFER
+            //Populate buffer
             std::copy(byte_vector->begin(), byte_vector->end(), buffer);
             break;
-        case 3: //SERIALIZE MAP
-            //GET MAP FROM VARIANT
+        case 3: //Serialize map
+            //Get map from variant
             std::map<std::vector<unsigned char>, std::string> *thumbs_map;
             thumbs_map = std::get<3>(content_);
 
@@ -103,9 +103,9 @@ void payload::serialize(unsigned char *buffer) {
             unsigned char *byte_buffer = buffer;
             uint32_t next_length;
 
-            //ITERATE OVER MAP
+            //Iterate over map
             for(const auto& [key, value] : *thumbs_map) {
-                //COPY THUMB LENGTH AND THUMB FILE
+                //Copy thumb length and thumb file
                 int_buffer = (uint32_t *)buffer;
                 next_length = key.size();
                 *int_buffer++ = htonl(next_length);
@@ -113,7 +113,7 @@ void payload::serialize(unsigned char *buffer) {
                 std::copy(key.begin(), key.end(), byte_buffer);
                 byte_buffer += next_length;
 
-                //COPY PATH LENGTH AND PATH
+                //Copy path length and path
                 int_buffer = (uint32_t *)byte_buffer;
                 next_length = value.length();
                 *int_buffer++ = htonl(next_length);
@@ -132,23 +132,23 @@ void payload::deserialize(unsigned char *buffer, uint32_t buffer_size, message_t
         unsigned char *byte_buffer;
         uint32_t image_size, category_length;
 
-        //GET IMAGE FILE FROM PAYLOAD
+        //Get image file from payload
         int_buffer = (uint32_t *)buffer;
         image_size = ntohl(*int_buffer++);
         byte_buffer = (unsigned char *)int_buffer;
         auto image_file = new std::vector<unsigned char>(image_size);
         image_file->assign(byte_buffer, byte_buffer + image_size);
 
-        //GET CATEGORY FROM PAYLOAD
+        //Get category from payload
         int_buffer = (uint32_t *)(byte_buffer + image_size);
         category_length = ntohl(*int_buffer++);
         byte_buffer = (unsigned char *)int_buffer;
         auto category = new std::string((char *)byte_buffer, category_length);
 
-        //PUT IMAGE FILE AND CATEGORY IN IMAGE
+        //Put image file and category in image
         content_ = new image(image_file, category);
     }
-    else { //VIEW THUMBS OR DOWNLOAD IMAGE
+    else { //VIEW THUMBS or DOWNLOAD IMAGE
         content_ = new std::string((char *)buffer, buffer_size);
     }
 }
