@@ -15,8 +15,5 @@ To run the application, move to the `setup` directory, placed in the root of the
 
 ```
 cd setup
-```
-
-```
 ./imagic.sh
 ```

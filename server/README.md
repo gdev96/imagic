@@ -3,6 +3,8 @@ The Imagic server that send responses to the Imagic client.
 
 ## Prerequisites
 
+### MySQL
+
 In order to create and connect to DB, download MySQL Community Server 8 from:
 
 https://dev.mysql.com/downloads/mysql/
@@ -20,51 +22,68 @@ and make a complete installation following the guide:
 https://dev.mysql.com/doc/connector-cpp/8.0/en/connector-cpp-installation-binary.html
 
 Be sure to download the development files required for building the application.
-If build fails, edit `CMakeLists.txt` file and verify that:
-
-1. correct header files are included
-2. correct libraries are linked
 
 For further details, see:
 
 https://dev.mysql.com/doc/connector-cpp/8.0/en/connector-cpp-apps-general-considerations.html
 
-## SQL command to create user and DB
+### Image Magick
 
-Open terminal and start mysql service:
+In order to create the image thumbnails, you need to download Imagic Magick.
 
-```
-sudo service mysql start
-```
+First, download JPEG delegate from:
 
-Access mysql as root user:
+http://www.imagemagick.org/download/delegates/jpegsrc.v9b.tar.gz
 
-```
-sudo mysql -u root
-```
-
-Now, type the following commands in order to create `imagic` database and `imagicuser` user, granting him complete access to DB:
+Unpack the distribution with this command:
 
 ```
-CREATE DATABASE IF NOT EXISTS imagic;
+tar xvzf jpegsrc.v9b.tar.gz
 ```
 
-```
-CREATE USER IF NOT EXISTS
-  'imagicuser'@'%' identified by 'ImgApp2020!';
-```
+Next configure and compile ImageMagick:
 
 ```
-GRANT ALL ON imagic.* TO 'imagicuser'@'%';
+cd jpeg-9b
+./configure
+make
 ```
 
-Finally, create `image` table:
+Administrator privileges are required to install. To install, type:
 
 ```
-CREATE TABLE IF NOT EXISTS imagic.image (
-  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  image_file_path VARCHAR(45) NULL,
-  thumb_file_path VARCHAR(45) NULL,
-  category VARCHAR(45) NULL
-) ENGINE = InnoDB;
+sudo make install
 ```
+
+Then, download Image Magick sources from:
+
+https://imagemagick.org/download/ImageMagick.tar.gz
+
+Now, you need to repeat the steps above.
+
+Unpack the distribution with this command:
+
+```
+tar xvzf ImageMagick.tar.gz
+```
+
+Next configure and compile ImageMagick:
+
+```
+cd ImageMagick-7.0.9-21
+./configure
+make
+```
+
+Administrator privileges are required to install. To install, type:
+
+```
+sudo make install
+```
+
+## Build problems
+
+If build fails, edit `CMakeLists.txt` file and verify that:
+
+1. correct header files are included
+2. correct libraries are linked
