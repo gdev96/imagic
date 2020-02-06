@@ -2,6 +2,7 @@
 #define SERVER_STORAGE_MANAGER_H
 
 #include <mysqlx/xdevapi.h>
+#include <Magick++.h>
 #include <string>
 #include "message.h"
 

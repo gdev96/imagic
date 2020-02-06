@@ -4,7 +4,7 @@
 
 server::server(const char *address, int port, int id) : id_(id) {
     //SET OUTPUT IDENTIFIER
-    OUTPUT_IDENTIFIER = new std::string("\033[36mserver " + std::to_string(id_) + "      |\033[m ");
+    OUTPUT_IDENTIFIER = new std::string("\033[" + std::to_string(id_ % 5 + 32) + "mserver " + std::to_string(id_) + "      |\033[m ");
     //CREATE LOAD BALANCER CONNECTOR
     std::cout << *OUTPUT_IDENTIFIER << "Server " << id_ <<" created" << std::endl;
     lb_connector_ = load_balancer_connector(address, port, id);

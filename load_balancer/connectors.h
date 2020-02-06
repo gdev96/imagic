@@ -32,7 +32,7 @@ class server_connector {
         server_connector(sockaddr_in *server_address);
         unsigned int get_server_load() const;
         void set_server_load(unsigned int server_load);
-        void manage_response(const message& client_message, bool send_upload_response = false);
+        void manage_response(const message* client_message, bool send_upload_response = false);
 };
 
 #endif //IMAGIC_BACKEND_CONNECTORS_H

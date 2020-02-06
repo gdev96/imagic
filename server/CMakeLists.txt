@@ -5,9 +5,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS -pthread)
 
 include_directories(.
-        /usr/include/mysql-cppconn-8)
+        /usr/include/mysql-cppconn-8
+        /usr/include/ImageMagick-7)
 
-set(PROJECT_LINK_LIBS libmysqlcppconn8.so)
+set(PROJECT_LINK_LIBS
+        /usr/lib/x86_64-linux-gnu/libmysqlcppconn8.so
+        /usr/lib/libMagick++-7.Q16HDRI.so)
+
+add_definitions(-DMAGICKCORE_QUANTUM_DEPTH=16)
+add_definitions(-DMAGICKCORE_HDRI_ENABLE=0)
 
 add_executable(imagic_srv
         constants.h

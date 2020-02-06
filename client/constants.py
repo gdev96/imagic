@@ -5,4 +5,4 @@ CHUNK_SIZE = 8192
 HEADER_LENGTH = 9
 
 # Valid extensions
-IMAGE_EXTENSIONS = '.jpg', '.png', '.gif', '.tif'
+IMAGE_EXTENSIONS = '.jpg', '.png'

@@ -25,7 +25,7 @@ class load_balancer {
         void initialize_server_connectors();
         unsigned int balance();
         void get_requests();
-        void manage_request(message client_message);
+        void manage_request(message *client_message);
 };
 
 #endif //IMAGIC_BACKEND_LOADBALANCER_H

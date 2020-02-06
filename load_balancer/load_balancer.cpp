@@ -6,7 +6,7 @@
 
 load_balancer::load_balancer() {
     //Set output identifier
-    OUTPUT_IDENTIFIER = new std::string("\033[33mload_balancer |\033[m ");
+    OUTPUT_IDENTIFIER = new std::string("\033[31mload_balancer |\033[m ");
 
     //Initialize attributes
     n_server_ = std::stoi(std::getenv("N_SERVER"));
@@ -77,20 +77,24 @@ void load_balancer::get_requests() {
             message_queue_.pop();
 
             //Manage request
-            std::thread t = std::thread(&load_balancer::manage_request, this, *current_message_);
+            std::thread t = std::thread(&load_balancer::manage_request, this, current_message_);
             t.detach();
         }
         write_mutex_.unlock();
     }
 }
 
-void load_balancer::manage_request(message client_message) {
-    if(client_message.get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
+void load_balancer::manage_request(message *client_message) {
+    if(client_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
         //Broadcast message
+        std::thread threads[n_server_];
         for(int i=0; i<n_server_; i++){
             server_connectors_[i].set_server_load(server_connectors_[i].get_server_load() + 1);
             std::thread t = std::thread(&server_connector::manage_response, server_connectors_[i], client_message, i == n_server_ - 1);
-            t.detach();
+            threads[i] = (std::thread &&)t;
+        }
+        for(int i=0; i<n_server_; i++){
+            threads[i].join();
         }
     }
     else {
@@ -101,5 +105,5 @@ void load_balancer::manage_request(message client_message) {
     }
 
     //Delete message
-    delete &client_message;
+    delete client_message;
 }

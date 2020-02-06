@@ -151,8 +151,8 @@ void server_connector::set_server_load(unsigned int server_load) {
     server_load_ = server_load;
 }
 
-void server_connector::manage_response(const message& client_message, bool send_upload_response) {
-    auto client_message_header = client_message.get_header();
+void server_connector::manage_response(const message *client_message, bool send_upload_response) {
+    auto client_message_header = client_message->get_header();
 
     //Get the client_sockfd
     uint32_t client_sockfd = client_message_header->get_source_id();
@@ -162,7 +162,7 @@ void server_connector::manage_response(const message& client_message, bool send_
     unsigned char header_buffer[HEADER_LENGTH];
     client_message_header->serialize(header_buffer);
     write_bytes(server_sockfd_, header_buffer, HEADER_LENGTH);
-    write_bytes(server_sockfd_, client_message.get_payload(), client_payload_length);
+    write_bytes(server_sockfd_, client_message->get_payload(), client_payload_length);
 
     //Get response from server
     read_bytes(server_sockfd_, header_buffer, HEADER_LENGTH);

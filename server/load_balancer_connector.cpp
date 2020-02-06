@@ -70,7 +70,7 @@ void load_balancer_connector::receive_requests() {
 
     while (true) {
         socklen_t lb_length = sizeof(lb_address);
-        int lb_sockfd = accept(server_sockfd, (struct sockaddr *)&lb_address, &lb_length); //every connector has a sockfd
+        int lb_sockfd = accept(server_sockfd, (struct sockaddr *)&lb_address, &lb_length);
         std::cout << *OUTPUT_IDENTIFIER << "Connection from load balancer accepted" << std::endl;
 
         std::thread t(&load_balancer_connector::manage_request, this, lb_sockfd);

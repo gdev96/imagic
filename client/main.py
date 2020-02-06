@@ -151,7 +151,7 @@ class Ui_MainWindow(object):
     def uploadbutton_onclick(self):
         file_dialog = QtWidgets.QFileDialog(self.mainpage)
         file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-        file_dialog.setNameFilter("Images (*.jpg *.png *.gif *tif)")
+        file_dialog.setNameFilter("Images (*.jpg *.png)")
         if file_dialog.exec_():
             file_name = file_dialog.selectedFiles()[0]
             imagic.validate_image(file_name)
