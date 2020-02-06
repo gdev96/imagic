@@ -16,7 +16,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.4 (f8dce91, 2019-08-02)"
-   sodipodi:docname="disegno.svg">
+   sodipodi:docname="imagic_schema.svg">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -213,6 +213,36 @@
        y1="646.54462"
        x2="-26.3501"
        y2="629.83759" />
+    <inkscape:path-effect
+       only_selected="false"
+       apply_with_weight="true"
+       apply_no_weight="true"
+       helper_size="0"
+       steps="2"
+       weight="33.333333"
+       is_visible="true"
+       id="path-effect1800-9-36"
+       effect="bspline" />
+    <inkscape:path-effect
+       only_selected="false"
+       apply_with_weight="true"
+       apply_no_weight="true"
+       helper_size="0"
+       steps="2"
+       weight="33.333333"
+       is_visible="true"
+       id="path-effect1800-9-36-5"
+       effect="bspline" />
+    <inkscape:path-effect
+       only_selected="false"
+       apply_with_weight="true"
+       apply_no_weight="true"
+       helper_size="0"
+       steps="2"
+       weight="33.333333"
+       is_visible="true"
+       id="path-effect1800-9-36-56"
+       effect="bspline" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -222,8 +252,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="407.05967"
-     inkscape:cy="480.87568"
+     inkscape:cx="687.99963"
+     inkscape:cy="450.9222"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -240,7 +270,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1246,108 +1276,86 @@
          inkscape:connector-curvature="0" />
       <g
          id="g1637">
-	<rect
-   id="rect1631"
-   height="42.667"
-   width="213.33299"
-   style="fill:#78909c"
-   y="85.333"
-   x="149.33299" />
-
-	<rect
-   id="rect1633"
-   height="21.333"
-   width="128"
-   style="fill:#78909c"
-   y="213.33299"
-   x="192" />
-
-	<rect
-   id="rect1635"
-   height="42.667"
-   width="213.33299"
-   style="fill:#78909c"
-   y="149.33299"
-   x="149.33299" />
-
-</g>
+        <rect
+           id="rect1631"
+           height="42.667"
+           width="213.33299"
+           style="fill:#78909c"
+           y="85.333"
+           x="149.33299" />
+        <rect
+           id="rect1633"
+           height="21.333"
+           width="128"
+           style="fill:#78909c"
+           y="213.33299"
+           x="192" />
+        <rect
+           id="rect1635"
+           height="42.667"
+           width="213.33299"
+           style="fill:#78909c"
+           y="149.33299"
+           x="149.33299" />
+      </g>
       <g
          id="g1647">
-	<path
-   id="path1639"
-   d="m 234.667,320 c 0,-11.76 -9.563,-21.333 -21.333,-21.333 -11.771,0 -21.334,9.573 -21.334,21.333 0,11.76 9.563,21.333 21.333,21.333 11.771,0 21.334,-9.573 21.334,-21.333 z"
-   style="fill:#303c42"
-   inkscape:connector-curvature="0" />
-
-	<path
-   id="path1641"
-   d="m 320,320 c 0,-11.76 -9.563,-21.333 -21.333,-21.333 -11.771,0 -21.333,9.573 -21.333,21.333 0,11.76 9.563,21.333 21.333,21.333 C 310.438,341.333 320,331.76 320,320 Z"
-   style="fill:#303c42"
-   inkscape:connector-curvature="0" />
-
-	<path
-   id="path1643"
-   d="M 330.667,384 H 181.333 c -5.896,0 -10.667,4.771 -10.667,10.667 0,5.896 4.771,10.667 10.667,10.667 h 149.333 c 5.896,0 10.667,-4.771 10.667,-10.667 0,-5.896 -4.77,-10.667 -10.666,-10.667 z"
-   style="fill:#303c42"
-   inkscape:connector-curvature="0" />
-
-	<path
-   id="path1645"
-   d="M 330.667,426.667 H 181.333 c -5.896,0 -10.667,4.771 -10.667,10.667 0,5.896 4.772,10.666 10.667,10.666 h 149.333 c 5.896,0 10.667,-4.771 10.667,-10.667 0,-5.896 -4.77,-10.666 -10.666,-10.666 z"
-   style="fill:#303c42"
-   inkscape:connector-curvature="0" />
-
-</g>
+        <path
+           id="path1639"
+           d="m 234.667,320 c 0,-11.76 -9.563,-21.333 -21.333,-21.333 -11.771,0 -21.334,9.573 -21.334,21.333 0,11.76 9.563,21.333 21.333,21.333 11.771,0 21.334,-9.573 21.334,-21.333 z"
+           style="fill:#303c42"
+           inkscape:connector-curvature="0" />
+        <path
+           id="path1641"
+           d="m 320,320 c 0,-11.76 -9.563,-21.333 -21.333,-21.333 -11.771,0 -21.333,9.573 -21.333,21.333 0,11.76 9.563,21.333 21.333,21.333 C 310.438,341.333 320,331.76 320,320 Z"
+           style="fill:#303c42"
+           inkscape:connector-curvature="0" />
+        <path
+           id="path1643"
+           d="M 330.667,384 H 181.333 c -5.896,0 -10.667,4.771 -10.667,10.667 0,5.896 4.771,10.667 10.667,10.667 h 149.333 c 5.896,0 10.667,-4.771 10.667,-10.667 0,-5.896 -4.77,-10.667 -10.666,-10.667 z"
+           style="fill:#303c42"
+           inkscape:connector-curvature="0" />
+        <path
+           id="path1645"
+           d="M 330.667,426.667 H 181.333 c -5.896,0 -10.667,4.771 -10.667,10.667 0,5.896 4.772,10.666 10.667,10.666 h 149.333 c 5.896,0 10.667,-4.771 10.667,-10.667 0,-5.896 -4.77,-10.666 -10.666,-10.666 z"
+           style="fill:#303c42"
+           inkscape:connector-curvature="0" />
+      </g>
       <path
          id="path1654"
          d="M 384,0 H 128 C 104.479,0 85.333,19.135 85.333,42.667 V 501.334 C 85.333,507.229 90.104,512 96,512 h 320 c 5.896,0 10.667,-4.771 10.667,-10.667 V 42.667 C 426.667,19.135 407.521,0 384,0 Z"
          style="fill:url(#SVGID_1_)"
          inkscape:connector-curvature="0" />
       <g
-         id="g1656">
-</g>
+         id="g1656" />
       <g
-         id="g1658">
-</g>
+         id="g1658" />
       <g
-         id="g1660">
-</g>
+         id="g1660" />
       <g
-         id="g1662">
-</g>
+         id="g1662" />
       <g
-         id="g1664">
-</g>
+         id="g1664" />
       <g
-         id="g1666">
-</g>
+         id="g1666" />
       <g
-         id="g1668">
-</g>
+         id="g1668" />
       <g
-         id="g1670">
-</g>
+         id="g1670" />
       <g
-         id="g1672">
-</g>
+         id="g1672" />
       <g
-         id="g1674">
-</g>
+         id="g1674" />
       <g
-         id="g1676">
-</g>
+         id="g1676" />
       <g
-         id="g1678">
-</g>
+         id="g1678" />
       <g
-         id="g1680">
-</g>
+         id="g1680" />
       <g
-         id="g1682">
-</g>
+         id="g1682" />
       <g
-         id="g1684">
-</g>
+         id="g1684" />
     </g>
     <g
        id="g1722-5"
@@ -1817,5 +1825,21 @@
        id="path2105"
        inkscape:connector-curvature="0"
        transform="matrix(0.26458333,0,0,0.26458333,0,87)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.26493034;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:2.11944283, 2.11944283;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 24.001488,267.32887 c 12.977447,-0.12599 25.954631,-0.25198 38.931546,-0.37797"
+       id="path1798-1-7"
+       inkscape:connector-curvature="0"
+       inkscape:path-effect="#path-effect1800-9-36"
+       inkscape:original-d="m 24.001488,267.32887 c 12.977445,-0.12625 25.954628,-0.25225 38.931546,-0.37797"
+       transform="matrix(-0.01839735,0.57515024,-1.9398545,0.3627843,673.88795,36.746348)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.26493034;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:2.11944283, 2.11944283;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 24.001488,267.32887 c 12.977447,-0.12599 25.954631,-0.25198 38.931546,-0.37797"
+       id="path1798-1-7-2"
+       inkscape:connector-curvature="0"
+       inkscape:path-effect="#path-effect1800-9-36-56"
+       inkscape:original-d="m 24.001488,267.32887 c 12.977445,-0.12625 25.954628,-0.25225 38.931546,-0.37797"
+       transform="matrix(-0.01839735,0.57515024,-1.9398545,0.36278431,595.36339,80.213612)" />
   </g>
 </svg>
