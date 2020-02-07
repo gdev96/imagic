@@ -16,7 +16,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.4 (f8dce91, 2019-08-02)"
-   sodipodi:docname="application_structure.svg">
+   sodipodi:docname="imagic_schema.svg">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -340,7 +340,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1851,7 +1851,7 @@
        inkscape:connector-curvature="0"
        inkscape:path-effect="#path-effect1800-6-9"
        inkscape:original-d="m 24.003554,267.4806 c 12.976754,-0.177 25.953246,-0.35373 38.929473,-0.53019"
-       transform="rotate(0.78027097,95.889278,11650.673)"
+       transform="rotate(0.78027097,95.889275,11650.673)"
        sodipodi:nodetypes="cc" />
     <path
        sodipodi:type="star"
