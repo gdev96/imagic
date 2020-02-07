@@ -127,9 +127,6 @@ void load_balancer_connector::manage_request(int lb_sockfd){
         //Send payload
         write_bytes(lb_sockfd, response_payload_buffer, response_payload_length);
 
-        std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
-        std::cout << *OUTPUT_IDENTIFIER << *(temporary_message_->get_header()) << std::endl;
-
         //Delete message
         delete temporary_message_;
     }

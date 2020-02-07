@@ -174,6 +174,9 @@ void server_connector::manage_response(const message *client_message, bool send_
         //Send response to client
         write_bytes(client_sockfd, header_buffer, HEADER_LENGTH);
         write_bytes(client_sockfd, server_payload_buffer, server_payload_length);
+
+        std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << server_message_header << std::endl;
     }
 
     //Decrement server load
