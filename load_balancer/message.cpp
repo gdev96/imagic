@@ -15,16 +15,8 @@ uint32_t header::get_payload_length() const {
     return payload_length_;
 }
 
-void header::set_message_type(message_type msg_type) {
-    message_type_ = msg_type;
-}
-
 void header::set_source_id(uint32_t source_id) {
     source_id_ = source_id;
-}
-
-void header::set_payload_length(uint32_t payload_length) {
-    payload_length_ = payload_length;
 }
 
 void header::serialize(unsigned char *buffer) {
@@ -42,8 +34,7 @@ void header::deserialize(unsigned char *buffer) {
 }
 
 std::ostream &operator<<(std::ostream &os, const header &header) {
-    os << "message_type: " << (unsigned int)header.message_type_ << " source_id: " << header.source_id_
-        << " payload_length: " << header.payload_length_;
+    os << "message_type: " << (unsigned int)header.message_type_ << " source_id: " << header.source_id_ << " payload_length: " << header.payload_length_;
     return os;
 }
 

@@ -51,10 +51,7 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
 
 //Client-side connector
 
-client_connector::client_connector(std::queue<message *> *message_queue, std::mutex *read_mutex, std::mutex *write_mutex,
-                                   std::mutex *write_count_mutex) : message_queue_(message_queue), read_mutex_(read_mutex),
-                                                                  write_mutex_(write_mutex),
-                                                                  write_count_mutex(write_count_mutex) {}
+client_connector::client_connector(std::queue<message *> *message_queue, std::mutex *read_mutex, std::mutex *write_mutex, std::mutex *write_count_mutex) : message_queue_(message_queue), read_mutex_(read_mutex), write_mutex_(write_mutex), write_count_mutex(write_count_mutex) {}
 
 void client_connector::accept_requests() {
     //Create socket
@@ -130,6 +127,7 @@ void client_connector::queue_request(int client_sockfd) {
 }
 
 //Server-side connector
+
 server_connector::server_connector() {};
 
 server_connector::server_connector(sockaddr_in *server_address) : server_address_(server_address) {

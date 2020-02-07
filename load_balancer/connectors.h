@@ -16,8 +16,7 @@ class client_connector {
         std::mutex *read_mutex_, *write_mutex_, *write_count_mutex;
         inline static unsigned int write_count_ = 0;
     public:
-        client_connector(std::queue<message *> *message_queue, std::mutex *read_mutex, std::mutex *write_mutex,
-                        std::mutex *write_count_mutex);
+        client_connector(std::queue<message *> *message_queue, std::mutex *read_mutex, std::mutex *write_mutex, std::mutex *write_count_mutex);
         void accept_requests();
         void queue_request(int client_sockfd);
 };

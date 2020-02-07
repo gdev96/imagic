@@ -1,12 +1,11 @@
 #include "image.h"
 
-image::image(std::vector<unsigned char> *image_file, std::string *category) : image_file_(image_file),
-                                                                              category_(category) {}
+image::image(std::vector<unsigned char> *file, std::string *category) : file_(file), category_(category) {}
 
-std::vector<unsigned char> *image::getImageFile() const {
-    return image_file_;
+std::vector<unsigned char> *image::get_file() const {
+    return file_;
 }
 
-std::string *image::getCategory() const {
+std::string *image::get_category() const {
     return category_;
 }

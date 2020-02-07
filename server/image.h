@@ -6,12 +6,12 @@
 
 class image {
     private:
-        std::vector<unsigned char> *image_file_, *thumb_file_;
-        std::string *image_file_path_, *thumb_file_path_, *category_;
+        std::vector<unsigned char> *file_;
+        std::string *category_;
     public:
         image(std::vector<unsigned char> *image_file, std::string *category);
-        std::vector<unsigned char> *getImageFile() const;
-        std::string *getCategory() const;
+        std::vector<unsigned char> *get_file() const;
+        std::string *get_category() const;
 };
 
 #endif //SERVER_IMAGE_H

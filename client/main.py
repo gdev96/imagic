@@ -170,7 +170,7 @@ class Ui_MainWindow(object):
             response = "Image successfully uploaded"
             icon = QtWidgets.QMessageBox.Information
         else:
-            response = "Error while uploading image"
+            response = "Image already exists in this category"
             icon = QtWidgets.QMessageBox.Warning
         dialog = QtWidgets.QMessageBox(self.mainpage)
         dialog.setIcon(icon)

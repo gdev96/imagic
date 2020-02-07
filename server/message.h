@@ -23,10 +23,7 @@ class header {
     public:
         header();
         message_type get_message_type() const;
-        uint32_t get_source_id() const;
         uint32_t get_payload_length() const;
-        void set_message_type(message_type msg_type);
-        void set_source_id(uint32_t source_id);
         void set_payload_length(uint32_t payload_length);
         void serialize(unsigned char *buffer);
         void deserialize(unsigned char *buffer);
@@ -35,18 +32,10 @@ class header {
 
 class payload {
     private:
-        std::variant<
-                image *,
-                std::string *,
-                std::vector<unsigned char> *,
-                std::map<std::vector<unsigned char>, std::string> *
-               > content_;
+        std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> content_;
     public:
-        const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
-            get_content() const;
-        void set_content(
-            const std::variant<image *, std::string *, std::vector<unsigned char> *,
-                    std::map<std::vector<unsigned char>, std::string> *> &content);
+        const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &get_content() const;
+        void set_content(const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &content);
         void serialize(unsigned char *buffer);
         void deserialize(unsigned char *buffer, uint32_t buffer_size, message_type msg_type);
 };
@@ -61,7 +50,6 @@ class message {
         ~message();
         header *get_header() const;
         payload *get_payload() const;
-        void set_payload(payload *payload);
 };
 
 #endif //SERVER_MESSAGE_H

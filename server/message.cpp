@@ -7,20 +7,8 @@ message_type header::get_message_type() const {
     return message_type_;
 }
 
-uint32_t header::get_source_id() const {
-    return source_id_;
-}
-
 uint32_t header::get_payload_length() const {
     return payload_length_;
-}
-
-void header::set_message_type(message_type msg_type) {
-    message_type_ = msg_type;
-}
-
-void header::set_source_id(uint32_t source_id) {
-    source_id_ = source_id;
 }
 
 void header::set_payload_length(uint32_t payload_length) {
@@ -42,8 +30,7 @@ void header::deserialize(unsigned char *buffer) {
 }
 
 std::ostream &operator<<(std::ostream &os, const header &header) {
-    os << "message_type: " << (unsigned int)header.message_type_ << " source_id: " << header.source_id_
-        << " payload_length: " << header.payload_length_;
+    os << "message_type: " << (unsigned int)header.message_type_ << " source_id: " << header.source_id_ << " payload_length: " << header.payload_length_;
     return os;
 }
 
@@ -64,17 +51,11 @@ payload *message::get_payload() const {
     return payload_;
 }
 
-void message::set_payload(payload *payload) {
-    payload_ = payload;
-}
-
-const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &
-payload::get_content() const {
+const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &payload::get_content() const {
     return content_;
 }
 
-void payload::set_content(
-        const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &content) {
+void payload::set_content(const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &content) {
     content_ = content;
 }
 
@@ -135,8 +116,7 @@ void payload::deserialize(unsigned char *buffer, uint32_t buffer_size, message_t
         int_buffer = (uint32_t *)buffer;
         image_size = ntohl(*int_buffer++);
         byte_buffer = (unsigned char *)int_buffer;
-        auto image_file = new std::vector<unsigned char>(image_size);
-        image_file->assign(byte_buffer, byte_buffer + image_size);
+        auto image_file = new std::vector<unsigned char>(byte_buffer, byte_buffer + image_size);
 
         //Get category from payload
         int_buffer = (uint32_t *)(byte_buffer + image_size);
