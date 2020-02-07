@@ -56,7 +56,7 @@ do
     sudo mysql -u root -e "$STATEMENTS"
 
     echo "Creating directory for server $SERVER_ID..."
-    mkdir -p server/resources/$SERVER_ID
+    mkdir -p server/images/$SERVER_ID
     ./server/build/imagic_srv &
     ((SERVER_ID++))
 

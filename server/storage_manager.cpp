@@ -56,15 +56,15 @@ void storage_manager::upload_request() {
     std::transform(image_format.begin(), image_format.end(), image_format.begin(), ::tolower);
 
     //Save image file to disk
-    std::string image_file_path = "server/resources/" + std::to_string(server_id_) + "/" + std::to_string(image_id) + "." + image_format;
+    std::string image_file_path = "server/images/" + std::to_string(server_id_) + "/" + std::to_string(image_id) + "." + image_format;
     std::ofstream output_image_file("./" + image_file_path, std::ios::binary);
     output_image_file.write((const char*)image_file->data(), image_file->size());
     output_image_file.close();
     std::cout << *OUTPUT_IDENTIFIER << "Image saved in: " + image_file_path << std::endl;
 
     //Save thumb file to disk
-    std::string thumb_file_path = "server/resources/" + std::to_string(server_id_) + "/" + std::to_string(image_id) + "_thumb." + image_format;
-    thumb.resize("400x400");
+    std::string thumb_file_path = "server/images/" + std::to_string(server_id_) + "/" + std::to_string(image_id) + "_thumb." + image_format;
+    thumb.resize(std::getenv("THUMB_SIZE"));
     thumb.write("./" + thumb_file_path);
     std::cout << *OUTPUT_IDENTIFIER << "Thumb saved in: " + thumb_file_path << std::endl;
 

@@ -89,11 +89,11 @@ class MessageHandler:
                     break
                 offset += struct.calcsize('!I')
                 thumb_file = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)[0]
-                offset += struct.calcsize('!{}s'.format(next_length))
+                offset += next_length
                 next_length = struct.unpack_from('!I', self.current_message.payload, offset)[0]
                 offset += struct.calcsize('!I')
                 thumb_path = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)[0]
-                offset += struct.calcsize('!{}s'.format(next_length))
+                offset += next_length
                 thumbs_dict[thumb_file] = thumb_path.decode("raw_unicode_escape")
             return self.current_message.header, thumbs_dict
         # DOWNLOAD_IMAGE
