@@ -5,8 +5,14 @@ cd ..
 echo "Starting MySQL service..."
 sudo service mysql start
 
-echo "Compiling server..."
-cmake -S server -B server/build
+if [ "$1" != 0 ] && [ "$1" == "TEST" ]
+then
+    echo "Compiling server in testing mode..."
+    cmake -S server -B server/build -DDEFINE_MACRO=ON
+else
+    echo "Compiling server in normal mode..."
+    cmake -S server -B server/build
+fi
 make -C server/build
 
 echo "Compiling load balancer..."

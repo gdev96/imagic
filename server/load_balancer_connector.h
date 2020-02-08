@@ -11,15 +11,14 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
 class load_balancer_connector {
     private:
         struct sockaddr_in server_address_;
-        storage_manager *storage_manager_;
         unsigned int server_id_;
-        message *temporary_message_;
+        message *current_message_;
 
     public:
         load_balancer_connector();
         load_balancer_connector(const char *address, int port, unsigned int server_id);
         void receive_requests();
-        void manage_request(int lb_sockfd);
+        void manage_request(int lb_sockfd, message *client_message);
 };
 
 #endif //SERVER_LOAD_BALANCER_CONNECTOR_H

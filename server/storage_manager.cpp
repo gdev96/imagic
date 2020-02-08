@@ -2,11 +2,22 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
-#include <vector>
 #include <map>
+#include <random>
+#include <thread>
+#include <vector>
 #include "constants.h"
 #include "image.h"
 #include "storage_manager.h"
+
+#ifdef TESTING
+    size_t random_generator(size_t min, size_t max) {
+        std::random_device dev;
+        std::mt19937 rng(dev());
+        std::uniform_int_distribution<std::mt19937::result_type> dist(min,max); // distribution in range [min, max]
+        return dist(rng);
+    }
+#endif
 
 storage_manager::storage_manager(message *current_request, unsigned int server_id) : current_request_(current_request), server_id_(server_id) {
     std::string db_host(std::getenv("DB_HOST"));
@@ -36,6 +47,13 @@ storage_manager::~storage_manager() {
 }
 
 void storage_manager::upload_request() {
+
+#ifdef TESTING
+    int waiting_time = random_generator(30, 90);
+    std::cout << *OUTPUT_IDENTIFIER << "Sleeping for " << waiting_time << " seconds..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(waiting_time));
+#endif
+
     //Get image and its content from message
     image *image = std::get<0>(current_request_->get_payload()->get_content());
     std::vector<unsigned char> *image_file = image->get_file();
@@ -102,9 +120,21 @@ void storage_manager::upload_request() {
 
     //Set new payload
     current_request_->get_payload()->set_content(response);
+
+#ifdef TESTING
+    std::cout << *OUTPUT_IDENTIFIER << "Image upload finished" << std::endl;
+#endif
+
 }
 
 void storage_manager::view_thumbs() {
+
+#ifdef TESTING
+    int waiting_time = random_generator(30, 90);
+    std::cout << *OUTPUT_IDENTIFIER << "Sleeping for " << waiting_time << " seconds..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(waiting_time));
+#endif
+
     //Get thumb_path from message
     std::string *category = std::get<1>(current_request_->get_payload()->get_content());
 
@@ -148,9 +178,21 @@ void storage_manager::view_thumbs() {
 
     //Set new payload
     current_request_->get_payload()->set_content(thumbs_map);
+
+#ifdef TESTING
+    std::cout << *OUTPUT_IDENTIFIER << "Image thumbs retrieval finished" << std::endl;
+#endif
+
 }
 
 void storage_manager::download_image() {
+
+#ifdef TESTING
+    int waiting_time = random_generator(30, 90);
+    std::cout << *OUTPUT_IDENTIFIER << "Sleeping for " << waiting_time << " seconds..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(waiting_time));
+#endif
+
     //Get thumb_path from message
     std::string *thumb_file_name = std::get<1>(current_request_->get_payload()->get_content());
 
@@ -182,4 +224,9 @@ void storage_manager::download_image() {
 
     //Set new payload
     current_request_->get_payload()->set_content(image_file);
+
+#ifdef TESTING
+    std::cout << *OUTPUT_IDENTIFIER << "Image download finished" << std::endl;
+#endif
+
 }

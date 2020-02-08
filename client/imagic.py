@@ -28,12 +28,11 @@ class Imagic:
         received_payload = self.message_handler.send_message(MessageType.FIND_THUMBS, category)[1]
         self.current_thumbs = received_payload
 
-    def show_image(self, thumb_file):
-        thumb_file_path = self.current_thumbs[thumb_file]
-        received_payload = self.message_handler.send_message(MessageType.DOWNLOAD_IMAGE, thumb_file_path)[1]
-        self.current_image.image_file = received_payload
+    def show_image(self, thumb_file_name):
+        received_payload = self.message_handler.send_message(MessageType.DOWNLOAD_IMAGE, thumb_file_name)[1]
+        self.current_image = Image(received_payload)
 
-    def download_image(self, dir_path):
-        with open(dir_path, "wb") as f:
+    def download_image(self, image_path):
+        with open(image_path, "wb") as f:
             f.write(self.current_image.image_file)
             f.close()

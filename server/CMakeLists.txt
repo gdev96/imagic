@@ -15,6 +15,12 @@ set(PROJECT_LINK_LIBS
 add_definitions(-DMAGICKCORE_QUANTUM_DEPTH=16)
 add_definitions(-DMAGICKCORE_HDRI_ENABLE=0)
 
+option(DEFINE_MACRO "To test application concurrency" OFF)
+
+if(DEFINE_MACRO)
+    add_definitions(-DTESTING)
+endif(DEFINE_MACRO)
+
 add_executable(imagic_srv
         constants.h
         image.cpp

@@ -68,66 +68,68 @@ void load_balancer_connector::receive_requests() {
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
     std::cout << *OUTPUT_IDENTIFIER << "Waiting for connections from load balancer..." << std::endl;
 
-    while (true) {
+    while(true) {
         socklen_t lb_length = sizeof(lb_address);
         int lb_sockfd = accept(server_sockfd, (struct sockaddr *)&lb_address, &lb_length);
         std::cout << *OUTPUT_IDENTIFIER << "Connection from load balancer accepted" << std::endl;
 
-        std::thread t(&load_balancer_connector::manage_request, this, lb_sockfd);
-        t.detach();
+        while(true) {
+            //Read request from socket and create message
+            unsigned char header_buffer[HEADER_LENGTH];
+            read_bytes(lb_sockfd, header_buffer, HEADER_LENGTH);
+            auto message_header = new header();
+            message_header->deserialize(header_buffer);
+
+            std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED!" << std::endl;
+            std::cout << *OUTPUT_IDENTIFIER << *message_header << std::endl;
+            std::cout << *OUTPUT_IDENTIFIER << "Processing request..." << std::endl;
+
+            uint32_t payload_length = message_header->get_payload_length();
+            message_type msg_type = message_header->get_message_type();
+            auto message_payload = new payload();
+            unsigned char payload_buffer[payload_length];
+            read_bytes(lb_sockfd, payload_buffer, payload_length);
+            message_payload->deserialize(payload_buffer, payload_length, msg_type);
+            current_message_ = new message(message_header, message_payload);
+
+            std::thread t(&load_balancer_connector::manage_request, this, lb_sockfd, current_message_);
+            t.detach();
+        }
     }
 }
 
-void load_balancer_connector::manage_request(int lb_sockfd){
-    while(true) {
-        //Read request from socket and create message
-        unsigned char header_buffer[HEADER_LENGTH];
-        read_bytes(lb_sockfd, header_buffer, HEADER_LENGTH);
-        auto message_header = new header();
-        message_header->deserialize(header_buffer);
-        uint32_t payload_length = message_header->get_payload_length();
-        message_type msg_type = message_header->get_message_type();
-        auto message_payload = new payload();
-        unsigned char payload_buffer[payload_length];
-        read_bytes(lb_sockfd, payload_buffer, payload_length);
-        message_payload->deserialize(payload_buffer, payload_length, msg_type);
-        temporary_message_ = new message(message_header, message_payload);
-
-        std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED!" << std::endl;
-        std::cout << *OUTPUT_IDENTIFIER << *message_header << std::endl;
-
-        //Manage request
-        storage_manager_ = new storage_manager(temporary_message_, server_id_);
-        switch(msg_type) {
-            case message_type::UPLOAD_IMAGE:
-                storage_manager_->upload_request();
-                break;
-            case message_type::FIND_THUMBS:
-                storage_manager_->view_thumbs();
-                break;
-            case message_type::DOWNLOAD_IMAGE:
-                storage_manager_->download_image();
-                break;
-        }
-        //Delete storage manager
-        delete storage_manager_;
-
-        //Serialize response header
-        unsigned char response_header_buffer[HEADER_LENGTH];
-        temporary_message_->get_header()->serialize(response_header_buffer);
-
-        //Send header
-        write_bytes(lb_sockfd, response_header_buffer, HEADER_LENGTH);
-
-        //Serialize response payload
-        uint32_t response_payload_length = temporary_message_->get_header()->get_payload_length();
-        unsigned char response_payload_buffer[response_payload_length];
-        temporary_message_->get_payload()->serialize(response_payload_buffer);
-
-        //Send payload
-        write_bytes(lb_sockfd, response_payload_buffer, response_payload_length);
-
-        //Delete message
-        delete temporary_message_;
+void load_balancer_connector::manage_request(int lb_sockfd, message *client_message){
+    //Manage request
+    auto storage_manager_instance = new storage_manager(client_message, server_id_);
+    switch(client_message->get_header()->get_message_type()) {
+        case message_type::UPLOAD_IMAGE:
+            storage_manager_instance->upload_request();
+            break;
+        case message_type::FIND_THUMBS:
+            storage_manager_instance->view_thumbs();
+            break;
+        case message_type::DOWNLOAD_IMAGE:
+            storage_manager_instance->download_image();
+            break;
     }
+    //Delete storage manager
+    delete storage_manager_instance;
+
+    //Serialize response header
+    unsigned char response_header_buffer[HEADER_LENGTH];
+    client_message->get_header()->serialize(response_header_buffer);
+
+    //Send header
+    write_bytes(lb_sockfd, response_header_buffer, HEADER_LENGTH);
+
+    //Serialize response payload
+    uint32_t response_payload_length = client_message->get_header()->get_payload_length();
+    unsigned char response_payload_buffer[response_payload_length];
+    client_message->get_payload()->serialize(response_payload_buffer);
+
+    //Send payload
+    write_bytes(lb_sockfd, response_payload_buffer, response_payload_length);
+
+    //Delete message
+    delete client_message;
 }

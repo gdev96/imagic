@@ -50,8 +50,7 @@ void load_balancer::initialize_server_connectors() {
 }
 
 unsigned int load_balancer::balance() {
-    unsigned int current_lowest_load = server_connectors_[0].get_server_load();
-    unsigned int current_lowest_load_server = 0;
+    unsigned int current_lowest_load = server_connectors_[0].get_server_load(), current_lowest_load_server = 0;
     for(int i=1; i<n_server_; i++) {
         unsigned int current_load = server_connectors_[i].get_server_load();
         if(current_load < current_lowest_load){
@@ -87,14 +86,11 @@ void load_balancer::get_requests() {
 void load_balancer::manage_request(message *client_message) {
     if(client_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
         //Broadcast message
-        std::thread threads[n_server_];
+        auto remaining_uploads = new unsigned int(n_server_);
         for(int i=0; i<n_server_; i++){
             server_connectors_[i].set_server_load(server_connectors_[i].get_server_load() + 1);
-            std::thread t = std::thread(&server_connector::manage_response, server_connectors_[i], client_message, i == n_server_ - 1);
-            threads[i] = (std::thread &&)t;
-        }
-        for(int i=0; i<n_server_; i++){
-            threads[i].join();
+            std::thread t = std::thread(&server_connector::manage_response, server_connectors_[i], client_message, remaining_uploads);
+            t.detach();
         }
     }
     else {
@@ -103,7 +99,4 @@ void load_balancer::manage_request(message *client_message) {
         server_connectors_[chosen_server].set_server_load(server_connectors_[chosen_server].get_server_load() + 1);
         server_connectors_[chosen_server].manage_response(client_message);
     }
-
-    //Delete message
-    delete client_message;
 }

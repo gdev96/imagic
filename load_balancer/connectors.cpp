@@ -1,7 +1,6 @@
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <iostream>
-#include <mutex>
 #include <stdexcept>
 #include <sys/socket.h>
 #include <thread>
@@ -132,6 +131,7 @@ server_connector::server_connector() {};
 
 server_connector::server_connector(sockaddr_in *server_address) : server_address_(server_address) {
     server_load_ = 0;
+    write_mutex_ = new std::mutex();
 
     //Connection with server
     server_sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
@@ -149,7 +149,7 @@ void server_connector::set_server_load(unsigned int server_load) {
     server_load_ = server_load;
 }
 
-void server_connector::manage_response(const message *client_message, bool send_upload_response) {
+void server_connector::manage_response(const message *client_message, unsigned int *remaining_uploads) {
     auto client_message_header = client_message->get_header();
 
     //Get the client_sockfd
@@ -170,13 +170,24 @@ void server_connector::manage_response(const message *client_message, bool send_
     unsigned char server_payload_buffer[server_payload_length];
     read_bytes(server_sockfd_, server_payload_buffer, server_payload_length);
 
-    if(client_message_header->get_message_type() != message_type::UPLOAD_IMAGE || send_upload_response) {
+    if(client_message_header->get_message_type() != message_type::UPLOAD_IMAGE || *remaining_uploads == 1) {
         //Send response to client
         write_bytes(client_sockfd, header_buffer, HEADER_LENGTH);
         write_bytes(client_sockfd, server_payload_buffer, server_payload_length);
 
         std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
         std::cout << *OUTPUT_IDENTIFIER << server_message_header << std::endl;
+
+        //Delete counter of remaining uploads
+        delete remaining_uploads;
+
+        //Delete client message
+        delete client_message;
+    }
+    else {
+        std::lock_guard<std::mutex> lock(*write_mutex_);
+        (*remaining_uploads)--;
+        std::cout << *OUTPUT_IDENTIFIER << "Remaining uploads: " << *remaining_uploads << std::endl;
     }
 
     //Decrement server load

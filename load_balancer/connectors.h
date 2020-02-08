@@ -2,6 +2,7 @@
 #define IMAGIC_BACKEND_CONNECTORS_H
 
 #include <cstdint>
+#include <mutex>
 #include <netinet/in.h>
 #include <queue>
 #include "message.h"
@@ -26,12 +27,13 @@ class server_connector {
         int server_sockfd_;
         struct sockaddr_in *server_address_;
         unsigned int server_load_;
+        std::mutex *write_mutex_;
     public:
         server_connector();
         server_connector(sockaddr_in *server_address);
         unsigned int get_server_load() const;
         void set_server_load(unsigned int server_load);
-        void manage_response(const message* client_message, bool send_upload_response = false);
+        void manage_response(const message* client_message, unsigned int *remaining_uploads = nullptr);
 };
 
 #endif //IMAGIC_BACKEND_CONNECTORS_H
