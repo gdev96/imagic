@@ -8,10 +8,10 @@ sudo service mysql start
 if [ "$1" != 0 ] && [ "$1" == "TEST" ]
 then
     echo "Compiling server in testing mode..."
-    cmake -S server -B server/build -DDEFINE_MACRO=ON
+    cmake -DTESTING_MACRO=ON -S server -B server/build
 else
     echo "Compiling server in normal mode..."
-    cmake -S server -B server/build
+    cmake -DTESTING_MACRO=OFF -S server -B server/build
 fi
 make -C server/build
 

@@ -21,8 +21,7 @@ class load_balancer {
     public:
         load_balancer();
         void initialize_server_addresses();
-        void initialize_client_connector();
-        void initialize_server_connectors();
+        void initialize_connectors();
         unsigned int balance();
         void get_requests();
         void manage_request(message *client_message);

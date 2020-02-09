@@ -8,7 +8,7 @@ class server {
         load_balancer_connector lb_connector_;
         unsigned int id_;
     public:
-        server(const char *address, int port, int id);
+        server(const char *address, int port, unsigned int id);
         void receive_requests();
 };
 

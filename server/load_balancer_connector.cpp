@@ -48,12 +48,53 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     } while(offset < message_length);
 }
 
+void send(int sockfd, const message *msg) {
+    //Serialize response header
+    unsigned char header_buffer[HEADER_LENGTH];
+    msg->get_header()->serialize(header_buffer);
+
+    //Send header
+    write_bytes(sockfd, header_buffer, HEADER_LENGTH);
+
+    //Serialize response payload
+    uint32_t payload_length = msg->get_header()->get_payload_length();
+    unsigned char payload_buffer[payload_length];
+    msg->get_payload()->serialize(payload_buffer);
+
+    //Send payload
+    write_bytes(sockfd, payload_buffer, payload_length);
+}
+
+message *receive(int sockfd) {
+    //Receive header
+    unsigned char header_buffer[HEADER_LENGTH];
+    read_bytes(sockfd, header_buffer, HEADER_LENGTH);
+
+    //Deserialize request header
+    auto message_header = new header();
+    message_header->deserialize(header_buffer);
+
+    //Receive payload
+    uint32_t payload_length = message_header->get_payload_length();
+    unsigned char payload_buffer[payload_length];
+    read_bytes(sockfd, payload_buffer, payload_length);
+
+    //Deserialize request payload
+    auto message_payload = new payload();
+    message_type msg_type = message_header->get_message_type();
+    message_payload->deserialize(payload_buffer, payload_length, msg_type);
+
+    return new message(message_header, message_payload);
+}
+
 load_balancer_connector::load_balancer_connector() {};
 
 load_balancer_connector::load_balancer_connector(const char *address, int port, unsigned int server_id) : server_id_(server_id) {
     server_address_.sin_family = AF_INET;
     server_address_.sin_addr.s_addr = inet_addr(address);
     server_address_.sin_port = htons(port);
+
+    send_response_mutex_ = new std::mutex();
 }
 
 void load_balancer_connector::receive_requests() {
@@ -74,23 +115,12 @@ void load_balancer_connector::receive_requests() {
         std::cout << *OUTPUT_IDENTIFIER << "Connection from load balancer accepted" << std::endl;
 
         while(true) {
-            //Read request from socket and create message
-            unsigned char header_buffer[HEADER_LENGTH];
-            read_bytes(lb_sockfd, header_buffer, HEADER_LENGTH);
-            auto message_header = new header();
-            message_header->deserialize(header_buffer);
+            //Receive request
+            current_message_ = receive(lb_sockfd);
 
             std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED!" << std::endl;
-            std::cout << *OUTPUT_IDENTIFIER << *message_header << std::endl;
+            std::cout << *OUTPUT_IDENTIFIER << *current_message_->get_header() << std::endl;
             std::cout << *OUTPUT_IDENTIFIER << "Processing request..." << std::endl;
-
-            uint32_t payload_length = message_header->get_payload_length();
-            message_type msg_type = message_header->get_message_type();
-            auto message_payload = new payload();
-            unsigned char payload_buffer[payload_length];
-            read_bytes(lb_sockfd, payload_buffer, payload_length);
-            message_payload->deserialize(payload_buffer, payload_length, msg_type);
-            current_message_ = new message(message_header, message_payload);
 
             std::thread t(&load_balancer_connector::manage_request, this, lb_sockfd, current_message_);
             t.detach();
@@ -100,36 +130,27 @@ void load_balancer_connector::receive_requests() {
 
 void load_balancer_connector::manage_request(int lb_sockfd, message *client_message){
     //Manage request
-    auto storage_manager_instance = new storage_manager(client_message, server_id_);
+    storage_manager storage_manager_instance(client_message, server_id_);
     switch(client_message->get_header()->get_message_type()) {
         case message_type::UPLOAD_IMAGE:
-            storage_manager_instance->upload_request();
+            storage_manager_instance.upload_request();
             break;
         case message_type::FIND_THUMBS:
-            storage_manager_instance->view_thumbs();
+            storage_manager_instance.view_thumbs();
             break;
         case message_type::DOWNLOAD_IMAGE:
-            storage_manager_instance->download_image();
+            storage_manager_instance.download_image();
             break;
     }
-    //Delete storage manager
-    delete storage_manager_instance;
+    //Lock send response
+    std::lock_guard<std::mutex> lock(*send_response_mutex_);
 
-    //Serialize response header
-    unsigned char response_header_buffer[HEADER_LENGTH];
-    client_message->get_header()->serialize(response_header_buffer);
+    //Send response
+    send(lb_sockfd, client_message);
 
-    //Send header
-    write_bytes(lb_sockfd, response_header_buffer, HEADER_LENGTH);
+    std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
+    std::cout << *OUTPUT_IDENTIFIER << *client_message->get_header() << std::endl;
 
-    //Serialize response payload
-    uint32_t response_payload_length = client_message->get_header()->get_payload_length();
-    unsigned char response_payload_buffer[response_payload_length];
-    client_message->get_payload()->serialize(response_payload_buffer);
-
-    //Send payload
-    write_bytes(lb_sockfd, response_payload_buffer, response_payload_length);
-
-    //Delete message
+    //Delete client request
     delete client_message;
 }

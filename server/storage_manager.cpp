@@ -33,7 +33,6 @@ storage_manager::storage_manager(message *current_request, unsigned int server_i
             (mysqlx::string)db_user,
             (mysqlx::string)db_password
     );
-
     //Obtain schema/database from session
     mysqlx::Schema schema = db_session_->getSchema((mysqlx::string)(db_name + "_" + std::to_string(server_id_)), true);
 
@@ -114,7 +113,6 @@ void storage_manager::upload_request() {
 
         response = new std::string("Uploaded");
     }
-
     //Set payload length in message header
     current_request_->get_header()->set_payload_length(response->length());
 

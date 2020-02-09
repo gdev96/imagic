@@ -16,11 +16,8 @@ load_balancer::load_balancer() {
     //Initialize server addresses
     initialize_server_addresses();
 
-    //Create client connector
-    initialize_client_connector();
-
-    //Create server connectors
-    initialize_server_connectors();
+    //Create connectors
+    initialize_connectors();
 }
 
 void load_balancer::initialize_server_addresses() {
@@ -35,14 +32,14 @@ void load_balancer::initialize_server_addresses() {
     std::cout << *OUTPUT_IDENTIFIER << "Server addresses initialized" << std::endl;
 }
 
-void load_balancer::initialize_client_connector() {
+void load_balancer::initialize_connectors() {
+    //Create client connector
     client_connector_ = new client_connector(&message_queue_, &read_mutex_, &write_mutex_, &write_count_mutex_);
     std::cout << *OUTPUT_IDENTIFIER << "Client connector created" << std::endl;
     std::thread t = std::thread(&client_connector::accept_requests, client_connector_);
     t.detach();
-}
 
-void load_balancer::initialize_server_connectors() {
+    //Create server connectors
     for(int i=0; i<n_server_; i++) {
         server_connectors_[i] = server_connector(&server_addresses_[i]);
         std::cout << *OUTPUT_IDENTIFIER << "Server connector " << i << " created" << std::endl;
@@ -58,7 +55,6 @@ unsigned int load_balancer::balance() {
             current_lowest_load_server = i;
         }
     }
-    std::cout << *OUTPUT_IDENTIFIER << "SENDING MESSAGE TO SERVER: " << current_lowest_load_server << std::endl;
     return current_lowest_load_server;
 }
 
@@ -86,17 +82,19 @@ void load_balancer::get_requests() {
 void load_balancer::manage_request(message *client_message) {
     if(client_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
         //Broadcast message
+        std::cout << *OUTPUT_IDENTIFIER << "BROADCASTING MESSAGE" << std::endl;
         auto remaining_uploads = new unsigned int(n_server_);
         for(int i=0; i<n_server_; i++){
             server_connectors_[i].set_server_load(server_connectors_[i].get_server_load() + 1);
-            std::thread t = std::thread(&server_connector::manage_response, server_connectors_[i], client_message, remaining_uploads);
+            std::thread t = std::thread(&server_connector::send_request_receive_response, server_connectors_[i], client_message, remaining_uploads);
             t.detach();
         }
     }
     else {
         //Send message to server with less load
         unsigned int chosen_server = balance();
+        std::cout << *OUTPUT_IDENTIFIER << "SENDING MESSAGE TO SERVER: " << chosen_server << std::endl;
         server_connectors_[chosen_server].set_server_load(server_connectors_[chosen_server].get_server_load() + 1);
-        server_connectors_[chosen_server].manage_response(client_message);
+        server_connectors_[chosen_server].send_request_receive_response(client_message);
     }
 }

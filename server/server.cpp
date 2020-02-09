@@ -2,7 +2,7 @@
 #include "constants.h"
 #include "server.h"
 
-server::server(const char *address, int port, int id) : id_(id) {
+server::server(const char *address, int port, unsigned int id) : id_(id) {
     //SET OUTPUT IDENTIFIER
     OUTPUT_IDENTIFIER = new std::string("\033[" + std::to_string(id_ % 5 + 32) + "mserver " + std::to_string(id_) + "      |\033[m ");
     //CREATE LOAD BALANCER CONNECTOR
@@ -13,4 +13,4 @@ server::server(const char *address, int port, int id) : id_(id) {
 
 void server::receive_requests() {
     lb_connector_.receive_requests();
-};
+}
