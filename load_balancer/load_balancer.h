@@ -12,6 +12,7 @@ class load_balancer {
     private:
         message *current_message_;
         std::queue<message *> message_queue_;
+        std::queue<int> request_queue_;
         unsigned int n_server_;
         client_connector *client_connector_;
         server_connector *server_connectors_;

@@ -175,31 +175,31 @@ void server_connector::set_server_load(unsigned int server_load) {
     server_load_ = server_load;
 }
 
-void server_connector::send_request_receive_response(const message *client_message, unsigned int *remaining_uploads) {
-    send_request_mutex_->lock();
-
+void server_connector::send_request_and_receive_response(const message *client_message, unsigned int *remaining_uploads) {
     //Send request to server
+    send_request_mutex_->lock();
     send(server_sockfd_, client_message);
-
     send_request_mutex_->unlock();
 
-    receive_response_mutex_->lock();
-
     //Get response from server
+    receive_response_mutex_->lock();
     message *response = receive(server_sockfd_);
-
     receive_response_mutex_->unlock();
 
-    if(response->get_header()->get_message_type() != message_type::UPLOAD_IMAGE || *remaining_uploads == 1) {
+    //Get message type
+    message_type msg_type = response->get_header()->get_message_type();
+
+    if(msg_type != message_type::UPLOAD_IMAGE || *remaining_uploads == 1) {
         //Send response to client
         send(response->get_header()->get_source_id(), response);
 
         std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
         std::cout << *OUTPUT_IDENTIFIER << *response->get_header() << std::endl;
 
-        //Delete counter of remaining uploads
-        delete remaining_uploads;
-
+        //Only the last server which has received an upload request must delete the counter
+        if(msg_type == message_type::UPLOAD_IMAGE) {
+            delete remaining_uploads;
+        }
         //Delete client message and response
         delete client_message;
         delete response;

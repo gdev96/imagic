@@ -5,7 +5,7 @@ cd ..
 echo "Starting MySQL service..."
 sudo service mysql start
 
-if [ "$1" != 0 ] && [ "$1" == "TEST" ]
+if [ "$1" != 0 ] && [ "$1" == "test" ]
 then
     echo "Compiling server in testing mode..."
     cmake -DTESTING_MACRO=ON -S server -B server/build

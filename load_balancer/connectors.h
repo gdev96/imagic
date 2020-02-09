@@ -36,7 +36,7 @@ class server_connector {
         server_connector(sockaddr_in *server_address);
         unsigned int get_server_load() const;
         void set_server_load(unsigned int server_load);
-        void send_request_receive_response(const message* client_message, unsigned int *remaining_uploads = nullptr);
+        void send_request_and_receive_response(const message* client_message, unsigned int *remaining_uploads);
 };
 
 #endif //IMAGIC_BACKEND_CONNECTORS_H

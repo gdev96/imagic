@@ -128,7 +128,7 @@ void storage_manager::upload_request() {
 void storage_manager::view_thumbs() {
 
 #ifdef TESTING
-    int waiting_time = random_generator(30, 90);
+    int waiting_time = random_generator(10, 30);
     std::cout << *OUTPUT_IDENTIFIER << "Sleeping for " << waiting_time << " seconds..." << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(waiting_time));
 #endif
@@ -186,7 +186,7 @@ void storage_manager::view_thumbs() {
 void storage_manager::download_image() {
 
 #ifdef TESTING
-    int waiting_time = random_generator(30, 90);
+    int waiting_time = random_generator(10, 30);
     std::cout << *OUTPUT_IDENTIFIER << "Sleeping for " << waiting_time << " seconds..." << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(waiting_time));
 #endif
