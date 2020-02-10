@@ -42,7 +42,7 @@ message::message(header *header, unsigned char *payload) : header_(header), payl
 
 message::~message() {
     delete header_;
-    delete payload_;
+    delete[] payload_;
 }
 
 header *message::get_header() const {

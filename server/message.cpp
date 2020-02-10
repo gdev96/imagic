@@ -7,6 +7,10 @@ message_type header::get_message_type() const {
     return message_type_;
 }
 
+uint32_t header::get_source_id() const {
+    return source_id_;
+}
+
 uint32_t header::get_payload_length() const {
     return payload_length_;
 }

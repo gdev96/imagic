@@ -14,7 +14,8 @@ message *receive(int sockfd);
 class load_balancer_connector {
     private:
         struct sockaddr_in server_address_;
-        unsigned int server_id_;
+        unsigned int server_id_, last_image_id_;
+        bool last_image_id_read_;
         message *current_message_;
         std::mutex *send_response_mutex_;
 

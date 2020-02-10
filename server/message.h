@@ -23,6 +23,7 @@ class header {
     public:
         header();
         message_type get_message_type() const;
+        uint32_t get_source_id() const;
         uint32_t get_payload_length() const;
         void set_payload_length(uint32_t payload_length);
         void serialize(unsigned char *buffer);

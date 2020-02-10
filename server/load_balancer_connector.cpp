@@ -130,7 +130,7 @@ void load_balancer_connector::receive_requests() {
 
 void load_balancer_connector::manage_request(int lb_sockfd, message *client_message){
     //Manage request
-    storage_manager storage_manager_instance(client_message, server_id_);
+    storage_manager storage_manager_instance(client_message, server_id_, &last_image_id_, &last_image_id_read_);
     switch(client_message->get_header()->get_message_type()) {
         case message_type::UPLOAD_IMAGE:
             storage_manager_instance.upload_request();
