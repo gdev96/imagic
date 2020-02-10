@@ -5,6 +5,7 @@
 #include <mutex>
 #include <netinet/in.h>
 #include <queue>
+#include <unordered_map>
 #include "message.h"
 
 u_int32_t min(uint32_t a, uint32_t b);
@@ -29,14 +30,16 @@ class server_connector {
         int server_sockfd_;
         struct sockaddr_in *server_address_;
         unsigned int server_load_;
+        std::unordered_map<int, unsigned int> *upload_counter_map_;
         std::mutex *send_request_mutex_, *receive_response_mutex_;
         inline static std::mutex write_mutex_ = std::mutex();
     public:
         server_connector();
-        server_connector(sockaddr_in *server_address);
+        server_connector(sockaddr_in *server_address, std::unordered_map<int, unsigned int> *upload_counter_map);
         unsigned int get_server_load() const;
         void set_server_load(unsigned int server_load);
-        void send_request_and_receive_response(const message* client_message, unsigned int *remaining_uploads);
+        void send_request_and_receive_response(const message* client_message);
+        void send_response(int sockfd, const message *response);
 };
 
 #endif //IMAGIC_BACKEND_CONNECTORS_H

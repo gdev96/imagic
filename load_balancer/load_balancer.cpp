@@ -41,7 +41,7 @@ void load_balancer::initialize_connectors() {
 
     //Create server connectors
     for(int i=0; i<n_server_; i++) {
-        server_connectors_[i] = server_connector(&server_addresses_[i]);
+        server_connectors_[i] = server_connector(&server_addresses_[i], &upload_counter_map);
         std::cout << *OUTPUT_IDENTIFIER << "Server connector " << i << " created" << std::endl;
     }
 }
@@ -71,6 +71,8 @@ void load_balancer::get_requests() {
             current_message_ = message_queue_.front();
             message_queue_.pop();
 
+            upload_counter_map[current_message_->get_header()->get_source_id()] = n_server_;
+
             //Manage request
             std::thread t = std::thread(&load_balancer::manage_request, this, current_message_);
             t.detach();
@@ -80,13 +82,12 @@ void load_balancer::get_requests() {
 }
 
 void load_balancer::manage_request(message *client_message) {
-    auto remaining_uploads = new unsigned int(n_server_);
     if(client_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
         //Broadcast message
         std::cout << *OUTPUT_IDENTIFIER << "BROADCASTING MESSAGE" << std::endl;
         for(int i=0; i<n_server_; i++){
             server_connectors_[i].set_server_load(server_connectors_[i].get_server_load() + 1);
-            std::thread t = std::thread(&server_connector::send_request_and_receive_response, server_connectors_[i], client_message, remaining_uploads);
+            std::thread t = std::thread(&server_connector::send_request_and_receive_response, server_connectors_[i], client_message);
             t.detach();
         }
     }
@@ -95,6 +96,6 @@ void load_balancer::manage_request(message *client_message) {
         unsigned int chosen_server = balance();
         std::cout << *OUTPUT_IDENTIFIER << "SENDING MESSAGE TO SERVER: " << chosen_server << std::endl;
         server_connectors_[chosen_server].set_server_load(server_connectors_[chosen_server].get_server_load() + 1);
-        server_connectors_[chosen_server].send_request_and_receive_response(client_message, remaining_uploads);
+        server_connectors_[chosen_server].send_request_and_receive_response(client_message);
     }
 }

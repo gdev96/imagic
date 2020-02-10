@@ -154,7 +154,7 @@ void client_connector::queue_request(int client_sockfd) {
 
 server_connector::server_connector() {};
 
-server_connector::server_connector(sockaddr_in *server_address) : server_address_(server_address) {
+server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<int, unsigned int> *upload_counter_map) : server_address_(server_address), upload_counter_map_(upload_counter_map) {
     server_load_ = 0;
     send_request_mutex_ = new std::mutex();
     receive_response_mutex_ = new std::mutex();
@@ -175,38 +175,56 @@ void server_connector::set_server_load(unsigned int server_load) {
     server_load_ = server_load;
 }
 
-void server_connector::send_request_and_receive_response(const message *client_message, unsigned int *remaining_uploads) {
+void server_connector::send_request_and_receive_response(const message *client_message) {
     //Send request to server
     send_request_mutex_->lock();
     send(server_sockfd_, client_message);
     send_request_mutex_->unlock();
+
+    //Get request message type
+    message_type request_message_type = client_message->get_header()->get_message_type();
 
     //Get response from server
     receive_response_mutex_->lock();
     message *response = receive(server_sockfd_);
     receive_response_mutex_->unlock();
 
-    //Get message type
-    message_type msg_type = response->get_header()->get_message_type();
+    //Get response message type and source id
+    message_type response_message_type = response->get_header()->get_message_type();
+    int response_source_id = response->get_header()->get_source_id();
 
-    if(msg_type != message_type::UPLOAD_IMAGE || *remaining_uploads == 1) {
-        //Send response to client
-        send(response->get_header()->get_source_id(), response);
+    if(response_message_type == message_type::UPLOAD_IMAGE) {
+        unsigned int remaining_uploads = upload_counter_map_->at(response_source_id);
+        if(remaining_uploads == 1) {
+            //Only the last server which has received an upload response must send response
+            send_response(response_source_id, response);
 
-        std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
-        std::cout << *OUTPUT_IDENTIFIER << *response->get_header() << std::endl;
-
-        //Only the last server which has received an upload request must delete the counter
-        if(msg_type == message_type::UPLOAD_IMAGE) {
-            delete remaining_uploads;
+            //Delete request
+            delete client_message;
         }
-        //Delete client message and response
-        delete client_message;
-        delete response;
-    } else {
-        std::lock_guard<std::mutex> lock(write_mutex_);
-        (*remaining_uploads)--;
+        else {
+            std::lock_guard<std::mutex> lock(write_mutex_);
+            upload_counter_map_->at(response_source_id)--;
+        }
+    }
+    else {
+        send_response(response_source_id, response);
+        if(request_message_type != message_type::UPLOAD_IMAGE || upload_counter_map_->at(response_source_id) == 1) {
+            //Delete request
+            delete client_message;
+        }
     }
     //Decrement server load
     server_load_--;
+}
+
+void server_connector::send_response(int sockfd, const message *response) {
+    //Send response to client
+    send(sockfd, response);
+
+    std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
+    std::cout << *OUTPUT_IDENTIFIER << *response->get_header() << std::endl;
+
+    //Delete request and response
+    delete response;
 }

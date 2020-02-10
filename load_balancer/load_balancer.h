@@ -4,6 +4,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <unordered_map>
 #include "connectors.h"
 #include "constants.h"
 #include "message.h"
@@ -12,7 +13,7 @@ class load_balancer {
     private:
         message *current_message_;
         std::queue<message *> message_queue_;
-        std::queue<int> request_queue_;
+        std::unordered_map<int, unsigned int> upload_counter_map;
         unsigned int n_server_;
         client_connector *client_connector_;
         server_connector *server_connectors_;
