@@ -34,14 +34,14 @@ void load_balancer::initialize_server_addresses() {
 
 void load_balancer::initialize_connectors() {
     //Create client connector
-    client_connector_ = new client_connector(&message_queue_, &read_mutex_, &write_mutex_, &write_count_mutex_);
+    client_connector_ = new client_connector(n_server_, &message_queue_, &request_map_, &read_mutex_, &write_mutex_, &write_count_mutex_);
     std::cout << *OUTPUT_IDENTIFIER << "Client connector created" << std::endl;
     std::thread t = std::thread(&client_connector::accept_requests, client_connector_);
     t.detach();
 
     //Create server connectors
     for(int i=0; i<n_server_; i++) {
-        server_connectors_[i] = server_connector(&server_addresses_[i], &upload_counter_map);
+        server_connectors_[i] = server_connector(&server_addresses_[i], &request_map_);
         std::cout << *OUTPUT_IDENTIFIER << "Server connector " << i << " created" << std::endl;
     }
 }
@@ -71,8 +71,6 @@ void load_balancer::get_requests() {
             current_message_ = message_queue_.front();
             message_queue_.pop();
 
-            upload_counter_map[current_message_->get_header()->get_source_id()] = n_server_;
-
             //Manage request
             std::thread t = std::thread(&load_balancer::manage_request, this, current_message_);
             t.detach();
@@ -85,7 +83,7 @@ void load_balancer::manage_request(message *client_message) {
     if(client_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
         //Broadcast message
         std::cout << *OUTPUT_IDENTIFIER << "BROADCASTING MESSAGE" << std::endl;
-        for(int i=0; i<n_server_; i++){
+        for(int i=0; i<n_server_; i++) {
             server_connectors_[i].set_server_load(server_connectors_[i].get_server_load() + 1);
             std::thread t = std::thread(&server_connector::send_request_and_receive_response, server_connectors_[i], client_message);
             t.detach();

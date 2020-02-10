@@ -19,7 +19,7 @@
     }
 #endif
 
-storage_manager::storage_manager(message *current_request, unsigned int server_id) : current_request_(current_request), server_id_(server_id) {
+storage_manager::storage_manager(message *current_request, unsigned int server_id, unsigned int *last_image_id, bool *last_image_id_read) : current_request_(current_request), server_id_(server_id), last_image_id_(last_image_id), last_image_id_read_(last_image_id_read) {
     std::string db_host(std::getenv("DB_HOST"));
     std::string db_user(std::getenv("DB_USER"));
     std::string db_password(std::getenv("DB_PASSWORD"));
@@ -74,14 +74,20 @@ void storage_manager::upload_request() {
         response = new std::string("Upload failed");
     }
     else {
-        //Get last id from DB
-        mysqlx::RowResult rows = current_table_
-                ->select("max(id)")
-                .execute();
+        if(!*last_image_id_read_) {
+            //Get last id from DB
+            mysqlx::RowResult rows = current_table_
+                    ->select("max(id)")
+                    .execute();
 
-        mysqlx::Row row = rows.fetchOne();
+            mysqlx::Row row = rows.fetchOne();
 
-        unsigned int image_id = row[0].isNull() ? 1 : (unsigned int)row[0] + 1;
+            *last_image_id_ = row[0].isNull() ? 0 : (unsigned int)row[0];
+
+            *last_image_id_read_ = true;
+        }
+
+        unsigned int image_id = current_request_->get_header()->get_source_id() + *last_image_id_;
 
         //Get thumb and image format
         Magick::Image thumb(Magick::Blob(image_file->data(), image_file->size()));
@@ -106,8 +112,8 @@ void storage_manager::upload_request() {
 
         //Create query to insert path and category in DB
         mysqlx::Result result = current_table_
-                ->insert("hash", "file_name", "thumb_file_name", "category")
-                .values((mysqlx::string)image_hash, (mysqlx::string)image_file_name, (mysqlx::string)thumb_file_name, (mysqlx::string)*category)
+                ->insert("id", "hash", "file_name", "thumb_file_name", "category")
+                .values(image_id, (mysqlx::string)image_hash, (mysqlx::string)image_file_name, (mysqlx::string)thumb_file_name, (mysqlx::string)*category)
                 .execute();
         std::cout << *OUTPUT_IDENTIFIER << "Image added to database" << std::endl;
 

@@ -80,7 +80,9 @@ message *receive(int sockfd) {
 
 //Client connector
 
-client_connector::client_connector(std::queue<message *> *message_queue, std::mutex *read_mutex, std::mutex *write_mutex, std::mutex *write_count_mutex) : message_queue_(message_queue), read_mutex_(read_mutex), write_mutex_(write_mutex), write_count_mutex_(write_count_mutex) {}
+client_connector::client_connector(unsigned int n_server, std::queue<message *> *message_queue, std::unordered_map<uint32_t, std::vector<int>> *request_map, std::mutex *read_mutex, std::mutex *write_mutex, std::mutex *write_count_mutex) : n_server_(n_server), message_queue_(message_queue), request_map_(request_map), read_mutex_(read_mutex), write_mutex_(write_mutex), write_count_mutex_(write_count_mutex) {
+    current_request_id_ = 1;
+}
 
 void client_connector::accept_requests() {
     //Create socket
@@ -118,7 +120,14 @@ void client_connector::queue_request(int client_sockfd) {
             message *received_message = receive(client_sockfd);
 
             //Set message source id
-            received_message->get_header()->set_source_id(client_sockfd);
+            received_message->get_header()->set_source_id(current_request_id_);
+
+            //Populate maps
+            (*request_map_)[current_request_id_].push_back(client_sockfd);
+            if(received_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
+                (*request_map_)[current_request_id_].push_back(n_server_);
+            }
+            current_request_id_++;
 
             //Increase write_counter
             write_count_mutex_->lock();
@@ -135,7 +144,7 @@ void client_connector::queue_request(int client_sockfd) {
             //Decrease write_counter
             write_count_mutex_->lock();
             write_count_--;
-            if (write_count_==0)
+            if(write_count_ == 0)
                 read_mutex_->unlock();
             write_count_mutex_->unlock();
 
@@ -154,7 +163,7 @@ void client_connector::queue_request(int client_sockfd) {
 
 server_connector::server_connector() {};
 
-server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<int, unsigned int> *upload_counter_map) : server_address_(server_address), upload_counter_map_(upload_counter_map) {
+server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map) : server_address_(server_address), request_map_(request_map) {
     server_load_ = 0;
     send_request_mutex_ = new std::mutex();
     receive_response_mutex_ = new std::mutex();
@@ -175,7 +184,7 @@ void server_connector::set_server_load(unsigned int server_load) {
     server_load_ = server_load;
 }
 
-void server_connector::send_request_and_receive_response(const message *client_message) {
+void server_connector::send_request_and_receive_response(message *client_message) {
     //Send request to server
     send_request_mutex_->lock();
     send(server_sockfd_, client_message);
@@ -191,40 +200,59 @@ void server_connector::send_request_and_receive_response(const message *client_m
 
     //Get response message type and source id
     message_type response_message_type = response->get_header()->get_message_type();
-    int response_source_id = response->get_header()->get_source_id();
+    int response_id = response->get_header()->get_source_id();
 
+    //Manage response
     if(response_message_type == message_type::UPLOAD_IMAGE) {
-        unsigned int remaining_uploads = upload_counter_map_->at(response_source_id);
+        unsigned int remaining_uploads = (*request_map_)[response_id][1];
         if(remaining_uploads == 1) {
-            //Only the last server which has received an upload response must send response
-            send_response(response_source_id, response);
+            //Only the last server connector which has received an upload response must send response
+            send_response(response);
 
-            //Delete request
-            delete client_message;
+            if(request_message_type == message_type::UPLOAD_IMAGE) {
+                //Delete request
+                delete client_message;
+            }
+
+            std::lock_guard<std::mutex> lock(write_mutex_);
+
+            //Delete entry in request map
+            request_map_->erase(response_id);
         }
         else {
             std::lock_guard<std::mutex> lock(write_mutex_);
-            upload_counter_map_->at(response_source_id)--;
+            (*request_map_)[response_id][1]--;
         }
     }
     else {
-        send_response(response_source_id, response);
-        if(request_message_type != message_type::UPLOAD_IMAGE || upload_counter_map_->at(response_source_id) == 1) {
+        //Every server connector can send response
+        send_response(response);
+
+        if(request_message_type != message_type::UPLOAD_IMAGE || (*request_map_)[response_id][1] == 1) {
             //Delete request
             delete client_message;
+
+            std::lock_guard<std::mutex> lock(write_mutex_);
+
+            //Delete entry in request map
+            request_map_->erase(response_id);
         }
     }
     //Decrement server load
     server_load_--;
 }
 
-void server_connector::send_response(int sockfd, const message *response) {
+void server_connector::send_response(message *response) {
+    //Get client sockfd
+    uint32_t request_id = response->get_header()->get_source_id();
+    int client_sockfd = (*request_map_)[request_id][0];
+
     //Send response to client
-    send(sockfd, response);
+    send(client_sockfd, response);
 
     std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
     std::cout << *OUTPUT_IDENTIFIER << *response->get_header() << std::endl;
 
-    //Delete request and response
+    //Delete response
     delete response;
 }
