@@ -48,7 +48,7 @@ storage_manager::~storage_manager() {
 void storage_manager::upload_request() {
 
 #ifdef TESTING
-    int waiting_time = random_generator(30, 90);
+    int waiting_time = random_generator(10, 30);
     std::cout << *OUTPUT_IDENTIFIER << "Sleeping for " << waiting_time << " seconds..." << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(waiting_time));
 #endif
@@ -87,7 +87,7 @@ void storage_manager::upload_request() {
             *last_image_id_read_ = true;
         }
 
-        unsigned int image_id = current_request_->get_header()->get_source_id() + *last_image_id_;
+        unsigned int image_id = current_request_->get_header()->get_request_id() + *last_image_id_ + 1;
 
         //Get thumb and image format
         Magick::Image thumb(Magick::Blob(image_file->data(), image_file->size()));

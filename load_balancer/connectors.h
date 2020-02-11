@@ -14,6 +14,12 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
 void send(int sockfd, const message *msg);
 message *receive(int sockfd);
 
+enum map_values : int {
+    CLIENT_SOCKFD = 0,
+    UPLOAD_REQUEST_COUNTER = 1,
+    UPLOAD_RESPONSE_COUNTER = 2
+};
+
 class client_connector {
     private:
         uint32_t current_request_id_;
@@ -34,14 +40,14 @@ class server_connector {
         struct sockaddr_in *server_address_;
         unsigned int server_load_;
         std::unordered_map<uint32_t, std::vector<int>> *request_map_;
-        std::mutex *send_request_mutex_, *receive_response_mutex_;
-        inline static std::mutex write_mutex_ = std::mutex();
+        std::mutex *send_request_mutex_, *receive_response_mutex_, *server_load_mutex_;
+        inline static std::mutex request_map_mutex_ = std::mutex();
     public:
         server_connector();
         server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map);
         unsigned int get_server_load() const;
         void set_server_load(unsigned int server_load);
-        void send_request_and_receive_response(message *client_message);
+        void serve_request(message *client_message);
         void send_response(message *response);
 };
 

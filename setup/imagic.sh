@@ -70,7 +70,7 @@ do
 done
 
 echo "Starting load balancer..."
-#./load_balancer/build/imagic_lb &
+./load_balancer/build/imagic_lb &
 
 echo "Waiting for load balancer to be ready..."
 sleep 2
