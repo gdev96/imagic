@@ -19,7 +19,7 @@ echo "Compiling load balancer..."
 cmake -S load_balancer -B load_balancer/build
 make -C load_balancer/build
 
-# export environment variables
+# Export environment variables
 set -a
 
 . ./setup/imagic.env
@@ -32,10 +32,10 @@ done
 
 SERVER_ID=0
 
-# avoid exporting other environment variables
+# Avoid exporting other environment variables
 set +a
 
-#get number of active load balancers (name is truncated to 15 characters)
+# Get number of active load balancers (name is truncated to 15 characters)
 if pgrep -x 'imagic_lb' > /dev/null
 then
     echo "$(pgrep -c -x 'imagic_lb') active load balancers found!"
@@ -43,7 +43,7 @@ then
     pkill 'imagic_lb'
 fi
 
-# get number of active servers
+# Get number of active servers
 if pgrep -x 'imagic_srv' > /dev/null
 then
     echo "$(pgrep -c -x 'imagic_srv') active servers found!"
@@ -55,7 +55,7 @@ echo "Starting $N_SERVER servers..."
 
 while [ $SERVER_ID -lt $N_SERVER ]
 do
-    # source SQL statements
+    # Source SQL statements
     . ./setup/imagic.sql
 
     echo "Creating database for server $SERVER_ID..."
@@ -95,5 +95,5 @@ do
     sleep 1
 done
 
-# wait for processes termination
+# Wait for processes termination
 wait
