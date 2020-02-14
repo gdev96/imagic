@@ -1,5 +1,5 @@
-#ifndef IMAGIC_BACKEND_MESSAGE_H
-#define IMAGIC_BACKEND_MESSAGE_H
+#ifndef LOAD_BALANCER_MESSAGE_H
+#define LOAD_BALANCER_MESSAGE_H
 
 #include <cstdint>
 #include <ostream>
@@ -37,4 +37,4 @@ class message {
         unsigned char *get_payload() const;
 };
 
-#endif //IMAGIC_BACKEND_MESSAGE_H
+#endif //LOAD_BALANCER_MESSAGE_H

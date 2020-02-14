@@ -1,5 +1,5 @@
-#ifndef IMAGIC_BACKEND_LOADBALANCER_H
-#define IMAGIC_BACKEND_LOADBALANCER_H
+#ifndef LOAD_BALANCER_H
+#define LOAD_BALANCER_H
 
 #include <mutex>
 #include <queue>
@@ -19,7 +19,6 @@ class load_balancer {
         server_connector *server_connectors_;
         struct sockaddr_in *server_addresses_;
         std::mutex read_mutex_, write_mutex_, write_count_mutex_;
-
     public:
         load_balancer();
         void initialize_server_addresses();
@@ -29,4 +28,4 @@ class load_balancer {
         void manage_request(message *client_message);
 };
 
-#endif //IMAGIC_BACKEND_LOADBALANCER_H
+#endif //LOAD_BALANCER_H

@@ -18,7 +18,6 @@ class load_balancer_connector {
         bool last_image_id_read_;
         message *current_message_;
         std::mutex *send_response_mutex_;
-
     public:
         load_balancer_connector();
         load_balancer_connector(const char *address, int port, unsigned int server_id);

@@ -1,5 +1,5 @@
-#ifndef IMAGIC_BACKEND_CONNECTORS_H
-#define IMAGIC_BACKEND_CONNECTORS_H
+#ifndef LOAD_BALANCER_CONNECTORS_H
+#define LOAD_BALANCER_CONNECTORS_H
 
 #include <cstdint>
 #include <mutex>
@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include "message.h"
 
-u_int32_t min(uint32_t a, uint32_t b);
+uint32_t min(uint32_t a, uint32_t b);
 void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
 void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
 void send(int sockfd, const message *msg);
@@ -51,4 +51,4 @@ class server_connector {
         void send_response(message *response);
 };
 
-#endif //IMAGIC_BACKEND_CONNECTORS_H
+#endif //LOAD_BALANCER_CONNECTORS_H

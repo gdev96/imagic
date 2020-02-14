@@ -1,5 +1,5 @@
-#ifndef SERVER_SERVER_H
-#define SERVER_SERVER_H
+#ifndef SERVER_H
+#define SERVER_H
 
 #include "load_balancer_connector.h"
 
@@ -12,4 +12,4 @@ class server {
         void receive_requests();
 };
 
-#endif //SERVER_SERVER_H
+#endif //SERVER_H

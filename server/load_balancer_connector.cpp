@@ -8,8 +8,8 @@
 #include "message.h"
 #include "load_balancer_connector.h"
 
-uint32_t min(uint32_t a, uint32_t b) {
-    return (a<b)?a:b;
+inline uint32_t min(uint32_t a, uint32_t b) {
+    return a<b ? a : b;
 }
 
 void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
@@ -142,11 +142,10 @@ void load_balancer_connector::manage_request(int lb_sockfd, message *client_mess
             storage_manager_instance.download_image();
             break;
     }
-    //Lock send response
-    std::lock_guard<std::mutex> lock(*send_response_mutex_);
-
     //Send response
+    send_response_mutex_->lock();
     send(lb_sockfd, client_message);
+    send_response_mutex_->unlock();
 
     std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
     std::cout << *OUTPUT_IDENTIFIER << *client_message->get_header() << std::endl;
