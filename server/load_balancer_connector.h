@@ -5,7 +5,9 @@
 #include <netinet/in.h>
 #include "storage_manager.h"
 
-uint32_t min(uint32_t a, uint32_t b);
+inline uint32_t min(uint32_t a, uint32_t b) {
+    return a<b ? a : b;
+}
 void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
 void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
 void send(int sockfd, const message *msg);
