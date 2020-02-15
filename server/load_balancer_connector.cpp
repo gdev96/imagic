@@ -75,15 +75,19 @@ message *receive(int sockfd) {
     unsigned char payload_buffer[payload_length];
     read_bytes(sockfd, payload_buffer, payload_length);
 
+    payload *message_payload;
+
     //Deserialize request payload
-    auto message_payload = new payload();
-    message_type msg_type = message_header->get_message_type();
-    message_payload->deserialize(payload_buffer, payload_length, msg_type);
+    if(message_header->get_message_type() == message_type::UPLOAD_IMAGE) {
+        message_payload = new image_payload();
+    }
+    else {
+        message_payload = new string_payload();
+    }
+    message_payload->deserialize(payload_buffer, payload_length);
 
     return new message(message_header, message_payload);
 }
-
-load_balancer_connector::load_balancer_connector() {};
 
 load_balancer_connector::load_balancer_connector(const char *address, int port, unsigned int server_id) : server_id_(server_id) {
     server_address_.sin_family = AF_INET;
@@ -125,7 +129,7 @@ void load_balancer_connector::receive_requests() {
 }
 
 void load_balancer_connector::manage_request(int lb_sockfd, message *client_message){
-    //Manage request
+    //Serve request
     storage_manager storage_manager_instance(client_message, server_id_, &last_image_id_, &last_image_id_read_);
     switch(client_message->get_header()->get_message_type()) {
         case message_type::UPLOAD_IMAGE:
@@ -136,7 +140,6 @@ void load_balancer_connector::manage_request(int lb_sockfd, message *client_mess
             break;
         case message_type::DOWNLOAD_IMAGE:
             storage_manager_instance.download_image();
-            break;
     }
     //Send response
     send_response_mutex_->lock();

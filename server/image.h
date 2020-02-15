@@ -5,13 +5,12 @@
 #include <vector>
 
 class image {
-    private:
-        std::vector<unsigned char> *file_;
-        std::string *category_;
-    public:
-        image(std::vector<unsigned char> *image_file, std::string *category);
-        std::vector<unsigned char> *get_file() const;
-        std::string *get_category() const;
+    std::vector<unsigned char> *file_;
+    std::string *category_;
+public:
+    image(std::vector<unsigned char> *file, std::string *category) : file_(file), category_(category) {};
+    std::vector<unsigned char> *get_file() const { return file_; };
+    std::string *get_category() const { return category_; };
 };
 
 #endif //SERVER_IMAGE_H

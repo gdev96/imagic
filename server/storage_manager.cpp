@@ -54,9 +54,9 @@ void storage_manager::upload_request() {
 #endif
 
     //Get image and its content from message
-    image *image = std::get<0>(current_request_->get_payload()->get_content());
-    std::vector<unsigned char> *image_file = image->get_file();
-    std::string *category = image->get_category();
+    image *img = (image *)current_request_->get_payload()->get_content();
+    std::vector<unsigned char> *image_file = img->get_file();
+    std::string *category = img->get_category();
 
     std::string image_hash = std::to_string(std::hash<std::string>{}(std::string(image_file->begin(), image_file->end())));
 
@@ -122,8 +122,11 @@ void storage_manager::upload_request() {
     //Set payload length in message header
     current_request_->get_header()->set_payload_length(response->length());
 
+    //Delete old payload
+    delete current_request_->get_payload();
+
     //Set new payload
-    current_request_->get_payload()->set_content(response);
+    current_request_->set_payload(new string_payload(response));
 
 #ifdef TESTING
     std::cout << *OUTPUT_IDENTIFIER << "Image upload finished" << std::endl;
@@ -140,7 +143,7 @@ void storage_manager::view_thumbs() {
 #endif
 
     //Get thumb_path from message
-    std::string *category = std::get<1>(current_request_->get_payload()->get_content());
+    std::string *category = (std::string *)current_request_->get_payload()->get_content();
 
     //Create thumbs map
     auto thumbs_map = new std::map<std::vector<unsigned char>, std::string>;
@@ -180,8 +183,11 @@ void storage_manager::view_thumbs() {
     //Set payload length in message header
     current_request_->get_header()->set_payload_length(payload_length);
 
+    //Delete old payload
+    delete current_request_->get_payload();
+
     //Set new payload
-    current_request_->get_payload()->set_content(thumbs_map);
+    current_request_->set_payload(new thumbs_payload(thumbs_map));
 
 #ifdef TESTING
     std::cout << *OUTPUT_IDENTIFIER << "Image thumbs retrieval finished" << std::endl;
@@ -198,7 +204,7 @@ void storage_manager::download_image() {
 #endif
 
     //Get thumb_path from message
-    std::string *thumb_file_name = std::get<1>(current_request_->get_payload()->get_content());
+    std::string *thumb_file_name = (std::string *)current_request_->get_payload()->get_content();
 
     //Create query to get the image_path from thumb_path
     mysqlx::RowResult rows = current_table_
@@ -226,8 +232,11 @@ void storage_manager::download_image() {
     //Set payload length in message header
     current_request_->get_header()->set_payload_length(image_size);
 
+    //Delete old payload
+    delete current_request_->get_payload();
+
     //Set new payload
-    current_request_->get_payload()->set_content(image_file);
+    current_request_->set_payload(new byte_payload(image_file));
 
 #ifdef TESTING
     std::cout << *OUTPUT_IDENTIFIER << "Image download finished" << std::endl;

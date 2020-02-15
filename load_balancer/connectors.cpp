@@ -161,8 +161,6 @@ void client_connector::queue_request(int client_sockfd) {
 
 //Server connector
 
-server_connector::server_connector() {};
-
 server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map) : server_address_(server_address), request_map_(request_map) {
     server_load_ = 0;
     send_request_mutex_ = new std::mutex();
@@ -175,14 +173,6 @@ server_connector::server_connector(sockaddr_in *server_address, std::unordered_m
     if(connect(server_sockfd_, (struct sockaddr *)server_address_, len) == -1) {
         throw std::runtime_error("Socket connection refused");
     }
-}
-
-unsigned int server_connector::get_server_load() const {
-    return server_load_;
-}
-
-void server_connector::set_server_load(unsigned int server_load) {
-    server_load_ = server_load;
 }
 
 void server_connector::serve_request(message *client_message) {
@@ -210,7 +200,6 @@ void server_connector::serve_request(message *client_message) {
     else {
         delete client_message;
     }
-
     //Receive response from server
     receive_response_mutex_->lock();
     message *response = receive(server_sockfd_);

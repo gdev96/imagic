@@ -18,7 +18,7 @@ class LoadBalancerConnector:
             bytes_sent = self.sock.send(message[offset:])
             if bytes_sent == 0:
                 self.sock.close()
-                raise RuntimeError("socket connection broken")
+                raise RuntimeError("Socket connection broken")
             offset += bytes_sent
 
     def receive_bytes(self, message_length):
@@ -28,7 +28,7 @@ class LoadBalancerConnector:
             chunk = self.sock.recv(min(message_length - bytes_received, CHUNK_SIZE))
             if chunk == b'':
                 self.sock.close()
-                raise RuntimeError("socket connection closed")
+                raise RuntimeError("Socket connection closed")
             chunks.append(chunk)
             bytes_received += len(chunk)
         return b''.join(chunks)

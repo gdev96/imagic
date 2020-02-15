@@ -2,12 +2,8 @@
 #define SERVER_MESSAGE_H
 
 #include <cstdint>
-#include <map>
 #include <ostream>
-#include <string>
-#include <variant>
-#include <vector>
-#include "image.h"
+#include "payload.h"
 
 enum class message_type : unsigned char {
     UPLOAD_IMAGE = 0,
@@ -16,41 +12,30 @@ enum class message_type : unsigned char {
 };
 
 class header {
-    private:
-        message_type message_type_;
-        uint32_t request_id_;
-        uint32_t payload_length_;
-    public:
-        header();
-        message_type get_message_type() const;
-        uint32_t get_request_id() const;
-        uint32_t get_payload_length() const;
-        void set_payload_length(uint32_t payload_length);
-        void serialize(unsigned char *buffer);
-        void deserialize(unsigned char *buffer);
-        friend std::ostream &operator<<(std::ostream &os, const header &header);
-};
-
-class payload {
-    private:
-        std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> content_;
-    public:
-        const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &get_content() const;
-        void set_content(const std::variant<image *, std::string *, std::vector<unsigned char> *, std::map<std::vector<unsigned char>, std::string> *> &content);
-        void serialize(unsigned char *buffer);
-        void deserialize(unsigned char *buffer, uint32_t buffer_size, message_type msg_type);
+    message_type message_type_;
+    uint32_t request_id_;
+    uint32_t payload_length_;
+public:
+    header() {};
+    message_type get_message_type() const { return message_type_; };
+    uint32_t get_request_id() const { return request_id_; };
+    uint32_t get_payload_length() const { return payload_length_; };
+    void set_payload_length(uint32_t payload_length) { payload_length_ = payload_length; };
+    void serialize(unsigned char *buffer);
+    void deserialize(unsigned char *buffer);
+    friend std::ostream &operator<<(std::ostream &os, const header &header);
 };
 
 class message {
-    private:
-        header *header_;
-        payload *payload_;
-    public:
-        message();
-        message(header *header, payload *payload);
-        ~message();
-        header *get_header() const;
-        payload *get_payload() const;
+    header *header_;
+    payload *payload_;
+public:
+    message() {};
+    message(header *header, payload *payload) : header_(header), payload_(payload) {};
+    ~message();
+    header *get_header() const { return header_; };
+    payload *get_payload() const { return payload_; };
+    void set_payload(payload *payload) { payload_ = payload; }
 };
 
 #endif //SERVER_MESSAGE_H

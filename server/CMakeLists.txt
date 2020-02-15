@@ -21,7 +21,6 @@ endif(TESTING_MACRO)
 
 add_executable(imagic_srv
         constants.h
-        image.cpp
         image.h
         load_balancer_connector.cpp
         load_balancer_connector.h
@@ -31,6 +30,6 @@ add_executable(imagic_srv
         server.cpp
         server.h
         storage_manager.cpp
-        storage_manager.h)
+        storage_manager.h payload.cpp payload.h)
 
 target_link_libraries(imagic_srv ${PROJECT_LINK_LIBS})

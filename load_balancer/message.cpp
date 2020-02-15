@@ -1,24 +1,6 @@
 #include <netinet/in.h>
 #include "message.h"
 
-header::header() {}
-
-message_type header::get_message_type() const {
-    return message_type_;
-}
-
-uint32_t header::get_request_id() const {
-    return request_id_;
-}
-
-uint32_t header::get_payload_length() const {
-    return payload_length_;
-}
-
-void header::set_request_id(uint32_t request_id) {
-    request_id_ = request_id;
-}
-
 void header::serialize(unsigned char *buffer) {
     *buffer++ = (unsigned char)message_type_;
     auto *int_buffer = (uint32_t *)buffer;
@@ -38,17 +20,7 @@ std::ostream &operator<<(std::ostream &os, const header &header) {
     return os;
 }
 
-message::message(header *header, unsigned char *payload) : header_(header), payload_(payload) {}
-
 message::~message() {
     delete header_;
     delete[] payload_;
-}
-
-header *message::get_header() const {
-    return header_;
-}
-
-unsigned char *message::get_payload() const {
-    return payload_;
 }
