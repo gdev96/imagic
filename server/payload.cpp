@@ -3,7 +3,7 @@
 
 void string_payload::serialize(unsigned char *buffer) {
     //Populate buffer with the string
-    content_->copy((char *)buffer, content_->length());
+    std::copy(content_->begin(), content_->end(), buffer);
 }
 
 void string_payload::deserialize(unsigned char *buffer, uint32_t buffer_size) {
@@ -42,7 +42,7 @@ void thumbs_payload::serialize(unsigned char *buffer) {
     uint32_t next_length;
 
     //Iterate over map
-    for(const auto& [key, value] : *content_) {
+    for(const auto &[key, value] : *content_) {
         //Copy thumb file size and thumb file
         int_buffer = (uint32_t *)buffer;
         next_length = key.size();

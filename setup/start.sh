@@ -83,8 +83,6 @@ done
 
 echo "Executing $N_CLIENT clients..."
 
-#pip3 install -r client/requirements.txt
-
 CLIENT_ID=0
 
 while [ $CLIENT_ID -lt $N_CLIENT ]

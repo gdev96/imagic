@@ -94,13 +94,13 @@ void client_connector::accept_requests() {
 
     //Connection with client
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    bind(server_sockfd, (struct sockaddr *) &server_address, server_length);
+    bind(server_sockfd, (struct sockaddr *)&server_address, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
     std::cout << *OUTPUT_IDENTIFIER << "Waiting for connections from client..." << std::endl;
 
     while (true) {
         socklen_t client_length = sizeof(client_address);
-        int client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_length);
+        int client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_length);
 
         std::thread t(&client_connector::queue_request, this, client_sockfd);
         t.detach();
@@ -152,7 +152,7 @@ void client_connector::queue_request(int client_sockfd) {
             std::cout << *OUTPUT_IDENTIFIER << *received_message->get_header() << std::endl;
         }
     }
-    catch (const std::runtime_error& e) {
+    catch (const std::runtime_error &e) {
         close(client_sockfd);
         std::cout << *OUTPUT_IDENTIFIER << e.what() << std::endl;
         return;

@@ -43,6 +43,7 @@ storage_manager::storage_manager(message *current_request, unsigned int server_i
 storage_manager::~storage_manager() {
     db_session_->close();
     delete db_session_;
+    delete current_table_;
 }
 
 void storage_manager::upload_request() {
@@ -100,7 +101,7 @@ void storage_manager::upload_request() {
         //Save image file to disk
         std::string image_file_name = std::to_string(image_id) + "." + image_format;
         std::ofstream output_image_file("./" + server_images_dir + "/" + image_file_name, std::ios::binary);
-        output_image_file.write((const char*)image_file->data(), image_file->size());
+        output_image_file.write((const char *)image_file->data(), image_file->size());
         output_image_file.close();
         std::cout << *OUTPUT_IDENTIFIER << "Image '" + image_file_name << "' saved" << std::endl;
 

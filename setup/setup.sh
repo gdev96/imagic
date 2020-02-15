@@ -57,9 +57,9 @@ sudo make install
 cd ..
 
 echo "Downloading Image Magick..."
-curl https://imagemagick.org/download/ImageMagick.tar.gz | tar xz
+curl https://imagemagick.org/download/releases/ImageMagick-7.0.9-23.tar.gz | tar xz
 
-cd ImageMagick-*
+cd ImageMagick-7.0.9-23
 
 echo "Configuring Image Magick..."
 ./configure
@@ -70,4 +70,7 @@ make
 echo "Installing Image Magick..."
 sudo make install
 
-cd ..
+cd ../..
+
+echo "Installing PyQt5..."
+pip3 install -r client/requirements.txt

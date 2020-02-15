@@ -28,7 +28,7 @@ class LoadBalancerConnector:
             chunk = self.sock.recv(min(message_length - bytes_received, CHUNK_SIZE))
             if chunk == b'':
                 self.sock.close()
-                raise RuntimeError("Socket connection closed")
+                raise RuntimeError("Socket connection broken")
             chunks.append(chunk)
             bytes_received += len(chunk)
         return b''.join(chunks)

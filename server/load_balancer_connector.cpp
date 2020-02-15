@@ -105,7 +105,7 @@ void load_balancer_connector::receive_requests() {
 
     //Connection with load balancer
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    bind(server_sockfd, (struct sockaddr *) &server_address_, server_length);
+    bind(server_sockfd, (struct sockaddr *)&server_address_, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
     std::cout << *OUTPUT_IDENTIFIER << "Waiting for connections from load balancer..." << std::endl;
 
