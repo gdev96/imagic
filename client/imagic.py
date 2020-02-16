@@ -20,9 +20,7 @@ class Imagic:
 
     def upload_image(self):
         received_payload = self.message_handler.send_message(MessageType.UPLOAD_IMAGE, self.current_image)[1]
-        if received_payload == "Uploaded":
-            return True
-        return False
+        return received_payload
 
     def find_thumbs(self, category):
         received_payload = self.message_handler.send_message(MessageType.FIND_THUMBS, category)[1]

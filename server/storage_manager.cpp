@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <functional>
@@ -69,10 +70,10 @@ void storage_manager::upload_request() {
             .bind("hash", (mysqlx::string)image_hash)
             .execute();
 
-    std::string *response;
+    unsigned char response;
 
     if(duplicates.count() > 0) {
-        response = new std::string("Upload failed");
+        response = DUPLICATE;
     }
     else {
         if(!*last_image_id_read_) {
@@ -90,44 +91,54 @@ void storage_manager::upload_request() {
 
         unsigned int image_id = current_request_->get_header()->get_request_id() + *last_image_id_ + 1;
 
-        //Get thumb and image format
-        Magick::Image thumb(Magick::Blob(image_file->data(), image_file->size()));
-        std::string image_format = thumb.magick();
-        std::transform(image_format.begin(), image_format.end(), image_format.begin(), ::tolower);
+        try {
+            //Get thumb and image format
+            Magick::Image thumb(Magick::Blob(image_file->data(), image_file->size()));
+            std::string image_format = thumb.magick();
 
-        //Get images dir
-        std::string server_images_dir = std::getenv("IMAGES_DIR") + std::to_string(server_id_);
+            std::transform(image_format.begin(), image_format.end(), image_format.begin(), ::tolower);
 
-        //Save image file to disk
-        std::string image_file_name = std::to_string(image_id) + "." + image_format;
-        std::ofstream output_image_file("./" + server_images_dir + "/" + image_file_name, std::ios::binary);
-        output_image_file.write((const char *)image_file->data(), image_file->size());
-        output_image_file.close();
-        std::cout << *OUTPUT_IDENTIFIER << "Image '" + image_file_name << "' saved" << std::endl;
+            //Replace image format with more popular formats
+            if(image_format == "jpeg") {
+                image_format = "jpg";
+            }
+            //Get images dir
+            std::string server_images_dir = std::getenv("IMAGES_DIR") + std::to_string(server_id_);
 
-        //Save thumb file to disk
-        std::string thumb_file_name = std::to_string(image_id) + "_thumb." + image_format;
-        thumb.resize(std::getenv("THUMB_SIZE"));
-        thumb.write("./" + server_images_dir + "/" + thumb_file_name);
-        std::cout << *OUTPUT_IDENTIFIER << "Thumb '" + thumb_file_name << "' saved" << std::endl;
+            //Save image file to disk
+            std::string image_file_name = std::to_string(image_id) + "." + image_format;
+            std::ofstream output_image_file("./" + server_images_dir + "/" + image_file_name, std::ios::binary);
+            output_image_file.write((const char *) image_file->data(), image_file->size());
+            output_image_file.close();
+            std::cout << *OUTPUT_IDENTIFIER << "Image '" + image_file_name << "' saved" << std::endl;
 
-        //Create query to insert path and category in DB
-        mysqlx::Result result = current_table_
-                ->insert("id", "hash", "file_name", "thumb_file_name", "category")
-                .values(image_id, (mysqlx::string)image_hash, (mysqlx::string)image_file_name, (mysqlx::string)thumb_file_name, (mysqlx::string)*category)
-                .execute();
-        std::cout << *OUTPUT_IDENTIFIER << "Image added to database" << std::endl;
+            //Save thumb file to disk
+            std::string thumb_file_name = std::to_string(image_id) + "_thumb." + image_format;
+            thumb.resize(std::getenv("THUMB_SIZE"));
+            thumb.write("./" + server_images_dir + "/" + thumb_file_name);
+            std::cout << *OUTPUT_IDENTIFIER << "Thumb '" + thumb_file_name << "' saved" << std::endl;
 
-        response = new std::string("Uploaded");
+            //Create query to insert path and category in DB
+            mysqlx::Result result = current_table_
+                    ->insert("id", "hash", "file_name", "thumb_file_name", "category")
+                    .values(image_id, (mysqlx::string) image_hash, (mysqlx::string) image_file_name, (mysqlx::string) thumb_file_name, (mysqlx::string) *category)
+                    .execute();
+            std::cout << *OUTPUT_IDENTIFIER << "Image added to database" << std::endl;
+
+            response = UPLOADED;
+        } catch(const Magick::ErrorMissingDelegate &e) {
+            //No valid image format found
+            response = INVALID;
+        }
     }
     //Set payload length in message header
-    current_request_->get_header()->set_payload_length(response->length());
+    current_request_->get_header()->set_payload_length(1);
 
     //Delete old payload
     delete current_request_->get_payload();
 
     //Set new payload
-    current_request_->set_payload(new string_payload(response));
+    current_request_->set_payload(new byte_payload(new std::vector<unsigned char> {response}));
 
 #ifdef TESTING
     std::cout << *OUTPUT_IDENTIFIER << "Image upload finished" << std::endl;

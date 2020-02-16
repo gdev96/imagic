@@ -151,8 +151,7 @@ void client_connector::queue_request(int client_sockfd) {
             std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
             std::cout << *OUTPUT_IDENTIFIER << *received_message->get_header() << std::endl;
         }
-    }
-    catch (const std::runtime_error &e) {
+    } catch(const std::runtime_error &e) {
         close(client_sockfd);
         std::cout << *OUTPUT_IDENTIFIER << e.what() << std::endl;
         return;

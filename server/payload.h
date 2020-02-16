@@ -18,10 +18,8 @@ public:
 class string_payload : public payload {
     std::string *content_;
 public:
-    string_payload() {}
-    string_payload(std::string *content) : content_(content) {}
     void *get_content() const override { return content_; }
-    void serialize(unsigned char *buffer) override;
+    void serialize(unsigned char *buffer) override {};
     void deserialize(unsigned char *buffer, uint32_t buffer_size) override;
 };
 

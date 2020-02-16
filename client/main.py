@@ -2,6 +2,7 @@ from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 from constants import CATEGORIES
 from imagic import Imagic
+from message import UploadStatus
 
 
 class ClickableQLabel(QtWidgets.QLabel):
@@ -210,13 +211,18 @@ class Ui_MainWindow(object):
 
     def uploadimage_onclick(self):
         imagic.select_category(self.uploadcombobox.currentText())
-        result = imagic.upload_image()
-        if result is True:
-            response = "Image successfully uploaded"
+        result = UploadStatus(imagic.upload_image())
+        if result == UploadStatus.UPLOADED:
             icon = QtWidgets.QMessageBox.Information
+            response = "Image successfully uploaded"
         else:
-            response = "Image already exists in this category"
             icon = QtWidgets.QMessageBox.Warning
+            if result == UploadStatus.DUPLICATE:
+                response = "Image already exists in this category"
+            elif result == UploadStatus.INVALID:
+                response = "Image cannot be decoded"
+            else:
+                response = "Error while uploading image"
         dialog = QtWidgets.QMessageBox(self.mainpage)
         dialog.setIcon(icon)
         dialog.setWindowTitle("Upload result")

@@ -79,7 +79,8 @@ class MessageHandler:
         received_message_type = MessageType(message_type)
 
         if received_message_type == MessageType.UPLOAD_IMAGE:
-            return self.current_message.header, self.current_message.payload.decode("raw_unicode_escape")
+            response_status = struct.unpack_from('!B', self.current_message.payload)[0]
+            return self.current_message.header, response_status
         if received_message_type == MessageType.FIND_THUMBS:
             thumbs_dict = dict()
             offset = 0

@@ -1,11 +1,6 @@
 #include <netinet/in.h>
 #include "payload.h"
 
-void string_payload::serialize(unsigned char *buffer) {
-    //Populate buffer with the string
-    std::copy(content_->begin(), content_->end(), buffer);
-}
-
 void string_payload::deserialize(unsigned char *buffer, uint32_t buffer_size) {
     //Get string from buffer
     content_ = new std::string((char *)buffer, buffer_size);
