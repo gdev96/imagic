@@ -1,11 +1,8 @@
-#include <algorithm>
 #include <cstdlib>
 #include <fstream>
-#include <functional>
 #include <iostream>
 #include <map>
 #include <random>
-#include <thread>
 #include <vector>
 #include "constants.h"
 #include "image.h"
@@ -20,7 +17,10 @@
     }
 #endif
 
-storage_manager::storage_manager(message *current_request, unsigned int server_id, unsigned int *last_image_id, bool *last_image_id_read) : current_request_(current_request), server_id_(server_id), last_image_id_(last_image_id), last_image_id_read_(last_image_id_read) {
+bool storage_manager::last_image_id_read_ = false;
+unsigned int storage_manager::last_image_id_ = 0;
+
+storage_manager::storage_manager(message *current_request, unsigned int server_id) : current_request_(current_request), server_id_(server_id) {
     std::string db_host(std::getenv("DB_HOST"));
     std::string db_user(std::getenv("DB_USER"));
     std::string db_password(std::getenv("DB_PASSWORD"));
@@ -76,7 +76,7 @@ void storage_manager::upload_request() {
         response = DUPLICATE;
     }
     else {
-        if(!*last_image_id_read_) {
+        if(!last_image_id_read_) {
             //Get last id from DB
             mysqlx::RowResult rows = current_table_
                     ->select("max(id)")
@@ -84,12 +84,13 @@ void storage_manager::upload_request() {
 
             mysqlx::Row row = rows.fetchOne();
 
-            *last_image_id_ = row[0].isNull() ? 0 : (unsigned int)row[0];
-
-            *last_image_id_read_ = true;
+            if(!row[0].isNull()) {
+                last_image_id_ = (unsigned int)row[0];
+            }
+            last_image_id_read_ = true;
         }
 
-        unsigned int image_id = current_request_->get_header()->get_request_id() + *last_image_id_ + 1;
+        unsigned int image_id = current_request_->get_header()->get_request_id() + last_image_id_ + 1;
 
         try {
             //Get thumb and image format

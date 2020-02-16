@@ -3,11 +3,13 @@
 
 #include <mutex>
 #include <queue>
-#include <thread>
 #include <unordered_map>
 #include "connectors.h"
-#include "constants.h"
 #include "message.h"
+
+//Forward declarations
+class client_connector;
+class server_connector;
 
 class load_balancer {
     message *current_message_;
@@ -18,13 +20,14 @@ class load_balancer {
     server_connector *server_connectors_;
     struct sockaddr_in *server_addresses_;
     std::mutex read_mutex_, write_mutex_, write_count_mutex_;
-public:
-    load_balancer();
     void initialize_server_addresses();
     void initialize_connectors();
     unsigned int balance();
-    void get_requests();
     void manage_request(message *client_message);
+public:
+    load_balancer();
+    void get_requests();
+    friend class client_connector;
 };
 
 #endif //LOAD_BALANCER_H

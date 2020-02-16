@@ -219,10 +219,8 @@ class Ui_MainWindow(object):
             icon = QtWidgets.QMessageBox.Warning
             if result == UploadStatus.DUPLICATE:
                 response = "Image already exists in this category"
-            elif result == UploadStatus.INVALID:
+            else:  # result == UploadStatus.INVALID:
                 response = "Image cannot be decoded"
-            else:
-                response = "Error while uploading image"
         dialog = QtWidgets.QMessageBox(self.mainpage)
         dialog.setIcon(icon)
         dialog.setWindowTitle("Upload result")

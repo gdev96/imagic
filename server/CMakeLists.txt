@@ -27,9 +27,11 @@ add_executable(imagic_srv
         main.cpp
         message.cpp
         message.h
+        payload.cpp
+        payload.h
         server.cpp
         server.h
         storage_manager.cpp
-        storage_manager.h payload.cpp payload.h)
+        storage_manager.h)
 
 target_link_libraries(imagic_srv ${PROJECT_LINK_LIBS})

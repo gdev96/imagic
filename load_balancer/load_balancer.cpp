@@ -1,6 +1,8 @@
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <iostream>
+#include <string>
+#include <thread>
 #include "constants.h"
 #include "load_balancer.h"
 
@@ -34,7 +36,7 @@ void load_balancer::initialize_server_addresses() {
 
 void load_balancer::initialize_connectors() {
     //Create client connector
-    client_connector_ = new client_connector(n_server_, &message_queue_, &request_map_, &read_mutex_, &write_mutex_, &write_count_mutex_);
+    client_connector_ = new client_connector(this);
     std::cout << *OUTPUT_IDENTIFIER << "Client connector created" << std::endl;
     std::thread t = std::thread(&client_connector::accept_requests, client_connector_);
     t.detach();

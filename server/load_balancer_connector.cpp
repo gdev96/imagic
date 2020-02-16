@@ -1,12 +1,11 @@
 #include <arpa/inet.h>
 #include <iostream>
-#include <netinet/in.h>
 #include <sys/socket.h>
 #include <thread>
 #include <unistd.h>
 #include "constants.h"
-#include "message.h"
 #include "load_balancer_connector.h"
+#include "storage_manager.h"
 
 void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     uint32_t offset = 0;
@@ -130,7 +129,7 @@ void load_balancer_connector::receive_requests() {
 
 void load_balancer_connector::manage_request(int lb_sockfd, message *client_message){
     //Serve request
-    storage_manager storage_manager_instance(client_message, server_id_, &last_image_id_, &last_image_id_read_);
+    storage_manager storage_manager_instance(client_message, server_id_);
     switch(client_message->get_header()->get_message_type()) {
         case message_type::UPLOAD_IMAGE:
             storage_manager_instance.upload_request();

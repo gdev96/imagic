@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include <sys/socket.h>
 #include <thread>
 #include <unistd.h>
@@ -76,9 +77,7 @@ message *receive(int sockfd) {
 
 //Client connector
 
-client_connector::client_connector(unsigned int n_server, std::queue<message *> *message_queue, std::unordered_map<uint32_t, std::vector<int>> *request_map, std::mutex *read_mutex, std::mutex *write_mutex, std::mutex *write_count_mutex) : n_server_(n_server), message_queue_(message_queue), request_map_(request_map), read_mutex_(read_mutex), write_mutex_(write_mutex), write_count_mutex_(write_count_mutex) {
-    current_request_id_ = 0;
-}
+unsigned int client_connector::write_count_ = 0;
 
 void client_connector::accept_requests() {
     //Create socket
@@ -119,34 +118,34 @@ void client_connector::queue_request(int client_sockfd) {
             received_message->get_header()->set_request_id(current_request_id_);
 
             //Populate maps
-            (*request_map_)[current_request_id_].push_back(client_sockfd);
+            load_balancer_->request_map_[current_request_id_].push_back(client_sockfd);
             if(received_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
                 //Push number of remaining upload request
-                (*request_map_)[current_request_id_].push_back(n_server_);
+                load_balancer_->request_map_[current_request_id_].push_back(load_balancer_->n_server_);
 
                 //Push number of remaining upload response
-                (*request_map_)[current_request_id_].push_back(n_server_);
+                load_balancer_->request_map_[current_request_id_].push_back(load_balancer_->n_server_);
             }
             current_request_id_++;
 
             //Increase write_counter
-            write_count_mutex_->lock();
+            load_balancer_->write_count_mutex_.lock();
             write_count_++;
-            write_count_mutex_->unlock();
+            load_balancer_->write_count_mutex_.unlock();
 
-            write_mutex_->lock();
+            load_balancer_->write_mutex_.lock();
 
             //Write operation
-            message_queue_->push(received_message);
+            load_balancer_->message_queue_.push(received_message);
 
-            write_mutex_->unlock();
+            load_balancer_->write_mutex_.unlock();
 
             //Decrease write_counter
-            write_count_mutex_->lock();
+            load_balancer_->write_count_mutex_.lock();
             write_count_--;
             if(write_count_ == 0)
-                read_mutex_->unlock();
-            write_count_mutex_->unlock();
+                load_balancer_->read_mutex_.unlock();
+            load_balancer_->write_count_mutex_.unlock();
 
             std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
             std::cout << *OUTPUT_IDENTIFIER << *received_message->get_header() << std::endl;
@@ -159,6 +158,8 @@ void client_connector::queue_request(int client_sockfd) {
 }
 
 //Server connector
+
+std::mutex server_connector::request_map_mutex_ = std::mutex();
 
 server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map) : server_address_(server_address), request_map_(request_map) {
     server_load_ = 0;
