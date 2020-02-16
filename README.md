@@ -52,6 +52,7 @@ You have to install CMake 3.15 (or higher) in order to build the load balancer a
 ##### 2. MySQL Server 8
 
 In order to create and connect to DB, server needs MySQL Community Server 8.
+
 Download it from:
 
 https://dev.mysql.com/downloads/mysql/
@@ -73,6 +74,7 @@ Be sure to download the development files required for building the application.
 ##### 3. Image Magick 7
 
 In order to create the image thumbnails, server needs Imagic Magick 7.
+
 Here are the instructions to download and install it.
 
 First, download JPEG delegate from:
