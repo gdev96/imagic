@@ -13,11 +13,13 @@ There are:
 
 <img width="600" src="https://github.com/gdev96/imagic/blob/master/resources/imagic_schema.svg">
 
+Every server has its own database which collects infos about images.
+
 ## Message format
 
 Messages exchanged by client and servers have the following fixed format:
 
-<img width="600" src="https://github.com/gdev96/imagic/blob/master/resources/message_format.svg">
+<img width="800" src="https://github.com/gdev96/imagic/blob/master/resources/message_format.svg">
 
 ## Setup
 
@@ -43,11 +45,11 @@ cd setup
 
 #### Prerequisites
 
-##### CMake
+##### 1. CMake 3.15 (or higher)
 
-You have to install CMake (version 3.15 or higher).
+You have to install CMake 3.15 (or higher) in order to build the load balancer and the server projects using the `CMakeLists.txt` files.
 
-##### MySQL
+##### 2. MySQL Server 8
 
 In order to create and connect to DB, download MySQL Community Server 8 from:
 
@@ -67,9 +69,9 @@ https://dev.mysql.com/doc/connector-cpp/8.0/en/connector-cpp-installation-binary
 
 Be sure to download the development files required for building the application.
 
-##### Image Magick
+##### 3. Image Magick 7
 
-In order to create the image thumbnails, you need to download and install Imagic Magick.
+In order to create the image thumbnails, you need to download and install Imagic Magick 7.
 
 First, download JPEG delegate from:
 
@@ -124,6 +126,16 @@ sudo make install
 For further details, see:
 
 https://imagemagick.org/script/download.php
+
+##### 4. PyQt5
+
+Finally, you have to install PyQt5 in order to start the client.
+
+Simply type from terminal:
+
+```
+pip3 install -r client/requirements.txt
+```
 
 #### Build problems
 
