@@ -19,7 +19,7 @@ Every server has its own database which collects infos about images.
 
 Messages exchanged by client and servers have the following fixed format:
 
-<img width="800" src="https://github.com/gdev96/imagic/blob/master/resources/message_format.svg">
+<img width="900" src="https://github.com/gdev96/imagic/blob/master/resources/message_format.svg">
 
 ## Setup
 
@@ -37,7 +37,9 @@ Just type in terminal:
 ```
 cd setup
 ./setup.sh
+
 ...
+
 ./start.sh
 ```
 
