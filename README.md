@@ -5,6 +5,7 @@ A platform for uploading and downloading images.
 ## Architecture
 
 The application architecture is client-server.
+
 There are:
 
 - one or more clients that make requests
@@ -13,7 +14,7 @@ There are:
 
 <img width="600" src="https://github.com/gdev96/imagic/blob/master/resources/imagic_schema.svg">
 
-Every server has its own database which collects infos about images.
+Every server has its own database which collects infos about images. To guarantee consistency upload requests are broadcasted, and each request has a unique identifier.
 
 ## Message format
 
@@ -25,7 +26,7 @@ Messages exchanged by client and servers have the following fixed format:
 
 There are two options to start the application, depending on the platform you are running.
 
-### Ubuntu 18.04
+### Ubuntu 18.04 (*recommended*)
 
 To run the application move to the `setup` directory, placed in the root of the project, and execute, in order:
 
@@ -79,7 +80,9 @@ In order to create the image thumbnails, server needs Imagic Magick 7.
 
 Here are the instructions to download and install it.
 
-First, download JPEG delegate from:
+To work with a specific image format you need to install the right delegate.
+
+For example, to work with JPEG images, download the following:
 
 http://www.imagemagick.org/download/delegates/jpegsrc.v9b.tar.gz
 
@@ -93,7 +96,7 @@ Next configure and compile ImageMagick:
 
 ```
 cd jpeg-9b
-./configure
+./configure --prefix=/usr
 make
 ```
 
@@ -119,7 +122,7 @@ Next configure and compile ImageMagick:
 
 ```
 cd ImageMagick-7.0.9-23
-./configure
+./configure --prefix=/usr
 make
 ```
 
@@ -137,11 +140,13 @@ https://imagemagick.org/script/download.php
 
 Finally, you have to install PyQt5 in order to start the client.
 
-Simply type from terminal:
+Simply type, from project root:
 
 ```
 pip3 install -r client/requirements.txt
 ```
+
+### Troubleshooting
 
 #### Build problems
 
@@ -153,3 +158,15 @@ If build fails, edit `CMakeLists.txt` file in server project and verify that:
 In particular, for MySQL you can see:
 
 https://dev.mysql.com/doc/connector-cpp/8.0/en/connector-cpp-apps-general-considerations.html
+
+#### MySQL authentication problems
+
+If databases creation fails, maybe you need to install the `auth_socket` plugin.
+
+Open a terminal and type:
+
+```
+mysql -u root -p
+INSTALL PLUGIN auth_socket SONAME 'auth_socket.so';
+UPDATE mysql.user SET plugin = 'auth_socket' WHERE User = 'root';
+```

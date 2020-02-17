@@ -46,7 +46,7 @@ curl http://www.imagemagick.org/download/delegates/jpegsrc.v9b.tar.gz | tar xz
 cd jpeg-9b
 
 echo "Configuring JPEG delegate..."
-./configure
+./configure --prefix=/usr
 
 echo "Compiling JPEG delegate..."
 make
@@ -62,7 +62,7 @@ curl https://imagemagick.org/download/releases/ImageMagick-7.0.9-23.tar.gz | tar
 cd ImageMagick-7.0.9-23
 
 echo "Configuring Image Magick..."
-./configure
+./configure --prefix=/usr
 
 echo "Compiling Image Magick..."
 make
