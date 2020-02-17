@@ -23,7 +23,7 @@ public:
     void set_payload_length(uint32_t payload_length) { payload_length_ = payload_length; }
     void serialize(unsigned char *buffer);
     void deserialize(unsigned char *buffer);
-    friend std::ostream &operator<<(std::ostream &os, const header &header);
+    friend std::ostream & operator<<(std::ostream &os, const header &header);
 };
 
 class message {

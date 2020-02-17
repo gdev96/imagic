@@ -23,7 +23,7 @@ load_balancer::load_balancer() {
 }
 
 void load_balancer::initialize_server_addresses() {
-    const char *server_address(std::getenv("SERVER_ADDRESS"));
+    const char *server_address = std::getenv("SERVER_ADDRESS");
     int server_port = std::stoi(std::getenv("SERVER_START_PORT"));
 
     for(int i=0; i<n_server_; i++) {
@@ -50,8 +50,9 @@ void load_balancer::initialize_connectors() {
 
 unsigned int load_balancer::balance() {
     unsigned int current_lowest_load = server_connectors_[0].get_server_load(), current_lowest_load_server = 0;
+    unsigned int current_load;
     for(int i=1; i<n_server_; i++) {
-        unsigned int current_load = server_connectors_[i].get_server_load();
+        current_load = server_connectors_[i].get_server_load();
         if(current_load < current_lowest_load){
             current_lowest_load = current_load;
             current_lowest_load_server = i;
@@ -92,7 +93,7 @@ void load_balancer::manage_request(message *client_message) {
         }
     }
     else {
-        //Send message to server with less load
+        //Send message to the most unloaded server
         unsigned int chosen_server = balance();
         std::cout << *OUTPUT_IDENTIFIER << "SENDING MESSAGE TO SERVER: " << chosen_server << std::endl;
         server_connectors_[chosen_server].set_server_load(server_connectors_[chosen_server].get_server_load() + 1);

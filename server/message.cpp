@@ -15,7 +15,7 @@ void header::deserialize(unsigned char *buffer) {
     payload_length_ = ntohl(*int_buffer);
 }
 
-std::ostream &operator<<(std::ostream &os, const header &header) {
+std::ostream & operator<<(std::ostream &os, const header &header) {
     os << "message_type: " << (unsigned int)header.message_type_ << " request_id: " << header.request_id_ << " payload_length: " << header.payload_length_;
     return os;
 }
