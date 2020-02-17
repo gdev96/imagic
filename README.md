@@ -14,7 +14,13 @@ There are:
 
 <img width="600" src="https://github.com/gdev96/imagic/blob/master/resources/imagic_schema.svg">
 
-Every server has its own database which collects infos about images. To guarantee consistency upload requests are broadcasted, and each request has a unique identifier.
+Every server has its own database which collects infos about images. To guarantee consistency, upload requests are broadcasted, and each request has a unique identifier.
+
+When a server receives an upload request, it creates a thumbnail of the image, saves it, together with the image, in its file system, and records image infos in its database.
+
+Whenever a client wants to download an image, it makes a query specifying the category to which the searched image belongs to, and receives the thumbnails of the images present in that category.
+
+As soon as the user clicks on an image, the real image is downloaded, and it can be saved locally.
 
 ## Message format
 
@@ -43,6 +49,16 @@ cd setup
 
 ./start.sh
 ```
+
+To test the application, you can run the `start.sh` script passing it the argument "test":
+
+```
+./start.sh test
+```
+
+In this way, `TESTING` macro will be defined in servers code, and random sleeps will be executed once for request in order to test application parallelism when launching multiple clients.
+
+Moreover, in `resources` directory you can find some test images to upload to the application.
 
 ### Other platforms
 
@@ -76,7 +92,7 @@ Be sure to download the development files required for building the application.
 
 ##### 3. Image Magick 7
 
-In order to create the image thumbnails, server needs Imagic Magick 7.
+In order to create the image thumbnails, server needs Image Magick 7.
 
 Here are the instructions to download and install it.
 
