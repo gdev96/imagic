@@ -146,6 +146,8 @@ Simply type, from project root:
 pip3 install -r client/requirements.txt
 ```
 
+### Troubleshooting
+
 #### Build problems
 
 If build fails, edit `CMakeLists.txt` file in server project and verify that:
