@@ -58,7 +58,7 @@ void send(int sockfd, const message *msg) {
     write_bytes(sockfd, msg->get_payload(), payload_length);
 }
 
-message *receive(int sockfd) {
+message * receive(int sockfd) {
     //Receive header
     unsigned char header_buffer[HEADER_LENGTH];
     read_bytes(sockfd, header_buffer, HEADER_LENGTH);
@@ -83,7 +83,7 @@ void client_connector::accept_requests() {
     //Create socket
     struct sockaddr_in server_address, client_address;
 
-    const char *load_balancer_address(std::getenv("LOAD_BALANCER_ADDRESS"));
+    const char *load_balancer_address = std::getenv("LOAD_BALANCER_ADDRESS");
     int load_balancer_port = std::stoi(std::getenv("LOAD_BALANCER_PORT"));
 
     server_address.sin_family = AF_INET;

@@ -53,14 +53,16 @@ void send(int sockfd, const message *msg) {
 
     //Serialize response payload
     uint32_t payload_length = msg->get_header()->get_payload_length();
-    unsigned char payload_buffer[payload_length];
+    auto payload_buffer = new unsigned char[payload_length];
     msg->get_payload()->serialize(payload_buffer);
 
     //Send payload
     write_bytes(sockfd, payload_buffer, payload_length);
+
+    delete[] payload_buffer;
 }
 
-message *receive(int sockfd) {
+message * receive(int sockfd) {
     //Receive header
     unsigned char header_buffer[HEADER_LENGTH];
     read_bytes(sockfd, header_buffer, HEADER_LENGTH);
@@ -71,7 +73,7 @@ message *receive(int sockfd) {
 
     //Receive payload
     uint32_t payload_length = message_header->get_payload_length();
-    unsigned char payload_buffer[payload_length];
+    auto payload_buffer = new unsigned char[payload_length];
     read_bytes(sockfd, payload_buffer, payload_length);
 
     payload *message_payload;
@@ -84,6 +86,8 @@ message *receive(int sockfd) {
         message_payload = new string_payload();
     }
     message_payload->deserialize(payload_buffer, payload_length);
+
+    delete[] payload_buffer;
 
     return new message(message_header, message_payload);
 }
