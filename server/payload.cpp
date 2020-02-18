@@ -1,14 +1,26 @@
 #include <netinet/in.h>
 #include "payload.h"
 
+string_payload::~string_payload() {
+    delete content_;
+}
+
 void string_payload::deserialize(unsigned char *buffer, uint32_t buffer_size) {
     //Get string from buffer
     content_ = new std::string((char *)buffer, buffer_size);
 }
 
+byte_payload::~byte_payload() {
+    delete content_;
+}
+
 void byte_payload::serialize(unsigned char *buffer) {
     //Populate buffer
     std::copy(content_->begin(), content_->end(), buffer);
+}
+
+image_payload::~image_payload() {
+    delete content_;
 }
 
 void image_payload::deserialize(unsigned char *buffer, uint32_t buffer_size) {
@@ -30,6 +42,10 @@ void image_payload::deserialize(unsigned char *buffer, uint32_t buffer_size) {
 
     //Put image file and category in image
     content_ = new image(image_file, category);
+}
+
+thumbs_payload::~thumbs_payload() {
+    delete content_;
 }
 
 void thumbs_payload::serialize(unsigned char *buffer) {

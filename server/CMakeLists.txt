@@ -21,6 +21,7 @@ endif(TESTING_MACRO)
 
 add_executable(imagic_srv
         constants.h
+        image.cpp
         image.h
         load_balancer_connector.cpp
         load_balancer_connector.h

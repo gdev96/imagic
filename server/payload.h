@@ -18,6 +18,7 @@ public:
 class string_payload : public payload {
     std::string *content_;
 public:
+    ~string_payload() override;
     void *get_content() const override { return content_; }
     void serialize(unsigned char *buffer) override {}
     void deserialize(unsigned char *buffer, uint32_t buffer_size) override;
@@ -27,6 +28,7 @@ class byte_payload : public payload {
     std::vector<unsigned char> *content_;
 public:
     byte_payload(std::vector<unsigned char> *content) : content_(content) {}
+    ~byte_payload() override;
     void *get_content() const override { return content_; }
     void serialize(unsigned char *buffer) override;
     void deserialize(unsigned char *buffer, uint32_t buffer_size) override {}
@@ -35,6 +37,7 @@ public:
 class image_payload : public payload {
     image *content_;
 public:
+    ~image_payload() override;
     void *get_content() const override { return content_; }
     void serialize(unsigned char *buffer) override {}
     void deserialize(unsigned char *buffer, uint32_t buffer_size) override;
@@ -44,6 +47,7 @@ class thumbs_payload : public payload {
     std::map<std::vector<unsigned char>, std::string> *content_;
 public:
     thumbs_payload(std::map<std::vector<unsigned char>, std::string> *content) : content_(content) {}
+    ~thumbs_payload() override;
     void *get_content() const override { return content_; }
     void serialize(unsigned char *buffer) override;
     void deserialize(unsigned char *buffer, uint32_t buffer_size) override {}

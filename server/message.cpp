@@ -1,6 +1,11 @@
 #include <netinet/in.h>
 #include "message.h"
 
+message::~message() {
+    delete header_;
+    delete payload_;
+}
+
 void header::serialize(unsigned char *buffer) {
     *buffer++ = (unsigned char)message_type_;
     auto *int_buffer = (uint32_t *)buffer;
@@ -18,9 +23,4 @@ void header::deserialize(unsigned char *buffer) {
 std::ostream & operator<<(std::ostream &os, const header &header) {
     os << "message_type: " << (unsigned int)header.message_type_ << " request_id: " << header.request_id_ << " payload_length: " << header.payload_length_;
     return os;
-}
-
-message::~message() {
-    delete header_;
-    delete payload_;
 }

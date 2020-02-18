@@ -9,6 +9,7 @@ class image {
     std::string *category_;
 public:
     image(std::vector<unsigned char> *file, std::string *category) : file_(file), category_(category) {}
+    ~image();
     std::vector<unsigned char> *get_file() const { return file_; }
     std::string *get_category() const { return category_; }
 };
