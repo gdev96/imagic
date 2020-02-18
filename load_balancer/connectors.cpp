@@ -97,7 +97,7 @@ void client_connector::accept_requests() {
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
     std::cout << *OUTPUT_IDENTIFIER << "Waiting for connections from client..." << std::endl;
 
-    while (true) {
+    while(true) {
         socklen_t client_length = sizeof(client_address);
         int client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_length);
 
@@ -175,7 +175,7 @@ server_connector::server_connector(sockaddr_in *server_address, std::unordered_m
     }
 }
 
-void server_connector::serve_request(message *client_message) {
+void server_connector::serve_request(const message *client_message) {
     //Send request to server
     send_request_mutex_->lock();
     send(server_sockfd_, client_message);
@@ -241,7 +241,7 @@ void server_connector::serve_request(message *client_message) {
     server_load_--;
 }
 
-void server_connector::send_response(message *response) {
+void server_connector::send_response(const message *response) {
     //Get client sockfd
     uint32_t request_id = response->get_header()->get_request_id();
     int client_sockfd = (*request_map_)[request_id][CLIENT_SOCKFD];

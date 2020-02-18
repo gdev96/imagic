@@ -40,13 +40,13 @@ class server_connector {
     std::unordered_map<uint32_t, std::vector<int>> *request_map_;
     std::mutex *send_request_mutex_, *receive_response_mutex_, *server_load_mutex_;
     static std::mutex request_map_mutex_;
-    void send_response(message *response);
+    void send_response(const message *response);
 public:
     server_connector() {}
     server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map);
     unsigned int get_server_load() const { return server_load_; }
     void set_server_load(unsigned int server_load) { server_load_ = server_load; }
-    void serve_request(message *client_message);
+    void serve_request(const message *client_message);
 };
 
 #endif //LOAD_BALANCER_CONNECTORS_H

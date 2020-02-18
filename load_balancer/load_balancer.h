@@ -23,7 +23,7 @@ class load_balancer {
     void initialize_server_addresses();
     void initialize_connectors();
     unsigned int balance();
-    void manage_request(message *client_message);
+    void manage_request(const message *client_message);
 public:
     load_balancer();
     void get_requests();

@@ -82,7 +82,7 @@ void load_balancer::get_requests() {
     }
 }
 
-void load_balancer::manage_request(message *client_message) {
+void load_balancer::manage_request(const message *client_message) {
     if(client_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
         //Broadcast message
         std::cout << *OUTPUT_IDENTIFIER << "BROADCASTING MESSAGE" << std::endl;
