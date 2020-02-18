@@ -2,10 +2,12 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+
 #ifdef TESTING
 #include <random>
 #include <thread>
 #endif
+
 #include <vector>
 #include "constants.h"
 #include "image.h"
@@ -15,7 +17,7 @@
 size_t random_generator(size_t min, size_t max) {
     std::random_device dev;
     std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> dist(min,max); // distribution in range [min, max]
+    std::uniform_int_distribution<std::mt19937::result_type> dist(min,max); //Distribution in range [min, max]
     return dist(rng);
 }
 #endif
