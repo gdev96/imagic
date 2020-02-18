@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <cstdint>
 #include <iostream>
 #include <sys/socket.h>
 #include <thread>
@@ -6,6 +7,10 @@
 #include "constants.h"
 #include "load_balancer_connector.h"
 #include "storage_manager.h"
+
+inline uint32_t min(uint32_t a, uint32_t b) {
+    return a<b ? a : b;
+}
 
 void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     uint32_t offset = 0;

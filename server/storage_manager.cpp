@@ -52,6 +52,12 @@ storage_manager::~storage_manager() {
     delete current_table_;
 }
 
+enum upload_status : unsigned char {
+    UPLOADED = 0,
+    DUPLICATE = 1,
+    INVALID = 2
+};
+
 void storage_manager::upload_request() {
 
 #ifdef TESTING
@@ -188,12 +194,12 @@ void storage_manager::view_thumbs() {
         uint32_t thumb_size = input_thumb_file.tellg();
         input_thumb_file.seekg(0, std::ifstream::beg);
 
-        auto thumb_file = new std::vector<unsigned char>(thumb_size);
-        input_thumb_file.read((char *)thumb_file->data(), thumb_size);
+        auto thumb_file = std::vector<unsigned char>(thumb_size);
+        input_thumb_file.read((char *)thumb_file.data(), thumb_size);
         input_thumb_file.close();
 
         //Create the entry in thumb's map
-        thumbs_map->insert({*thumb_file, thumb_file_name});
+        thumbs_map->insert({thumb_file, thumb_file_name});
 
         // Update payload length
         payload_length += 8 + thumb_size + thumb_file_name.length();

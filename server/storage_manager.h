@@ -5,12 +5,6 @@
 #include <Magick++.h>
 #include "message.h"
 
-enum upload_status : unsigned char {
-    UPLOADED = 0,
-    DUPLICATE = 1,
-    INVALID = 2
-};
-
 class storage_manager {
     mysqlx::Session *db_session_;
     mysqlx::Table *current_table_;

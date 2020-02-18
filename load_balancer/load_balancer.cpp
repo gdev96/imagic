@@ -49,8 +49,10 @@ void load_balancer::initialize_connectors() {
 }
 
 unsigned int load_balancer::balance() {
-    unsigned int current_lowest_load = server_connectors_[0].get_server_load(), current_lowest_load_server = 0;
-    unsigned int current_load;
+    unsigned int current_lowest_load = server_connectors_[0].get_server_load(),
+        current_lowest_load_server = 0,
+        current_load;
+
     for(int i=1; i<n_server_; i++) {
         current_load = server_connectors_[i].get_server_load();
         if(current_load < current_lowest_load){

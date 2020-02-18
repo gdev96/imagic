@@ -9,6 +9,10 @@
 #include "connectors.h"
 #include "constants.h"
 
+inline uint32_t min(uint32_t a, uint32_t b) {
+    return a<b ? a : b;
+}
+
 void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     uint32_t offset = 0;
     int bytes_received;
@@ -161,7 +165,7 @@ void client_connector::queue_requests(int client_sockfd) {
 
 std::mutex server_connector::request_map_mutex_ = std::mutex();
 
-server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<unsigned int>> *request_map) : server_address_(server_address), request_map_(request_map) {
+server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map) : server_address_(server_address), request_map_(request_map) {
     server_load_ = 0;
     send_request_mutex_ = new std::mutex();
     receive_response_mutex_ = new std::mutex();
@@ -175,6 +179,12 @@ server_connector::server_connector(sockaddr_in *server_address, std::unordered_m
     }
 }
 
+enum map_values : int {
+    CLIENT_SOCKFD = 0,
+    UPLOAD_REQUEST_COUNTER = 1,
+    UPLOAD_RESPONSE_COUNTER = 2
+};
+
 void server_connector::serve_request(const message *client_message) {
     //Send request to server
     send_request_mutex_->lock();
@@ -183,14 +193,14 @@ void server_connector::serve_request(const message *client_message) {
 
     //Get request info
     message_type request_message_type = client_message->get_header()->get_message_type();
-    int request_id = client_message->get_header()->get_request_id();
+    uint32_t request_id = client_message->get_header()->get_request_id();
 
     //Free request info
     if(request_message_type == message_type::UPLOAD_IMAGE) {
         //Get upload request counter and decrement it
         request_map_mutex_.lock();
         (*request_map_)[request_id][UPLOAD_REQUEST_COUNTER]--;
-        unsigned int remaining_upload_requests = (*request_map_)[request_id][UPLOAD_REQUEST_COUNTER];
+        int remaining_upload_requests = (*request_map_)[request_id][UPLOAD_REQUEST_COUNTER];
         request_map_mutex_.unlock();
 
         if(!remaining_upload_requests) {
@@ -207,14 +217,14 @@ void server_connector::serve_request(const message *client_message) {
 
     //Get response info
     message_type response_message_type = response->get_header()->get_message_type();
-    int response_id = response->get_header()->get_request_id();
+    uint32_t response_id = response->get_header()->get_request_id();
 
     //Manage response
     if(response_message_type == message_type::UPLOAD_IMAGE) {
         //Get upload response counter and decrement it
         request_map_mutex_.lock();
         (*request_map_)[response_id][UPLOAD_RESPONSE_COUNTER]--;
-        unsigned int remaining_upload_responses = (*request_map_)[response_id][UPLOAD_RESPONSE_COUNTER];
+        int remaining_upload_responses = (*request_map_)[response_id][UPLOAD_RESPONSE_COUNTER];
         request_map_mutex_.unlock();
 
         if(!remaining_upload_responses) {
