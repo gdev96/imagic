@@ -101,12 +101,12 @@ void client_connector::accept_requests() {
         socklen_t client_length = sizeof(client_address);
         int client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_length);
 
-        std::thread t(&client_connector::queue_request, this, client_sockfd);
+        std::thread t(&client_connector::queue_requests, this, client_sockfd);
         t.detach();
     }
 }
 
-void client_connector::queue_request(int client_sockfd) {
+void client_connector::queue_requests(int client_sockfd) {
     try {
         std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
 
@@ -120,10 +120,10 @@ void client_connector::queue_request(int client_sockfd) {
             //Populate maps
             load_balancer_->request_map_[current_request_id_].push_back(client_sockfd);
             if(received_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
-                //Push number of remaining upload request
+                //Push number of remaining upload requests
                 load_balancer_->request_map_[current_request_id_].push_back(load_balancer_->n_server_);
 
-                //Push number of remaining upload response
+                //Push number of remaining upload responses
                 load_balancer_->request_map_[current_request_id_].push_back(load_balancer_->n_server_);
             }
             current_request_id_++;
@@ -161,7 +161,7 @@ void client_connector::queue_request(int client_sockfd) {
 
 std::mutex server_connector::request_map_mutex_ = std::mutex();
 
-server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map) : server_address_(server_address), request_map_(request_map) {
+server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<unsigned int>> *request_map) : server_address_(server_address), request_map_(request_map) {
     server_load_ = 0;
     send_request_mutex_ = new std::mutex();
     receive_response_mutex_ = new std::mutex();
@@ -190,7 +190,7 @@ void server_connector::serve_request(const message *client_message) {
         //Get upload request counter and decrement it
         request_map_mutex_.lock();
         (*request_map_)[request_id][UPLOAD_REQUEST_COUNTER]--;
-        unsigned int remaining_upload_requests = (*request_map_)[request_id][UPLOAD_RESPONSE_COUNTER];
+        unsigned int remaining_upload_requests = (*request_map_)[request_id][UPLOAD_REQUEST_COUNTER];
         request_map_mutex_.unlock();
 
         if(!remaining_upload_requests) {
