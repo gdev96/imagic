@@ -20,7 +20,7 @@ class load_balancer {
     client_connector *client_connector_;
     server_connector *server_connectors_;
     struct sockaddr_in *server_addresses_;
-    std::mutex read_mutex_, write_mutex_, write_count_mutex_;
+    std::mutex write_mutex_, write_count_mutex_;
     std::condition_variable message_production_;
     void initialize_server_addresses();
     void initialize_connectors();

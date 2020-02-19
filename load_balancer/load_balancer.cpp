@@ -64,13 +64,10 @@ unsigned int load_balancer::balance() {
 }
 
 void load_balancer::get_requests() {
+    std::unique_lock lock(write_mutex_);
     while(true) {
-        //Waiting for message production
-        std::unique_lock read_lock(read_mutex_);
-        message_production_.wait(read_lock);
-
-        //Lock writers
-        std::scoped_lock lock(write_mutex_);
+        //Wait for message production
+        message_production_.wait(lock);
 
         //Read operation
         while(!message_queue_.empty()) {
