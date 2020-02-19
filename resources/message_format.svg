@@ -476,9 +476,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497475"
-     inkscape:cx="648.80454"
-     inkscape:cy="582.51022"
+     inkscape:zoom="0.7"
+     inkscape:cx="354.09308"
+     inkscape:cy="645.49395"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -496,7 +496,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -530,7 +530,7 @@
    style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic'"
    id="tspan4922">UPLOAD_IMAGE</tspan></tspan></text>
     <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-9"
        width="85.528664"
        height="25.626284"
@@ -656,7 +656,7 @@
    style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic'"
    id="tspan4924">FIND_THUMBS</tspan></tspan></text>
     <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-9-4"
        width="85.528664"
        height="25.626284"
@@ -769,7 +769,7 @@
            x="83.842659"
            y="592.18958" /></flowRegion><flowPara
          id="flowPara1317" /></flowRoot>    <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-9-4-8"
        width="41.779518"
        height="11.544054"
@@ -798,7 +798,7 @@
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan893-3-8-5-5">CATEGORY</tspan></text>
     <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-9-4-87"
        width="85.528664"
        height="25.626284"
@@ -867,7 +867,7 @@
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan893-3-8-7-4-6">THUMB FILE NAME</tspan></text>
     <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.18151234;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.18151234;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-9-4-9"
        width="42.694489"
        height="13.067185"
@@ -933,7 +933,7 @@
    style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic'"
    id="tspan4926">DOWNLOAD_IMAGE</tspan></tspan></text>
     <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-9-4-8-9"
        width="41.779518"
        height="11.544054"
@@ -962,7 +962,7 @@
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan893-3-8-5-5-8">THUMB FILE NAME</tspan></text>
     <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-9-4-8-9-1"
        width="41.779518"
        height="11.544054"
@@ -991,7 +991,7 @@
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan893-3-8-5-5-8-4">IMAGE FILE</tspan></text>
     <rect
-       style="fill:#feffe3;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7eef4;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52"
        width="85.623215"
        height="12.893206"
@@ -1085,7 +1085,7 @@
          y="47.780319"
          style="font-style:italic;stroke-width:0.26458332">4 byte</tspan></text>
     <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-5"
        width="85.557579"
        height="32.67131"
@@ -1116,7 +1116,7 @@
          style="font-size:3.52777767px;text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan893-3-6-5">HEADER</tspan></text>
     <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-9-4-9-6"
        width="85.575233"
        height="12.632678"
@@ -1131,7 +1131,7 @@
        inkscape:original-d="m 74.839284,25.329612 c 2.65e-4,3.779497 2.65e-4,7.55926 0,11.339285"
        transform="matrix(1,0,0,1.1240181,67.759424,233.58725)" />
     <rect
-       style="fill:#ecffe5;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#d7f4d7;fill-opacity:1;stroke:#000000;stroke-width:0.177;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect52-9-4-8-2"
        width="41.779518"
        height="11.544054"
@@ -1291,7 +1291,7 @@
          style="font-style:italic;stroke-width:0.26458332">1 byte</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.16634841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 118.56302,-41.169867 c 11.61748,28.041906 23.23519,56.084346 34.8531,84.127301"
+       d="m 118.56302,-41.169867 c 11.61748,28.041906 23.23518,56.084346 34.8531,84.127301"
        id="path58-7-7-6-9"
        inkscape:connector-curvature="0"
        inkscape:path-effect="#path-effect60-6-8-2-3-2"
