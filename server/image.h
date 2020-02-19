@@ -14,4 +14,4 @@ public:
     std::string *get_category() const { return category_; }
 };
 
-#endif //SERVER_IMAGE_H
+#endif  // SERVER_IMAGE_H

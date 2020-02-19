@@ -9,7 +9,7 @@ void termination_handler(int signal){
 }
 
 int main() {
-    //Manage SIGINT signals (i.e. CTRL+C)
+    // Manage SIGINT signals (i.e. CTRL+C)
     struct sigaction action;
 
     action.sa_handler = termination_handler;

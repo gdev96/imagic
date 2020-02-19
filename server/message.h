@@ -38,4 +38,4 @@ public:
     void set_payload(payload *payload) { payload_ = payload; }
 };
 
-#endif //SERVER_MESSAGE_H
+#endif  // SERVER_MESSAGE_H

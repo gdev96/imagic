@@ -8,11 +8,15 @@
 #include "load_balancer_connector.h"
 #include "storage_manager.h"
 
-inline uint32_t min(uint32_t a, uint32_t b) {
-    return a<b ? a : b;
+load_balancer_connector::load_balancer_connector(const char *address, int port, unsigned int server_id) : server_id_(server_id) {
+    server_address_.sin_family = AF_INET;
+    server_address_.sin_addr.s_addr = inet_addr(address);
+    server_address_.sin_port = htons(port);
+
+    send_response_mutex_ = new std::mutex();
 }
 
-void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
+void load_balancer_connector::read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     uint32_t offset = 0;
     int bytes_received;
     do {
@@ -30,7 +34,7 @@ void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     } while(offset < message_length);
 }
 
-void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
+void load_balancer_connector::write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     uint32_t offset = 0;
     int bytes_sent;
     do {
@@ -48,42 +52,42 @@ void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     } while(offset < message_length);
 }
 
-void send(int sockfd, const message *msg) {
-    //Serialize response header
+void load_balancer_connector::send(int sockfd, const message *msg) {
+    // Serialize response header
     unsigned char header_buffer[HEADER_LENGTH];
     msg->get_header()->serialize(header_buffer);
 
-    //Send header
+    // Send header
     write_bytes(sockfd, header_buffer, HEADER_LENGTH);
 
-    //Serialize response payload
+    // Serialize response payload
     uint32_t payload_length = msg->get_header()->get_payload_length();
     auto payload_buffer = new unsigned char[payload_length];
     msg->get_payload()->serialize(payload_buffer);
 
-    //Send payload
+    // Send payload
     write_bytes(sockfd, payload_buffer, payload_length);
 
     delete[] payload_buffer;
 }
 
-message * receive(int sockfd) {
-    //Receive header
+message * load_balancer_connector::receive(int sockfd) {
+    // Receive header
     unsigned char header_buffer[HEADER_LENGTH];
     read_bytes(sockfd, header_buffer, HEADER_LENGTH);
 
-    //Deserialize request header
+    // Deserialize request header
     auto message_header = new header();
     message_header->deserialize(header_buffer);
 
-    //Receive payload
+    // Receive payload
     uint32_t payload_length = message_header->get_payload_length();
     auto payload_buffer = new unsigned char[payload_length];
     read_bytes(sockfd, payload_buffer, payload_length);
 
     payload *message_payload;
 
-    //Deserialize request payload
+    // Deserialize request payload
     if(message_header->get_message_type() == message_type::UPLOAD_IMAGE) {
         message_payload = new image_payload();
     }
@@ -97,21 +101,13 @@ message * receive(int sockfd) {
     return new message(message_header, message_payload);
 }
 
-load_balancer_connector::load_balancer_connector(const char *address, int port, unsigned int server_id) : server_id_(server_id) {
-    server_address_.sin_family = AF_INET;
-    server_address_.sin_addr.s_addr = inet_addr(address);
-    server_address_.sin_port = htons(port);
-
-    send_response_mutex_ = new std::mutex();
-}
-
 void load_balancer_connector::receive_requests() {
     struct sockaddr_in lb_address;
 
-    //Create socket
+    // Create socket
     int server_length = sizeof(server_address_);
 
-    //Connection with load balancer
+    // Connection with load balancer
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *)&server_address_, server_length);
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
@@ -123,7 +119,7 @@ void load_balancer_connector::receive_requests() {
         std::cout << *OUTPUT_IDENTIFIER << "Connection from load balancer accepted" << std::endl;
 
         while(true) {
-            //Receive request
+            // Receive request
             current_message_ = receive(lb_sockfd);
 
             std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED!" << std::endl;
@@ -137,7 +133,7 @@ void load_balancer_connector::receive_requests() {
 }
 
 void load_balancer_connector::manage_request(int lb_sockfd, message *client_message){
-    //Serve request
+    // Serve request
     storage_manager storage_manager_instance(client_message, server_id_);
     switch(client_message->get_header()->get_message_type()) {
         case message_type::UPLOAD_IMAGE:
@@ -149,7 +145,7 @@ void load_balancer_connector::manage_request(int lb_sockfd, message *client_mess
         case message_type::DOWNLOAD_IMAGE:
             storage_manager_instance.download_image();
     }
-    //Send response
+    // Send response
     {
         std::scoped_lock lock(*send_response_mutex_);
         send(lb_sockfd, client_message);
@@ -158,6 +154,6 @@ void load_balancer_connector::manage_request(int lb_sockfd, message *client_mess
     std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
     std::cout << *OUTPUT_IDENTIFIER << *client_message->get_header() << std::endl;
 
-    //Delete client request
+    // Delete client request
     delete client_message;
 }

@@ -1,5 +1,5 @@
-#ifndef LOAD_BALANCER_CONNECTORS_H
-#define LOAD_BALANCER_CONNECTORS_H
+#ifndef LOAD_BALANCER_CONNECTOR_H
+#define LOAD_BALANCER_CONNECTOR_H
 
 #include <cstdint>
 #include <mutex>
@@ -8,10 +8,19 @@
 #include "load_balancer.h"
 #include "message.h"
 
-//Forward declaration
+class connector {
+protected:
+    static uint32_t min(uint32_t a, uint32_t b) { return a<b ? a : b; }
+    static void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
+    static void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
+    static void send(int sockfd, const message *msg);
+    static message * receive(int sockfd);
+};
+
+// Forward declaration
 class load_balancer;
 
-class client_connector {
+class client_connector : private connector {
     load_balancer *load_balancer_;
     uint32_t current_request_id_;
     static unsigned int write_count_;
@@ -21,7 +30,7 @@ public:
     void accept_requests();
 };
 
-class server_connector {
+class server_connector : private connector {
     int server_sockfd_;
     struct sockaddr_in *server_address_;
     unsigned int server_load_;
@@ -37,4 +46,4 @@ public:
     void serve_request(const message *client_message);
 };
 
-#endif //LOAD_BALANCER_CONNECTORS_H
+#endif  // LOAD_BALANCER_CONNECTOR_H

@@ -20,4 +20,4 @@ public:
     void download_image();
 };
 
-#endif //SERVER_STORAGE_MANAGER_H
+#endif  // SERVER_STORAGE_MANAGER_H

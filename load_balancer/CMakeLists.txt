@@ -7,8 +7,8 @@ set(CMAKE_CXX_FLAGS -pthread)
 include_directories(.)
 
 add_executable(imagic_lb
-        connectors.cpp
-        connectors.h
+        connector.cpp
+        connector.h
         constants.h
         load_balancer.cpp
         load_balancer.h

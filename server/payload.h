@@ -53,4 +53,4 @@ public:
     void deserialize(unsigned char *buffer, uint32_t buffer_size) override {}
 };
 
-#endif //SERVER_PAYLOAD_H
+#endif  // SERVER_PAYLOAD_H

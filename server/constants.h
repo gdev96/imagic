@@ -3,16 +3,16 @@
 
 #include <string>
 
-//Output string
+// Output string
 inline const std::string *OUTPUT_IDENTIFIER;
 
-//Connector
+// Connector
 inline const unsigned int QUEUE_LENGTH_CONNECTIONS = 5;
 
-//Message
+// Message
 inline const unsigned int CHUNK_SIZE = 8192;
 
-//Header
+// Header
 inline const unsigned int HEADER_LENGTH = 9;
 
-#endif //SERVER_CONSTANTS_H
+#endif  // SERVER_CONSTANTS_H

@@ -11,4 +11,4 @@ public:
     void receive_requests();
 };
 
-#endif //SERVER_H
+#endif  // SERVER_H

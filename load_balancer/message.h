@@ -35,4 +35,4 @@ public:
     unsigned char *get_payload() const { return payload_; }
 };
 
-#endif //LOAD_BALANCER_MESSAGE_H
+#endif  // LOAD_BALANCER_MESSAGE_H

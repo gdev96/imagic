@@ -5,10 +5,10 @@
 #include <mutex>
 #include <queue>
 #include <unordered_map>
-#include "connectors.h"
+#include "connector.h"
 #include "message.h"
 
-//Forward declarations
+// Forward declarations
 class client_connector;
 class server_connector;
 
@@ -22,6 +22,7 @@ class load_balancer {
     struct sockaddr_in *server_addresses_;
     std::mutex write_mutex_, write_count_mutex_;
     std::condition_variable message_production_;
+    bool notified = false;
     void initialize_server_addresses();
     void initialize_connectors();
     unsigned int balance();
@@ -32,4 +33,4 @@ public:
     friend class client_connector;
 };
 
-#endif //LOAD_BALANCER_H
+#endif  // LOAD_BALANCER_H
