@@ -24,7 +24,7 @@ As soon as the user clicks on an image, the real image is downloaded, and it can
 
 ## Message format
 
-Messages exchanged by client and servers have the following fixed format:
+Messages exchanged by clients and servers have the following fixed format:
 
 <img width="900" src="https://github.com/gdev96/imagic/blob/master/resources/message_format.svg">
 
