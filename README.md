@@ -12,7 +12,7 @@ There are:
 - a load balancer (frontend) that forwards requests to the most unloaded servers
 - one or more servers that handle client requests
 
-<img width="600" src="https://github.com/gdev96/imagic/blob/master/resources/imagic_schema.svg">
+<img width="700" src="https://github.com/gdev96/imagic/blob/master/resources/imagic_schema.svg">
 
 Every server has its own database which collects infos about images. To guarantee consistency, upload requests are broadcasted, and each request has a unique identifier.
 
