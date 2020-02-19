@@ -25,6 +25,12 @@ sudo dpkg -i mysql-{common,community-client-core,community-client,client,communi
 echo "Resolving dependencies of MySQL Server..."
 sudo apt-get -f -y install
 
+echo "Installing auth_socket plugin..."
+mysql -u root -p < ../setup.sql
+
+echo "Restarting MySQL Server..."
+sudo service mysql restart
+
 echo "Downloading MySQL Connector/C++ files..."
 curl --remote-name-all \
 https://cdn.mysql.com/Downloads/Connector-C++/libmysqlcppconn7_8.0.19-1ubuntu18.04_amd64.deb \
@@ -57,9 +63,9 @@ sudo make install
 cd ..
 
 echo "Downloading Image Magick..."
-curl https://imagemagick.org/download/releases/ImageMagick-7.0.9-23.tar.gz | tar xz
+curl https://imagemagick.org/download/releases/ImageMagick-7.0.9-24.tar.gz | tar xz
 
-cd ImageMagick-7.0.9-23
+cd ImageMagick-7.0.9-24
 
 echo "Configuring Image Magick..."
 ./configure --prefix=/usr

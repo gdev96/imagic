@@ -168,22 +168,9 @@ pip3 install -r client/requirements.txt
 
 If build fails, edit `CMakeLists.txt` file in server project and verify that:
 
-1. correct header files are included
-2. correct libraries are linked
+1. correct header files are included (*include_directories* command)
+2. correct libraries are linked (*PROJECT_LINK_LIBS* variable)
 
 In particular, for MySQL you can see:
 
 https://dev.mysql.com/doc/connector-cpp/8.0/en/connector-cpp-apps-general-considerations.html
-
-#### MySQL authentication problems
-
-If databases creation fails, maybe you need to install the `auth_socket` plugin.
-
-Open a terminal and type:
-
-```
-mysql -u root -p
-
-INSTALL PLUGIN auth_socket SONAME 'auth_socket.so';
-UPDATE mysql.user SET plugin = 'auth_socket' WHERE User = 'root';
-```
