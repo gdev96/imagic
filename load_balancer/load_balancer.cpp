@@ -66,9 +66,11 @@ unsigned int load_balancer::balance() {
 void load_balancer::get_requests() {
     while(true) {
         //Waiting for message production
-        read_mutex_.lock();
+        std::unique_lock read_lock(read_mutex_);
+        message_production_.wait(read_lock);
 
-        write_mutex_.lock();
+        //Lock writers
+        std::scoped_lock lock(write_mutex_);
 
         //Read operation
         while(!message_queue_.empty()) {
@@ -80,7 +82,6 @@ void load_balancer::get_requests() {
             std::thread t = std::thread(&load_balancer::manage_request, this, current_message_);
             t.detach();
         }
-        write_mutex_.unlock();
     }
 }
 

@@ -133,24 +133,25 @@ void client_connector::queue_requests(int client_sockfd) {
             current_request_id_++;
 
             //Increase write_counter
-            load_balancer_->write_count_mutex_.lock();
-            write_count_++;
-            load_balancer_->write_count_mutex_.unlock();
-
-            load_balancer_->write_mutex_.lock();
+            {
+                std::scoped_lock lock(load_balancer_->write_count_mutex_);
+                write_count_++;
+            }
 
             //Write operation
-            load_balancer_->message_queue_.push(received_message);
-
-            load_balancer_->write_mutex_.unlock();
+            {
+                std::scoped_lock lock(load_balancer_->write_mutex_);
+                load_balancer_->message_queue_.push(received_message);
+            }
 
             //Decrease write_counter
-            load_balancer_->write_count_mutex_.lock();
-            write_count_--;
-            if(write_count_ == 0)
-                load_balancer_->read_mutex_.unlock();
-            load_balancer_->write_count_mutex_.unlock();
-
+            {
+                std::scoped_lock lock(load_balancer_->write_count_mutex_);
+                write_count_--;
+                if(write_count_ == 0) {
+                    load_balancer_->message_production_.notify_all();
+                }
+            }
             std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
             std::cout << *OUTPUT_IDENTIFIER << *received_message->get_header() << std::endl;
         }
@@ -187,9 +188,10 @@ enum map_values : int {
 
 void server_connector::serve_request(const message *client_message) {
     //Send request to server
-    send_request_mutex_->lock();
-    send(server_sockfd_, client_message);
-    send_request_mutex_->unlock();
+    {
+        std::scoped_lock lock(*send_request_mutex_);
+        send(server_sockfd_, client_message);
+    }
 
     //Get request info
     message_type request_message_type = client_message->get_header()->get_message_type();
@@ -197,11 +199,14 @@ void server_connector::serve_request(const message *client_message) {
 
     //Free request info
     if(request_message_type == message_type::UPLOAD_IMAGE) {
+        int remaining_upload_requests;
+
         //Get upload request counter and decrement it
-        request_map_mutex_.lock();
-        (*request_map_)[request_id][UPLOAD_REQUEST_COUNTER]--;
-        int remaining_upload_requests = (*request_map_)[request_id][UPLOAD_REQUEST_COUNTER];
-        request_map_mutex_.unlock();
+        {
+            std::scoped_lock lock(request_map_mutex_);
+            (*request_map_)[request_id][UPLOAD_REQUEST_COUNTER]--;
+            remaining_upload_requests = (*request_map_)[request_id][UPLOAD_REQUEST_COUNTER];
+        }
 
         if(!remaining_upload_requests) {
             delete client_message;
@@ -210,10 +215,13 @@ void server_connector::serve_request(const message *client_message) {
     else {
         delete client_message;
     }
+    message *response;
+
     //Receive response from server
-    receive_response_mutex_->lock();
-    message *response = receive(server_sockfd_);
-    receive_response_mutex_->unlock();
+    {
+        std::scoped_lock lock(*receive_response_mutex_);
+        response = receive(server_sockfd_);
+    }
 
     //Get response info
     message_type response_message_type = response->get_header()->get_message_type();
@@ -221,19 +229,21 @@ void server_connector::serve_request(const message *client_message) {
 
     //Manage response
     if(response_message_type == message_type::UPLOAD_IMAGE) {
+        int remaining_upload_responses;
+
         //Get upload response counter and decrement it
-        request_map_mutex_.lock();
-        (*request_map_)[response_id][UPLOAD_RESPONSE_COUNTER]--;
-        int remaining_upload_responses = (*request_map_)[response_id][UPLOAD_RESPONSE_COUNTER];
-        request_map_mutex_.unlock();
+        {
+            std::scoped_lock lock(request_map_mutex_);
+            (*request_map_)[response_id][UPLOAD_RESPONSE_COUNTER]--;
+            remaining_upload_responses = (*request_map_)[response_id][UPLOAD_RESPONSE_COUNTER];
+        }
 
         if(!remaining_upload_responses) {
             //Only the last server connector which has received an upload response must send response
             send_response(response);
 
-            std::lock_guard<std::mutex> lock(request_map_mutex_);
-
             //Delete entry in request map
+            std::scoped_lock lock(request_map_mutex_);
             request_map_->erase(response_id);
         }
     }
@@ -241,13 +251,12 @@ void server_connector::serve_request(const message *client_message) {
         //Every server connector can send response
         send_response(response);
 
-        std::lock_guard<std::mutex> lock(request_map_mutex_);
-
         //Delete entry in request map
+        std::scoped_lock lock(request_map_mutex_);
         request_map_->erase(response_id);
     }
     //Decrement server load
-    std::lock_guard<std::mutex> lock(*server_load_mutex_);
+    std::scoped_lock lock(*server_load_mutex_);
     server_load_--;
 }
 

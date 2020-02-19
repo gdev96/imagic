@@ -150,9 +150,10 @@ void load_balancer_connector::manage_request(int lb_sockfd, message *client_mess
             storage_manager_instance.download_image();
     }
     //Send response
-    send_response_mutex_->lock();
-    send(lb_sockfd, client_message);
-    send_response_mutex_->unlock();
+    {
+        std::scoped_lock lock(*send_response_mutex_);
+        send(lb_sockfd, client_message);
+    }
 
     std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
     std::cout << *OUTPUT_IDENTIFIER << *client_message->get_header() << std::endl;
