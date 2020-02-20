@@ -111,55 +111,54 @@ void client_connector::accept_requests() {
 }
 
 void client_connector::queue_requests(int client_sockfd) {
-    try {
-        std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
-
-        while(true) {
+    std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
+    message *received_message;
+    while(true) {
+        try {
             // Receive request
-            message *received_message = receive(client_sockfd);
-
-            // Set message source id
-            received_message->get_header()->set_request_id(current_request_id_);
-
-            // Populate maps
-            load_balancer_->request_map_[current_request_id_].push_back(client_sockfd);
-            if(received_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
-                // Push number of remaining upload requests
-                load_balancer_->request_map_[current_request_id_].push_back(load_balancer_->n_server_);
-
-                // Push number of remaining upload responses
-                load_balancer_->request_map_[current_request_id_].push_back(load_balancer_->n_server_);
-            }
-            current_request_id_++;
-
-            // Increase write counter
-            {
-                std::scoped_lock lock(load_balancer_->write_count_mutex_);
-                write_count_++;
-            }
-
-            // Write operation
-            {
-                std::scoped_lock lock(load_balancer_->write_mutex_);
-                load_balancer_->message_queue_.push(received_message);
-            }
-
-            // Decrease write counter
-            {
-                std::scoped_lock lock(load_balancer_->write_count_mutex_);
-                write_count_--;
-                if(write_count_ == 0) {
-                    load_balancer_->notified = true;
-                    load_balancer_->message_production_.notify_all();
-                }
-            }
-            std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
-            std::cout << *OUTPUT_IDENTIFIER << *received_message->get_header() << std::endl;
+            received_message = receive(client_sockfd);
+        } catch(const std::runtime_error &e) {
+            close(client_sockfd);
+            std::cout << *OUTPUT_IDENTIFIER << e.what() << std::endl;
+            break;
         }
-    } catch(const std::runtime_error &e) {
-        close(client_sockfd);
-        std::cout << *OUTPUT_IDENTIFIER << e.what() << std::endl;
-        return;
+        // Set message source id
+        received_message->get_header()->set_request_id(current_request_id_);
+
+        // Populate maps
+        load_balancer_->request_map_[current_request_id_].push_back(client_sockfd);
+        if(received_message->get_header()->get_message_type() == message_type::UPLOAD_IMAGE) {
+            // Push number of remaining upload requests
+            load_balancer_->request_map_[current_request_id_].push_back(load_balancer_->n_server_);
+
+            // Push number of remaining upload responses
+            load_balancer_->request_map_[current_request_id_].push_back(load_balancer_->n_server_);
+        }
+        current_request_id_++;
+
+        // Increase write counter
+        {
+            std::scoped_lock lock(load_balancer_->write_count_mutex_);
+            write_count_++;
+        }
+
+        // Write operation
+        {
+            std::scoped_lock lock(load_balancer_->write_mutex_);
+            load_balancer_->message_queue_.push(received_message);
+        }
+
+        // Decrease write counter
+        {
+            std::scoped_lock lock(load_balancer_->write_count_mutex_);
+            write_count_--;
+            if(write_count_ == 0) {
+                load_balancer_->notified = true;
+                load_balancer_->message_production_.notify_all();
+            }
+        }
+        std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << *received_message->get_header() << std::endl;
     }
 }
 
@@ -266,12 +265,15 @@ void server_connector::send_response(const message *response) {
     uint32_t request_id = response->get_header()->get_request_id();
     int client_sockfd = (*request_map_)[request_id][CLIENT_SOCKFD];
 
-    // Send response to client
-    send(client_sockfd, response);
-
-    std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
-    std::cout << *OUTPUT_IDENTIFIER << *response->get_header() << std::endl;
-
+    try {
+        // Send response to client
+        send(client_sockfd, response);
+        std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << *response->get_header() << std::endl;
+    } catch(const std::runtime_error &e) {
+        close(client_sockfd);
+        std::cout << *OUTPUT_IDENTIFIER << e.what() << std::endl;
+    }
     // Delete response info
     delete response;
 }
