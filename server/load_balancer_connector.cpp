@@ -71,7 +71,7 @@ void load_balancer_connector::send(int sockfd, const message *msg) {
     delete[] payload_buffer;
 }
 
-message * load_balancer_connector::receive(int sockfd) {
+message *load_balancer_connector::receive(int sockfd) {
     // Receive header
     unsigned char header_buffer[HEADER_LENGTH];
     read_bytes(sockfd, header_buffer, HEADER_LENGTH);

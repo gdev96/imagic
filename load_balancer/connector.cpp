@@ -58,7 +58,7 @@ void connector::send(int sockfd, const message *msg) {
     write_bytes(sockfd, msg->get_payload(), payload_length);
 }
 
-message * connector::receive(int sockfd) {
+message *connector::receive(int sockfd) {
     // Receive header
     unsigned char header_buffer[HEADER_LENGTH];
     read_bytes(sockfd, header_buffer, HEADER_LENGTH);

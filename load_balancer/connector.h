@@ -14,7 +14,7 @@ protected:
     static void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
     static void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
     static void send(int sockfd, const message *msg);
-    static message * receive(int sockfd);
+    static message *receive(int sockfd);
 };
 
 // Forward declaration

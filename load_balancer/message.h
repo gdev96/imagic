@@ -22,7 +22,7 @@ public:
     void set_request_id(uint32_t request_id) { request_id_ = request_id; }
     void serialize(unsigned char *buffer);
     void deserialize(unsigned char *buffer);
-    friend std::ostream & operator<<(std::ostream &os, const header &header);
+    friend std::ostream &operator<<(std::ostream &os, const header &header);
 };
 
 class message {
