@@ -9,6 +9,10 @@
 #include "connector.h"
 #include "constants.h"
 
+// Connector (abstract class)
+
+connector::~connector() {}
+
 void connector::read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     uint32_t offset = 0;
     int bytes_received;
