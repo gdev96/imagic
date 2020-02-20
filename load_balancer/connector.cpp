@@ -118,7 +118,6 @@ void client_connector::queue_requests(int client_sockfd) {
             // Receive request
             received_message = receive(client_sockfd);
         } catch(const std::runtime_error &e) {
-            close(client_sockfd);
             std::cout << *OUTPUT_IDENTIFIER << e.what() << std::endl;
             break;
         }
@@ -271,7 +270,6 @@ void server_connector::send_response(const message *response) {
         std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;
         std::cout << *OUTPUT_IDENTIFIER << *response->get_header() << std::endl;
     } catch(const std::runtime_error &e) {
-        close(client_sockfd);
         std::cout << *OUTPUT_IDENTIFIER << e.what() << std::endl;
     }
     // Delete response info
