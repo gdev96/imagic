@@ -83,27 +83,32 @@ message *connector::receive(int sockfd) {
 
 unsigned int client_connector::write_count_ = 0;
 
-void client_connector::accept_requests() {
-    // Create socket
-    struct sockaddr_in server_address, client_address;
-
+client_connector::client_connector(load_balancer *load_balancer) : load_balancer_(load_balancer) {
     const char *load_balancer_address = std::getenv("LOAD_BALANCER_ADDRESS");
     int load_balancer_port = std::stoi(std::getenv("LOAD_BALANCER_PORT"));
 
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = inet_addr(load_balancer_address);
-    server_address.sin_port = htons(load_balancer_port);
-    int server_length = sizeof(server_address);
+    // Initialize IP address and port
+    lb_address_.sin_family = AF_INET;
+    lb_address_.sin_addr.s_addr = inet_addr(load_balancer_address);
+    lb_address_.sin_port = htons(load_balancer_port);
+}
 
-    // Connection with client
+void client_connector::accept_connection_requests() {
+    // Create socket to connect to client
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    bind(server_sockfd, (struct sockaddr *)&server_address, server_length);
+    bind(server_sockfd, (struct sockaddr *)&lb_address_, sizeof(lb_address_));
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
-    std::cout << *OUTPUT_IDENTIFIER << "Waiting for connections from client..." << std::endl;
+
+    struct sockaddr_in client_address;
+    socklen_t client_length = sizeof(client_address);
+    int client_sockfd;
 
     while(true) {
-        socklen_t client_length = sizeof(client_address);
-        int client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_length);
+        std::cout << *OUTPUT_IDENTIFIER << "Waiting for connections from client..." << std::endl;
+
+        client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_length);
+
+        std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
 
         std::thread t(&client_connector::queue_requests, this, client_sockfd);
         t.detach();
@@ -111,8 +116,9 @@ void client_connector::accept_requests() {
 }
 
 void client_connector::queue_requests(int client_sockfd) {
-    std::cout << *OUTPUT_IDENTIFIER << "Connection from client accepted" << std::endl;
+    // Declare message
     message *received_message;
+
     while(true) {
         try {
             // Receive request
@@ -166,15 +172,14 @@ void client_connector::queue_requests(int client_sockfd) {
 std::mutex server_connector::request_map_mutex_ = std::mutex();
 
 server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map) : server_address_(server_address), request_map_(request_map) {
-    server_load_ = 0;
     send_request_mutex_ = new std::mutex();
     receive_response_mutex_ = new std::mutex();
     server_load_mutex_ = new std::mutex();
 
     // Connection with server
     server_sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
-    unsigned int len = sizeof(*server_address_);
-    if(connect(server_sockfd_, (struct sockaddr *)server_address_, len) == -1) {
+
+    if(connect(server_sockfd_, (struct sockaddr *)server_address_, sizeof(*server_address_)) == -1) {
         throw std::runtime_error("Socket connection refused");
     }
 }

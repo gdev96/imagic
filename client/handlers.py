@@ -34,13 +34,16 @@ class LoadBalancerConnector:
         return b''.join(chunks)
 
     def send(self, message):
+        # Send request
         self.send_bytes(message.header, HEADER_LENGTH)
-        if isinstance(message.payload, str):
-            message.payload = message.payload.encode("raw_unicode_escape")
         self.send_bytes(message.payload, len(message.payload))
-        received_header = self.receive_bytes(struct.calcsize('!BII'))
+
+        # Receive response
+        received_header = self.receive_bytes(HEADER_LENGTH)
         payload_length = struct.unpack('!BII', received_header)[2]
         received_payload = self.receive_bytes(payload_length)
+
+        # Return response
         return received_header, received_payload
 
 
@@ -54,6 +57,7 @@ class MessageHandler:
             payload.category = payload.category.encode("raw_unicode_escape")
             image_file_length = len(payload.image_file)
             category_length = len(payload.category)
+
             payload = struct.pack(
                 '!I{}sI{}s'.format(image_file_length, category_length),
                 image_file_length,
@@ -70,16 +74,14 @@ class MessageHandler:
             0,
             len(payload)
         )
-
         self.current_message.payload = payload
 
         self.current_message.header, self.current_message.payload = self.load_balancer_connector.send(self.current_message)
 
-        message_type = struct.unpack('!BII', self.current_message.header)[0]
-        received_message_type = MessageType(message_type)
+        received_message_type = MessageType(struct.unpack('!BII', self.current_message.header)[0])
 
         if received_message_type == MessageType.UPLOAD_IMAGE:
-            response_status = struct.unpack_from('!B', self.current_message.payload)[0]
+            response_status = struct.unpack('!B', self.current_message.payload)[0]
             return self.current_message.header, response_status
         if received_message_type == MessageType.FIND_THUMBS:
             thumbs_dict = dict()

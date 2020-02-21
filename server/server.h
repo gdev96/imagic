@@ -4,10 +4,10 @@
 #include "load_balancer_connector.h"
 
 class server {
-    load_balancer_connector lb_connector_;
     unsigned int id_;
+    load_balancer_connector lb_connector_;
 public:
-    server(const char *address, int port, unsigned int id);
+    server(unsigned int id);
     void receive_requests();
 };
 

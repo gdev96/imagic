@@ -8,10 +8,14 @@
 #include "load_balancer_connector.h"
 #include "storage_manager.h"
 
-load_balancer_connector::load_balancer_connector(const char *address, int port, unsigned int server_id) : server_id_(server_id) {
+load_balancer_connector::load_balancer_connector(unsigned int server_id) : server_id_(server_id) {
+    const char *server_address = std::getenv("SERVER_ADDRESS");
+    int server_start_port = std::stoi(std::getenv("SERVER_START_PORT"));
+
+    // Initialize IP address and port
     server_address_.sin_family = AF_INET;
-    server_address_.sin_addr.s_addr = inet_addr(address);
-    server_address_.sin_port = htons(port);
+    server_address_.sin_addr.s_addr = inet_addr(server_address);
+    server_address_.sin_port = htons(server_start_port + server_id);
 
     send_response_mutex_ = new std::mutex();
 }
@@ -102,39 +106,38 @@ message *load_balancer_connector::receive(int sockfd) {
 }
 
 void load_balancer_connector::receive_requests() {
-    struct sockaddr_in lb_address;
-
-    // Create socket
-    int server_length = sizeof(server_address_);
-
-    // Connection with load balancer
+    // Create socket to connect to load balancer
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    bind(server_sockfd, (struct sockaddr *)&server_address_, server_length);
+    bind(server_sockfd, (struct sockaddr *)&server_address_, sizeof(server_address_));
     listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
+
+    struct sockaddr_in lb_address;
+    socklen_t lb_length = sizeof(lb_address);
+
     std::cout << *OUTPUT_IDENTIFIER << "Waiting for connections from load balancer..." << std::endl;
 
+    lb_sockfd_ = accept(server_sockfd, (struct sockaddr *)&lb_address, &lb_length);
+
+    std::cout << *OUTPUT_IDENTIFIER << "Connection from load balancer accepted" << std::endl;
+
     while(true) {
-        socklen_t lb_length = sizeof(lb_address);
-        int lb_sockfd = accept(server_sockfd, (struct sockaddr *)&lb_address, &lb_length);
-        std::cout << *OUTPUT_IDENTIFIER << "Connection from load balancer accepted" << std::endl;
+        // Receive request
+        current_message_ = receive(lb_sockfd_);
 
-        while(true) {
-            // Receive request
-            current_message_ = receive(lb_sockfd);
+        std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED!" << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << *current_message_->get_header() << std::endl;
+        std::cout << *OUTPUT_IDENTIFIER << "Processing request..." << std::endl;
 
-            std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED!" << std::endl;
-            std::cout << *OUTPUT_IDENTIFIER << *current_message_->get_header() << std::endl;
-            std::cout << *OUTPUT_IDENTIFIER << "Processing request..." << std::endl;
-
-            std::thread t(&load_balancer_connector::manage_request, this, lb_sockfd, current_message_);
-            t.detach();
-        }
+        std::thread t(&load_balancer_connector::manage_request, this, current_message_);
+        t.detach();
     }
 }
 
-void load_balancer_connector::manage_request(int lb_sockfd, message *client_message){
-    // Serve request
+void load_balancer_connector::manage_request(message *client_message){
+    // Create storage manager
     storage_manager storage_manager_instance(client_message, server_id_);
+
+    // Serve request
     switch(client_message->get_header()->get_message_type()) {
         case message_type::UPLOAD_IMAGE:
             storage_manager_instance.upload_request();
@@ -148,7 +151,7 @@ void load_balancer_connector::manage_request(int lb_sockfd, message *client_mess
     // Send response
     {
         std::scoped_lock lock(*send_response_mutex_);
-        send(lb_sockfd, client_message);
+        send(lb_sockfd_, client_message);
     }
 
     std::cout << *OUTPUT_IDENTIFIER << "RESPONSE SENT!" << std::endl;

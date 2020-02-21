@@ -219,7 +219,7 @@ class Ui_MainWindow(object):
             icon = QtWidgets.QMessageBox.Warning
             if result == UploadStatus.DUPLICATE:
                 response = "Image already exists in this category"
-            else:  # result == UploadStatus.INVALID:
+            else:  # INVALID
                 response = "Image cannot be decoded"
         dialog = QtWidgets.QMessageBox(self.mainpage)
         dialog.setIcon(icon)
@@ -289,7 +289,6 @@ class Ui_MainWindow(object):
             dialog.setWindowTitle("Download result")
             dialog.setText("Download successfully completed")
             dialog.exec_()
-
 
     def downloadcancelbutton_onclick(self):
         self.stackedWidget.setCurrentIndex(3)

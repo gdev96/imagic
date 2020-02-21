@@ -6,24 +6,20 @@ class Image:
     def __init__(self, image_file):
         self.image_file = image_file
         self.category = None
-        self.thumb_file = None
 
     def __len__(self):
         image_length = 0
         for key in self.__dict__.keys():
-            attr = self.__getattribute__(key)
-            if attr is not None:
-                image_length += len(attr)
+            attribute = self.__getattribute__(key)
+            if attribute:
+                image_length += len(attribute)
         return image_length
 
 
 class ImageValidator:
-    def __init__(self):
-        self.image_extensions = IMAGE_EXTENSIONS
-
     def validate(self, image_file_path):
         file_extension = Path(image_file_path).suffix
-        if file_extension in self.image_extensions:
+        if file_extension in IMAGE_EXTENSIONS:
             return self.get_image(image_file_path)
         return None
 

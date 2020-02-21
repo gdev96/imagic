@@ -29,6 +29,7 @@ class load_balancer {
     void manage_request(const message *client_message);
 public:
     load_balancer();
+    void receive_requests();
     void get_requests();
     friend class client_connector;
 };

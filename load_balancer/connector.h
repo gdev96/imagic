@@ -23,18 +23,19 @@ class load_balancer;
 
 class client_connector : connector {
     load_balancer *load_balancer_;
-    uint32_t current_request_id_;
+    struct sockaddr_in lb_address_;
+    uint32_t current_request_id_ = 0;
     static unsigned int write_count_;
     void queue_requests(int client_sockfd);
 public:
-    client_connector(load_balancer *load_balancer) : load_balancer_(load_balancer) { current_request_id_ = 0; }
-    void accept_requests();
+    client_connector(load_balancer *load_balancer);
+    void accept_connection_requests();
 };
 
 class server_connector : connector {
     int server_sockfd_;
     struct sockaddr_in *server_address_;
-    unsigned int server_load_;
+    unsigned int server_load_ = 0;
     std::unordered_map<uint32_t, std::vector<int>> *request_map_;
     std::mutex *send_request_mutex_, *receive_response_mutex_, *server_load_mutex_;
     static std::mutex request_map_mutex_;
@@ -43,7 +44,7 @@ public:
     server_connector() {}
     server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map);
     unsigned int get_server_load() const { return server_load_; }
-    void set_server_load(unsigned int server_load) { server_load_ = server_load; }
+    void increment_server_load() { server_load_++; }
     void serve_request(const message *client_message);
 };
 
