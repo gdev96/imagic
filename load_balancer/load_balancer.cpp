@@ -100,7 +100,7 @@ void load_balancer::manage_request(const message *client_message) {
         std::cout << *OUTPUT_IDENTIFIER << "BROADCASTING MESSAGE" << std::endl;
         for(int i=0; i<n_server_-1; i++) {
             server_connectors_[i].increment_server_load();
-            std::thread t = std::thread(&server_connector::serve_request, server_connectors_[i], client_message);
+            std::thread t = std::thread(&server_connector::serve_request, &server_connectors_[i], client_message);
             t.detach();
         }
         server_connectors_[n_server_-1].increment_server_load();

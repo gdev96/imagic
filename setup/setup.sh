@@ -10,8 +10,8 @@ sudo apt-get update
 echo "Installing MySQL Server dependencies..."
 sudo apt-get install libaio1
 
-mkdir -p MySQL-Server-8.0.19
-cd MySQL-Server-8.0.19
+mkdir -p MySQLServer-8.0.19-1
+cd MySQLServer-8.0.19-1
 
 echo "Downloading MySQL Server..."
 curl https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-server_8.0.19-1ubuntu18.04_amd64.deb-bundle.tar | tar x
@@ -63,9 +63,9 @@ sudo make install
 cd ..
 
 echo "Downloading Image Magick..."
-curl https://imagemagick.org/download/releases/ImageMagick-7.0.9-24.tar.gz | tar xz
+curl https://imagemagick.org/download/releases/ImageMagick-7.0.9-25.tar.gz | tar xz
 
-cd ImageMagick-7.0.9-24
+cd ImageMagick-7.0.9-25
 
 echo "Configuring Image Magick..."
 ./configure --prefix=/usr

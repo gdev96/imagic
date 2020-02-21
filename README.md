@@ -12,7 +12,7 @@ There are:
 - a load balancer (frontend) that forwards requests to the most unloaded servers
 - one or more servers that handle client requests
 
-<img width="700" src="https://github.com/gdev96/imagic/blob/master/resources/imagic_schema.svg">
+<img width="700" src="https://github.com/gdev96/imagic/blob/master/resources/imagic_architecture.svg">
 
 Every server has its own database which collects infos about images. To guarantee consistency, upload requests are broadcasted, and each request has a unique identifier.
 
@@ -96,7 +96,7 @@ In order to create the image thumbnails, server needs Image Magick 7.
 
 Here are the instructions to download and install it.
 
-To work with a specific image format you need to install the right delegate.
+To work with a specific image format, you need to install the right delegate.
 
 For example, to work with JPEG images, download the following:
 
@@ -124,20 +124,20 @@ sudo make install
 
 Then, download Image Magick sources from:
 
-https://imagemagick.org/download/releases/ImageMagick-7.0.9-24.tar.gz
+https://imagemagick.org/download/releases/ImageMagick-7.0.9-25.tar.gz
 
 Now, you need to repeat the steps above.
 
 Unpack the distribution with this command:
 
 ```
-tar xvzf ImageMagick-7.0.9-24.tar.gz
+tar xvzf ImageMagick-7.0.9-25.tar.gz
 ```
 
 Next configure and compile ImageMagick:
 
 ```
-cd ImageMagick-7.0.9-24
+cd ImageMagick-7.0.9-25
 ./configure --prefix=/usr
 make
 ```

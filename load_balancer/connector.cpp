@@ -81,8 +81,6 @@ message *connector::receive(int sockfd) {
 
 // Client connector
 
-unsigned int client_connector::write_count_ = 0;
-
 client_connector::client_connector(load_balancer *load_balancer) : load_balancer_(load_balancer) {
     const char *load_balancer_address = std::getenv("LOAD_BALANCER_ADDRESS");
     int load_balancer_port = std::stoi(std::getenv("LOAD_BALANCER_PORT"));
@@ -91,6 +89,9 @@ client_connector::client_connector(load_balancer *load_balancer) : load_balancer
     lb_address_.sin_family = AF_INET;
     lb_address_.sin_addr.s_addr = inet_addr(load_balancer_address);
     lb_address_.sin_port = htons(load_balancer_port);
+
+    current_request_id_ = 0;
+    write_count_ = 0;
 }
 
 void client_connector::accept_connection_requests() {
@@ -172,6 +173,7 @@ void client_connector::queue_requests(int client_sockfd) {
 std::mutex server_connector::request_map_mutex_ = std::mutex();
 
 server_connector::server_connector(sockaddr_in *server_address, std::unordered_map<uint32_t, std::vector<int>> *request_map) : server_address_(server_address), request_map_(request_map) {
+    server_load_ = 0;
     send_request_mutex_ = new std::mutex();
     receive_response_mutex_ = new std::mutex();
     server_load_mutex_ = new std::mutex();
@@ -182,6 +184,11 @@ server_connector::server_connector(sockaddr_in *server_address, std::unordered_m
     if(connect(server_sockfd_, (struct sockaddr *)server_address_, sizeof(*server_address_)) == -1) {
         throw std::runtime_error("Socket connection refused");
     }
+}
+
+void server_connector::increment_server_load() {
+    std::scoped_lock lock(*server_load_mutex_);
+    server_load_++;
 }
 
 enum map_values : int {
