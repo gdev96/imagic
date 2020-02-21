@@ -24,8 +24,8 @@ class load_balancer;
 class client_connector : connector {
     load_balancer *load_balancer_;
     struct sockaddr_in lb_address_;
-    uint32_t current_request_id_;
-    unsigned int write_count_;
+    uint32_t current_request_id_ = 0;
+    unsigned int write_count_ = 0;
     void queue_requests(int client_sockfd);
 public:
     client_connector(load_balancer *load_balancer);
@@ -35,7 +35,7 @@ public:
 class server_connector : connector {
     int server_sockfd_;
     struct sockaddr_in *server_address_;
-    unsigned int server_load_;
+    unsigned int server_load_ = 0;
     std::unordered_map<uint32_t, std::vector<int>> *request_map_;
     std::mutex *send_request_mutex_, *receive_response_mutex_, *server_load_mutex_;
     static std::mutex request_map_mutex_;
