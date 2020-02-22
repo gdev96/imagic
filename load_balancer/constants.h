@@ -7,7 +7,7 @@
 inline const std::string *OUTPUT_IDENTIFIER;
 
 // Connectors
-inline const unsigned int QUEUE_LENGTH_CONNECTIONS = 5;
+inline const unsigned int CONNECTIONS_QUEUE_SIZE = 10;
 
 // Message
 inline const unsigned int CHUNK_SIZE = 8192;

@@ -95,7 +95,7 @@ void client_connector::accept_connection_requests() {
     // Create socket to connect to client
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *)&lb_address_, sizeof(lb_address_));
-    listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
+    listen(server_sockfd, CONNECTIONS_QUEUE_SIZE);
 
     struct sockaddr_in client_address;
     socklen_t client_length = sizeof(client_address);

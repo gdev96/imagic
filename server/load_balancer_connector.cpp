@@ -109,7 +109,7 @@ void load_balancer_connector::receive_requests() {
     // Create socket to connect to load balancer
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bind(server_sockfd, (struct sockaddr *)&server_address_, sizeof(server_address_));
-    listen(server_sockfd, QUEUE_LENGTH_CONNECTIONS);
+    listen(server_sockfd, CONNECTIONS_QUEUE_SIZE);
 
     struct sockaddr_in lb_address;
     socklen_t lb_length = sizeof(lb_address);
