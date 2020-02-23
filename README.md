@@ -26,7 +26,7 @@ As soon as the user clicks on an image, the real image is downloaded, and it can
 
 Messages exchanged by clients and servers have the following fixed format:
 
-<img width="900" src="resources/message_format.svg">
+<img src="resources/message_format.svg">
 
 ## Setup
 
