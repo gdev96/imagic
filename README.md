@@ -12,7 +12,7 @@ There are:
 - a load balancer (frontend) that forwards requests to the most unloaded servers
 - one or more servers that handle client requests
 
-<img width="700" src="https://github.com/gdev96/imagic/blob/master/resources/imagic_architecture.svg">
+<img width="700" src="resources/imagic_architecture.svg">
 
 Every server has its own database which collects infos about images. To guarantee consistency, upload requests are broadcasted, and each request has a unique identifier.
 
@@ -26,7 +26,7 @@ As soon as the user clicks on an image, the real image is downloaded, and it can
 
 Messages exchanged by clients and servers have the following fixed format:
 
-<img width="900" src="https://github.com/gdev96/imagic/blob/master/resources/message_format.svg">
+<img width="900" src="resources/message_format.svg">
 
 ## Setup
 
@@ -34,10 +34,10 @@ There are two options to start the application, depending on the platform you ar
 
 ### Ubuntu 18.04 (*recommended*)
 
-To run the application move to the `setup` directory, placed in the root of the project, and execute, in order:
+To run the application move to the [setup](setup) directory, placed in the root of the project, and execute, in order:
 
-1. the `setup.sh` script;
-2. the `start.sh` script.
+1. the [setup.sh](setup/setup.sh) script;
+2. the [start.sh](setup/start.sh) script.
 
 Just type in terminal:
 
@@ -50,15 +50,15 @@ cd setup
 ./start.sh
 ```
 
-To test the application, you can run the `start.sh` script passing it the argument "test":
+To test the application, you can run the [start.sh](setup/start.sh) script and pass it the argument "test":
 
 ```
 ./start.sh test
 ```
 
-In this way, `TESTING` macro will be defined in servers code, and random sleeps will be executed once for request in order to test application parallelism when launching multiple clients.
+In this way, `TESTING` macro will be defined in servers' code, and random sleeps will be executed once for request in order to test application parallelism when launching multiple clients.
 
-Moreover, in `resources` directory you can find some test images to upload to the application.
+Moreover, in [resources](resources) directory you can find some test images to upload to the application.
 
 ### Other platforms
 
@@ -66,7 +66,7 @@ Moreover, in `resources` directory you can find some test images to upload to th
 
 ##### 1. CMake 3.15 (or higher)
 
-You have to install CMake 3.15 (or higher) in order to build the load balancer and the server projects using the `CMakeLists.txt` files.
+You have to install CMake 3.15 (or higher) in order to build the load balancer and the server projects using the `CMakeLists.txt` files ([load balancer's](load_balancer/CMakeLists.txt) and [server's](server/CMakeLists.txt) one).
 
 ##### 2. MySQL Server 8
 
@@ -166,7 +166,7 @@ pip3 install -r client/requirements.txt
 
 #### Build problems
 
-If build fails, edit `CMakeLists.txt` file in server project and verify that:
+If build fails, edit [CMakeLists.txt](server/CMakeLists.txt) file in server project and verify that:
 
 1. correct header files are included (*include_directories* command)
 2. correct libraries are linked (*PROJECT_LINK_LIBS* variable)
