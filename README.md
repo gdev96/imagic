@@ -58,7 +58,7 @@ To test the application, you can run the [start.sh](setup/start.sh) script and p
 
 In this way, `TESTING` macro will be defined in servers' code, and random sleeps will be executed once for request in order to test application parallelism when launching multiple clients.
 
-Moreover, in [resources](resources) directory you can find some test images to upload to the application.
+Moreover, in [resources](resources) directory you can find some [test images](resources/test_images) to upload to the application.
 
 ### Other platforms
 
