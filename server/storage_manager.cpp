@@ -208,7 +208,7 @@ void storage_manager::find_thumbs() {
         input_thumb_file.close();
 
         // Create an entry in thumbs map
-        thumbs_map->insert({thumb_file, thumb_file_name});
+        (*thumbs_map)[thumb_file] = thumb_file_name;
 
         // Update payload length
         payload_length += 8 + thumb_size + thumb_file_name.length();
