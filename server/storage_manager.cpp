@@ -183,7 +183,6 @@ void storage_manager::find_thumbs() {
     mysqlx::RowResult rows = current_table_
             ->select("thumb_file_name")
             .where("category like :category")
-            .orderBy("id DESC")
             .bind("category", (mysqlx::string)*category)
             .execute();
 
