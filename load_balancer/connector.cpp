@@ -157,7 +157,7 @@ void client_connector::queue_requests(int client_sockfd) {
             write_count_--;
             if(write_count_ == 0) {
                 load_balancer_->notified = true;
-                load_balancer_->message_production_.notify_all();
+                load_balancer_->message_production_.notify_one();
             }
         }
         std::cout << *OUTPUT_IDENTIFIER << "NEW MESSAGE RECEIVED AND QUEUED!" << std::endl;

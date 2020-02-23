@@ -140,10 +140,10 @@ void load_balancer_connector::manage_request(message *client_message){
     // Serve request
     switch(client_message->get_header()->get_message_type()) {
         case message_type::UPLOAD_IMAGE:
-            storage_manager_instance.upload_request();
+            storage_manager_instance.upload_image();
             break;
         case message_type::FIND_THUMBS:
-            storage_manager_instance.view_thumbs();
+            storage_manager_instance.find_thumbs();
             break;
         case message_type::DOWNLOAD_IMAGE:
             storage_manager_instance.download_image();

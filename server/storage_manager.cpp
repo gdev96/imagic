@@ -60,7 +60,7 @@ enum upload_status : unsigned char {
     INVALID = 2
 };
 
-void storage_manager::upload_request() {
+void storage_manager::upload_image() {
 
 #ifdef TESTING
     int waiting_time = random_generator(10, 30);
@@ -93,7 +93,7 @@ void storage_manager::upload_request() {
         if(!last_image_id_read_) {
             // Get last id from DB
             mysqlx::RowResult rows = current_table_
-                    ->select("max(id)")
+                    ->select("MAX(id)")
                     .execute();
 
             mysqlx::Row row = rows.fetchOne();
@@ -165,7 +165,7 @@ void storage_manager::upload_request() {
 
 }
 
-void storage_manager::view_thumbs() {
+void storage_manager::find_thumbs() {
 
 #ifdef TESTING
     int waiting_time = random_generator(10, 30);
@@ -183,6 +183,7 @@ void storage_manager::view_thumbs() {
     mysqlx::RowResult rows = current_table_
             ->select("thumb_file_name")
             .where("category like :category")
+            .orderBy("id DESC")
             .bind("category", (mysqlx::string)*category)
             .execute();
 

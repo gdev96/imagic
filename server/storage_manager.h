@@ -15,8 +15,8 @@ class storage_manager {
 public:
     storage_manager(message *current_request, unsigned int server_id);
     ~storage_manager();
-    void upload_request();
-    void view_thumbs();
+    void upload_image();
+    void find_thumbs();
     void download_image();
 };
 
