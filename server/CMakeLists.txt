@@ -32,6 +32,8 @@ add_executable(imagic_srv
         payload.h
         server.cpp
         server.h
+        socket.cpp
+        socket.h
         storage_manager.cpp
         storage_manager.h)
 

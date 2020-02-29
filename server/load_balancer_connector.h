@@ -11,11 +11,6 @@ class load_balancer_connector {
     int lb_sockfd_;
     message *current_message_;
     std::mutex *send_response_mutex_;
-    static uint32_t min(uint32_t a, uint32_t b) { return a<b ? a : b; }
-    static void read_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
-    static void write_bytes(int sockfd, unsigned char *buffer, uint32_t message_length);
-    static void send(int sockfd, const message *msg);
-    static message *receive(int sockfd);
     void manage_request(message *client_message);
 public:
     load_balancer_connector() {}

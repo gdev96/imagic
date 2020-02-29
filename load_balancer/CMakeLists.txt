@@ -14,4 +14,6 @@ add_executable(imagic_lb
         load_balancer.h
         main.cpp
         message.cpp
-        message.h)
+        message.h
+        socket.cpp
+        socket.h)
