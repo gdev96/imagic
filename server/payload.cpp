@@ -52,22 +52,22 @@ void thumbs_payload::serialize(unsigned char *buffer) {
     uint32_t *int_buffer;
     uint32_t next_length;
 
-    // Iterate over map
-    for(const auto &[key, value] : *content_) {
-        // Copy thumb file size and thumb file
+    // Iterate over thumbs vector
+    for(const auto &[thumb_file_name, thumb_file] : *content_) {
+        // Copy thumb file name length and thumb file name
         int_buffer = (uint32_t *)buffer;
-        next_length = key.size();
+        next_length = thumb_file_name.length();
         *int_buffer++ = htonl(next_length);
         buffer = (unsigned char *)int_buffer;
-        std::copy(key.begin(), key.end(), buffer);
+        std::copy(thumb_file_name.begin(), thumb_file_name.end(), buffer);
         buffer += next_length;
 
-        // Copy path length and path
+        // Copy thumb file size and thumb file
         int_buffer = (uint32_t *)buffer;
-        next_length = value.length();
+        next_length = thumb_file.size();
         *int_buffer++ = htonl(next_length);
         buffer = (unsigned char *)int_buffer;
-        std::copy(value.begin(), value.end(), buffer);
+        std::copy(thumb_file.begin(), thumb_file.end(), buffer);
         buffer += next_length;
     }
     int_buffer = (uint32_t *)buffer;

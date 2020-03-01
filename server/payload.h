@@ -2,8 +2,8 @@
 #define SERVER_PAYLOAD_H
 
 #include <cstdint>
-#include <map>
 #include <string>
+#include <utility>
 #include <vector>
 #include "image.h"
 
@@ -44,9 +44,9 @@ public:
 };
 
 class thumbs_payload : public payload {
-    std::map<std::vector<unsigned char>, std::string> *content_;
+    std::vector<std::pair<std::string, std::vector<unsigned char>>> *content_;
 public:
-    thumbs_payload(std::map<std::vector<unsigned char>, std::string> *content) : content_(content) {}
+    thumbs_payload(std::vector<std::pair<std::string, std::vector<unsigned char>>> *content) : content_(content) {}
     ~thumbs_payload() override;
     void *get_content() const override { return content_; }
     void serialize(unsigned char *buffer) override;

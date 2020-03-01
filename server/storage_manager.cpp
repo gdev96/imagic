@@ -1,13 +1,13 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <map>
 
 #ifdef TESTING
 #include <random>
 #include <thread>
 #endif
 
+#include <utility>
 #include <vector>
 #include "constants.h"
 #include "image.h"
@@ -176,13 +176,14 @@ void storage_manager::find_thumbs() {
     // Get category from message
     std::string *category = (std::string *)current_request_->get_payload()->get_content();
 
-    // Create thumbs map
-    auto thumbs_map = new std::map<std::vector<unsigned char>, std::string>;
+    // Create thumbs vector
+    auto thumbs_vector = new std::vector<std::pair<std::string, std::vector<unsigned char>>>;
 
     // Get thumb file names from DB
     mysqlx::RowResult rows = current_table_
             ->select("thumb_file_name")
             .where("category like :category")
+            .orderBy("id DESC")
             .bind("category", (mysqlx::string)*category)
             .execute();
 
@@ -206,8 +207,8 @@ void storage_manager::find_thumbs() {
         input_thumb_file.read((char *)thumb_file.data(), thumb_size);
         input_thumb_file.close();
 
-        // Create an entry in thumbs map
-        (*thumbs_map)[thumb_file] = thumb_file_name;
+        // Create an entry in thumbs vector
+        thumbs_vector->push_back(std::make_pair(thumb_file_name, thumb_file));
 
         // Update payload length
         payload_length += 8 + thumb_size + thumb_file_name.length();
@@ -219,7 +220,7 @@ void storage_manager::find_thumbs() {
     delete current_request_->get_payload();
 
     // Set new payload
-    current_request_->set_payload(new thumbs_payload(thumbs_map));
+    current_request_->set_payload(new thumbs_payload(thumbs_vector));
 
 #ifdef TESTING
     std::cout << *OUTPUT_IDENTIFIER << "Image thumbs retrieval finished" << std::endl;
