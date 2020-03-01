@@ -177,7 +177,7 @@ void storage_manager::find_thumbs() {
     std::string *category = (std::string *)current_request_->get_payload()->get_content();
 
     // Create thumbs vector
-    auto thumbs_vector = new std::vector<std::pair<std::string, std::vector<unsigned char>>>;
+    auto thumbs_vector = new std::vector<std::pair<std::vector<unsigned char>, std::string>>;
 
     // Get thumb file names from DB
     mysqlx::RowResult rows = current_table_
@@ -208,7 +208,7 @@ void storage_manager::find_thumbs() {
         input_thumb_file.close();
 
         // Create an entry in thumbs vector
-        thumbs_vector->push_back(std::make_pair(thumb_file_name, thumb_file));
+        thumbs_vector->push_back(std::make_pair(thumb_file, thumb_file_name));
 
         // Update payload length
         payload_length += 8 + thumb_size + thumb_file_name.length();

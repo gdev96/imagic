@@ -91,11 +91,11 @@ class MessageHandler:
                 if next_length == 0:
                     break
                 offset += struct.calcsize('!I')
-                thumb_file_name = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)[0]
+                thumb_file = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)[0]
                 offset += next_length
                 next_length = struct.unpack_from('!I', self.current_message.payload, offset)[0]
                 offset += struct.calcsize('!I')
-                thumb_file = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)[0]
+                thumb_file_name = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)[0]
                 offset += next_length
                 thumbs_dict[thumb_file_name.decode("raw_unicode_escape")] = thumb_file
             return self.current_message.header, thumbs_dict

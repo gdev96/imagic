@@ -44,9 +44,9 @@ public:
 };
 
 class thumbs_payload : public payload {
-    std::vector<std::pair<std::string, std::vector<unsigned char>>> *content_;
+    std::vector<std::pair<std::vector<unsigned char>, std::string>> *content_;
 public:
-    thumbs_payload(std::vector<std::pair<std::string, std::vector<unsigned char>>> *content) : content_(content) {}
+    thumbs_payload(std::vector<std::pair<std::vector<unsigned char>, std::string>> *content) : content_(content) {}
     ~thumbs_payload() override;
     void *get_content() const override { return content_; }
     void serialize(unsigned char *buffer) override;
