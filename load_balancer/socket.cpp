@@ -20,6 +20,10 @@ void send_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     } while(offset < message_length);
 }
 
+inline uint32_t min(uint32_t a, uint32_t b) {
+    return a<b ? a : b;
+}
+
 void receive_bytes(int sockfd, unsigned char *buffer, uint32_t message_length) {
     uint32_t offset = 0;
     int bytes_received;
