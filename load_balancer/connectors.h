@@ -1,5 +1,5 @@
-#ifndef LOAD_BALANCER_CONNECTOR_H
-#define LOAD_BALANCER_CONNECTOR_H
+#ifndef LOAD_BALANCER_CONNECTORS_H
+#define LOAD_BALANCER_CONNECTORS_H
 
 #include <cstdint>
 #include <mutex>
@@ -38,4 +38,4 @@ public:
     void serve_request(const message *client_message);
 };
 
-#endif  // LOAD_BALANCER_CONNECTOR_H
+#endif  // LOAD_BALANCER_CONNECTORS_H

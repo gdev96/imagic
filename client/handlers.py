@@ -5,12 +5,12 @@ from constants import *
 from message import Message, MessageType
 
 
-class LoadBalancerConnector:
+class SocketHandler:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host_address = os.environ["LOAD_BALANCER_ADDRESS"]
-        port = int(os.environ["LOAD_BALANCER_PORT"])
-        self.sock.connect((host_address, port))
+        host_port = int(os.environ["LOAD_BALANCER_PORT"])
+        self.sock.connect((host_address, host_port))
 
     def send_bytes(self, message, message_length):
         offset = 0
@@ -50,7 +50,7 @@ class LoadBalancerConnector:
 class MessageHandler:
     def __init__(self):
         self.current_message = Message()
-        self.load_balancer_connector = LoadBalancerConnector()
+        self.socket_handler = SocketHandler()
 
     def send_message(self, message_type, payload):
         if message_type == MessageType.UPLOAD_IMAGE:
@@ -76,7 +76,7 @@ class MessageHandler:
         )
         self.current_message.payload = payload
 
-        self.current_message.header, self.current_message.payload = self.load_balancer_connector.send(self.current_message)
+        self.current_message.header, self.current_message.payload = self.socket_handler.send(self.current_message)
 
         received_message_type = MessageType(struct.unpack('!BII', self.current_message.header)[0])
 
