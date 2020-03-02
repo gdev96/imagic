@@ -47,21 +47,6 @@ void load_balancer::initialize_connectors() {
     }
 }
 
-unsigned int load_balancer::balance() {
-    unsigned int current_lowest_load = server_connectors_[0].get_server_load();
-    unsigned int current_lowest_load_server = 0;
-    unsigned int current_load;
-
-    for(int i=1; i<n_server_; i++) {
-        current_load = server_connectors_[i].get_server_load();
-        if(current_load < current_lowest_load){
-            current_lowest_load = current_load;
-            current_lowest_load_server = i;
-        }
-    }
-    return current_lowest_load_server;
-}
-
 void load_balancer::receive_requests() {
     // Start message consumer
     std::thread t = std::thread(&load_balancer::get_requests, this);
@@ -113,4 +98,19 @@ void load_balancer::manage_request(const message *client_message) {
         server_connectors_[chosen_server].increment_server_load();
         server_connectors_[chosen_server].serve_request(client_message);
     }
+}
+
+unsigned int load_balancer::balance() {
+    unsigned int current_lowest_load = server_connectors_[0].get_server_load();
+    unsigned int current_lowest_load_server = 0;
+    unsigned int current_load;
+
+    for(int i=1; i<n_server_; i++) {
+        current_load = server_connectors_[i].get_server_load();
+        if(current_load < current_lowest_load){
+            current_lowest_load = current_load;
+            current_lowest_load_server = i;
+        }
+    }
+    return current_lowest_load_server;
 }

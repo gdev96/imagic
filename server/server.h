@@ -7,7 +7,7 @@ class server {
     unsigned int id_;
     load_balancer_connector lb_connector_;
 public:
-    server(unsigned int id);
+    server();
     void receive_requests();
 };
 

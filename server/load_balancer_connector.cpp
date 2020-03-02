@@ -6,18 +6,20 @@
 #include "constants.h"
 #include "load_balancer_connector.h"
 #include "socket.h"
-#include "storage_manager.h"
 
-load_balancer_connector::load_balancer_connector(unsigned int server_id) : server_id_(server_id) {
+load_balancer_connector::load_balancer_connector() {
     const char *server_address = std::getenv("SERVER_ADDRESS");
     int server_start_port = std::stoi(std::getenv("SERVER_START_PORT"));
 
     // Initialize IP address and port
     server_address_.sin_family = AF_INET;
     server_address_.sin_addr.s_addr = inet_addr(server_address);
-    server_address_.sin_port = htons(server_start_port + server_id);
+    server_address_.sin_port = htons(server_start_port + std::stoi(std::getenv("SERVER_ID")));
 
     send_response_mutex_ = new std::mutex();
+
+    // Create storage manager
+    storage_manager_ = new storage_manager();
 }
 
 void load_balancer_connector::receive_requests() {
@@ -49,19 +51,16 @@ void load_balancer_connector::receive_requests() {
 }
 
 void load_balancer_connector::manage_request(message *client_message){
-    // Create storage manager
-    storage_manager storage_manager_instance(client_message, server_id_);
-
     // Serve request
     switch(client_message->get_header()->get_message_type()) {
         case message_type::UPLOAD_IMAGE:
-            storage_manager_instance.upload_image();
+            storage_manager_->upload_image(client_message);
             break;
         case message_type::FIND_THUMBS:
-            storage_manager_instance.find_thumbs();
+            storage_manager_->find_thumbs(client_message);
             break;
         case message_type::DOWNLOAD_IMAGE:
-            storage_manager_instance.download_image();
+            storage_manager_->download_image(client_message);
     }
     // Send response
     {

@@ -3,14 +3,14 @@
 
 void header::serialize(unsigned char *buffer) {
     *buffer++ = (unsigned char)message_type_;
-    auto *int_buffer = (uint32_t *)buffer;
+    uint32_t *int_buffer = (uint32_t *)buffer;
     *int_buffer++ = htonl(request_id_);
     *int_buffer = htonl(payload_length_);
 }
 
 void header::deserialize(unsigned char *buffer) {
     message_type_ = (message_type)(*buffer++);
-    auto *int_buffer = (uint32_t *)buffer;
+    uint32_t *int_buffer = (uint32_t *)buffer;
     request_id_ = ntohl(*int_buffer++);
     payload_length_ = ntohl(*int_buffer);
 }

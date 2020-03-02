@@ -19,6 +19,6 @@ int main() {
     sigaction(SIGINT, &action, nullptr);
 
     // Create and start load balancer
-    load_balancer load_balancer_instance;
-    load_balancer_instance.receive_requests();
+    load_balancer lb;
+    lb.receive_requests();
 }

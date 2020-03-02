@@ -6,18 +6,16 @@
 #include "message.h"
 
 class storage_manager {
-    mysqlx::Session *db_session_;
-    mysqlx::Table *current_table_;
-    message *current_request_;
-    unsigned int server_id_;
-    static bool last_image_id_read_;
-    static unsigned int last_image_id_;
+    std::string db_host_, db_user_, db_password_, db_name_, db_table_name_;
+    int db_port_;
+    std::string images_dir_, thumb_size_;
+    bool last_image_id_read_ = false;
+    unsigned int last_image_id_;
 public:
-    storage_manager(message *current_request, unsigned int server_id);
-    ~storage_manager();
-    void upload_image();
-    void find_thumbs();
-    void download_image();
+    storage_manager();
+    void upload_image(message *client_message);
+    void find_thumbs(message *client_message);
+    void download_image(message *client_message);
 };
 
 #endif  // SERVER_STORAGE_MANAGER_H

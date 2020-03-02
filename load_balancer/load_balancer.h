@@ -2,6 +2,7 @@
 #define LOAD_BALANCER_H
 
 #include <condition_variable>
+#include <cstdint>
 #include <mutex>
 #include <queue>
 #include <unordered_map>
