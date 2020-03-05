@@ -22,9 +22,8 @@ storage_manager::storage_manager() {
     db_name_ = std::string(std::getenv("DB_NAME")) + "_" + std::string(std::getenv("SERVER_ID"));
     db_table_name_ = std::string(std::getenv("DB_TABLE_NAME"));
 
-    // Get images directory and thumb size
+    // Get images directory
     images_dir_ = std::string(std::getenv("IMAGES_DIR")) + std::string(std::getenv("SERVER_ID"));
-    thumb_size_ = std::string(std::getenv("THUMB_SIZE"));
 }
 
 #ifdef TESTING
@@ -123,7 +122,7 @@ void storage_manager::upload_image(message *client_message) {
             std::cout << *OUTPUT_IDENTIFIER << "Image \"" + image_file_name << "\" saved" << std::endl;
 
             // Generate thumb
-            thumb.resize(thumb_size_);
+            thumb.resize(THUMB_SIZE);
 
             // Save thumb file to disk
             std::string thumb_file_name = std::to_string(image_id) + "_thumb." + image_format;

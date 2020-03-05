@@ -15,4 +15,7 @@ inline const unsigned int CHUNK_SIZE = 8192;
 // Header
 inline const unsigned int HEADER_LENGTH = 9;
 
+// Thumb size
+inline const std::string THUMB_SIZE = "300x300";
+
 #endif  // SERVER_CONSTANTS_H
