@@ -196,12 +196,9 @@ class Ui_MainWindow(object):
         self.savebutton.setText(_translate("MainWindow", "Save"))
 
     def uploadbutton_onclick(self):
-        file_dialog = QtWidgets.QFileDialog(self.mainpage)
-        file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-        file_dialog.setNameFilter("Images (*.jpg *.jpeg)")
-        if file_dialog.exec_():
-            file_name = file_dialog.selectedFiles()[0]
-            imagic.validate_image(file_name)
+        image_file_name = QtWidgets.QFileDialog.getOpenFileName(self.mainpage, "Select image to upload", "", "Images (*.jpg *.jpeg *.png *.tif *.tiff)")[0]
+        if image_file_name:
+            imagic.validate_image(image_file_name)
             image_pixmap = QtGui.QPixmap()
             image_pixmap.loadFromData(QtCore.QByteArray(imagic.current_image.image_file))
             width = self.uploadimagelabel.width()
@@ -285,12 +282,12 @@ class Ui_MainWindow(object):
 
     def savebutton_onclick(self):
         thumb_file_name = self.downloadimagelabel.objectName()
-        file_name = QtWidgets.QFileDialog.getSaveFileName(self.mainpage, "Save image", thumb_file_name.replace("_thumb", ""), "Images (*.jpg *.jpeg)")[0]
-        if file_name:
+        image_file_name = QtWidgets.QFileDialog.getSaveFileName(self.mainpage, "Save image", thumb_file_name.replace("_thumb", ""), "Images (*.jpg *.jpeg *.png *.tif *.tiff)")[0]
+        if image_file_name:
             file_extension = Path(thumb_file_name).suffix
-            if Path(file_name).suffix != file_extension:
-                file_name += file_extension
-            imagic.download_image(file_name)
+            if Path(image_file_name).suffix != file_extension:
+                image_file_name += file_extension
+            imagic.download_image(image_file_name)
             dialog = QtWidgets.QMessageBox(self.downloadpage)
             dialog.setIcon(QtWidgets.QMessageBox.Information)
             dialog.setWindowTitle("Download result")

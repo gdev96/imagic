@@ -6,11 +6,11 @@ set(CMAKE_CXX_FLAGS -pthread)
 
 include_directories(.
         /usr/include/mysql-cppconn-8
-        /usr/include/ImageMagick-7)
+        /usr/local/include/ImageMagick-7)
 
 set(PROJECT_LINK_LIBS
         /usr/lib/x86_64-linux-gnu/libmysqlcppconn8.so
-        /usr/lib/libMagick++-7.Q16HDRI.so)
+        /usr/local/lib/libMagick++-7.Q16HDRI.so)
 
 add_definitions(-DMAGICKCORE_QUANTUM_DEPTH=16)
 add_definitions(-DMAGICKCORE_HDRI_ENABLE=0)

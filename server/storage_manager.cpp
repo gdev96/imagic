@@ -107,9 +107,12 @@ void storage_manager::upload_image(message *client_message) {
             std::transform(image_format.begin(), image_format.end(), image_format.begin(),
                     [](unsigned char c) -> unsigned char { return std::tolower(c); });
 
-            // Replace image format with more popular formats
+            // Replace image format with more popular extensions
             if(image_format == "jpeg") {
                 image_format = "jpg";
+            }
+            else if(image_format == "tiff") {
+                image_format = "tif";
             }
 
             // Save image file to disk

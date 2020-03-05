@@ -4,11 +4,12 @@ echo "Installing CMake..."
 sudo snap install cmake --classic
 
 # Install MySQL Server and MySQL Connector/C++
+
 echo "Updating APT packages..."
 sudo apt-get update
 
 echo "Installing MySQL Server dependencies..."
-sudo apt-get install libaio1
+sudo apt-get install -y libaio1
 
 mkdir -p MySQLServer-8.0.19-1
 cd MySQLServer-8.0.19-1
@@ -45,14 +46,34 @@ sudo apt-get -f -y install
 
 cd ..
 
-# Install Image Magick and JPEG delegate
+# Install Image Magick and delegate library dependencies
+
+echo "Installing prerequisites..."
+sudo apt-get install -y pkg-config
+
+echo "Downloading ZLIB..."
+curl http://www.imagemagick.org/download/delegates/zlib-1.2.11.tar.gz | tar xz
+
+cd zlib-1.2.11
+
+echo "Configuring ZLIB..."
+./configure
+
+echo "Compiling ZLIB..."
+make
+
+echo "Installing ZLIB..."
+sudo make install
+
+cd ..
+
 echo "Downloading JPEG delegate..."
 curl http://www.imagemagick.org/download/delegates/jpegsrc.v9b.tar.gz | tar xz
 
 cd jpeg-9b
 
 echo "Configuring JPEG delegate..."
-./configure --prefix=/usr
+./configure
 
 echo "Compiling JPEG delegate..."
 make
@@ -62,21 +83,55 @@ sudo make install
 
 cd ..
 
-echo "Downloading Image Magick..."
-curl https://imagemagick.org/download/releases/ImageMagick-7.0.9-25.tar.gz | tar xz
+echo "Downloading PNG delegate..."
+curl http://www.imagemagick.org/download/delegates/libpng-1.6.31.tar.gz | tar xz
 
-cd ImageMagick-7.0.9-25
+cd libpng-1.6.31
+
+echo "Configuring PNG delegate..."
+./configure
+
+echo "Compiling PNG delegate..."
+make
+
+echo "Installing PNG delegate..."
+sudo make install
+
+cd ..
+
+echo "Downloading TIFF delegate..."
+curl http://www.imagemagick.org/download/delegates/tiff-4.0.8.tar.gz | tar xz
+
+cd tiff-4.0.8
+
+echo "Configuring TIFF delegate..."
+./configure
+
+echo "Compiling TIFF delegate..."
+make
+
+echo "Installing TIFF delegate..."
+sudo make install
+
+cd ..
+
+echo "Downloading Image Magick..."
+curl https://imagemagick.org/download/releases/ImageMagick-7.0.9-27.tar.gz | tar xz
+
+cd ImageMagick-7.0.9-27
 
 echo "Configuring Image Magick..."
-./configure --prefix=/usr
+./configure
 
 echo "Compiling Image Magick..."
-make
+make -j$(nproc)
 
 echo "Installing Image Magick..."
 sudo make install
 
 cd ../..
+
+# Install client libraries
 
 echo "Installing PyQt5..."
 pip3 install -r client/requirements.txt

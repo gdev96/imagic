@@ -124,20 +124,20 @@ sudo make install
 
 Then, download Image Magick sources from:
 
-https://imagemagick.org/download/releases/ImageMagick-7.0.9-25.tar.gz
+https://imagemagick.org/download/releases/ImageMagick-7.0.9-27.tar.gz
 
 Now, you need to repeat the steps above.
 
 Unpack the distribution with this command:
 
 ```
-tar xvzf ImageMagick-7.0.9-25.tar.gz
+tar xvzf ImageMagick-7.0.9-27.tar.gz
 ```
 
 Next configure and compile ImageMagick:
 
 ```
-cd ImageMagick-7.0.9-25
+cd ImageMagick-7.0.9-27
 ./configure --prefix=/usr
 make
 ```
