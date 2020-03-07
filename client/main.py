@@ -201,11 +201,14 @@ class Ui_MainWindow:
             imagic.validate_image(image_file_name)
             image_pixmap = QtGui.QPixmap()
             image_pixmap.loadFromData(QtCore.QByteArray(imagic.current_image.image_file))
-            width = self.uploadimagelabel.width()
-            height = self.uploadimagelabel.height()
-            self.uploadimagelabel.setPixmap(image_pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio))
-            self.uploadimagelabel.setAlignment(QtCore.Qt.AlignCenter)
-            self.stackedWidget.setCurrentIndex(1)
+            if not image_pixmap.isNull():
+                width = self.uploadimagelabel.width()
+                height = self.uploadimagelabel.height()
+                self.uploadimagelabel.setPixmap(image_pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio))
+                self.uploadimagelabel.setAlignment(QtCore.Qt.AlignCenter)
+                self.stackedWidget.setCurrentIndex(1)
+            else:
+                QtWidgets.QMessageBox.warning(self.uploadpage, "Error", "Unable to load image")
 
     def uploadcancelbutton_onclick(self):
         self.stackedWidget.setCurrentIndex(0)
@@ -214,19 +217,13 @@ class Ui_MainWindow:
         imagic.select_category(self.uploadcombobox.currentText())
         result = UploadStatus(imagic.upload_image())
         if result == UploadStatus.UPLOADED:
-            icon = QtWidgets.QMessageBox.Information
-            response = "Image successfully uploaded"
+            QtWidgets.QMessageBox.information(self.uploadpage, "Upload result", "Image successfully uploaded")
         else:
-            icon = QtWidgets.QMessageBox.Warning
             if result == UploadStatus.DUPLICATE:
                 response = "Image already exists in this category"
             else:  # INVALID
                 response = "Image cannot be decoded"
-        dialog = QtWidgets.QMessageBox(self.uploadpage)
-        dialog.setIcon(icon)
-        dialog.setWindowTitle("Upload result")
-        dialog.setText(response)
-        dialog.exec_()
+            QtWidgets.QMessageBox.warning(self.uploadpage, "Upload result", response)
 
     def downloadbutton_onclick(self):
         self.stackedWidget.setCurrentIndex(2)
@@ -288,11 +285,7 @@ class Ui_MainWindow:
             if Path(image_file_name).suffix != file_extension:
                 image_file_name += file_extension
             imagic.download_image(image_file_name)
-            dialog = QtWidgets.QMessageBox(self.downloadpage)
-            dialog.setIcon(QtWidgets.QMessageBox.Information)
-            dialog.setWindowTitle("Download result")
-            dialog.setText("Image successfully saved")
-            dialog.exec_()
+            QtWidgets.QMessageBox.information(self.downloadpage, "Download result", "Image successfully saved")
 
 
 if __name__ == "__main__":
