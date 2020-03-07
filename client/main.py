@@ -9,7 +9,7 @@ class ClickableQLabel(QtWidgets.QLabel):
     clicked = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
-        QtWidgets.QLabel.__init__(self, parent)
+        super().__init__(parent)
 
     def mousePressEvent(self, ev):
         self.clicked.emit()
@@ -21,7 +21,7 @@ class ClickableQLabel(QtWidgets.QLabel):
         QtWidgets.QApplication.restoreOverrideCursor()
 
 
-class Ui_MainWindow(object):
+class Ui_MainWindow:
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setFixedSize(1121, 600)
