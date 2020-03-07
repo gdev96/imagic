@@ -222,7 +222,7 @@ class Ui_MainWindow:
                 response = "Image already exists in this category"
             else:  # INVALID
                 response = "Image cannot be decoded"
-        dialog = QtWidgets.QMessageBox(self.mainpage)
+        dialog = QtWidgets.QMessageBox(self.uploadpage)
         dialog.setIcon(icon)
         dialog.setWindowTitle("Upload result")
         dialog.setText(response)
@@ -282,7 +282,7 @@ class Ui_MainWindow:
 
     def savebutton_onclick(self):
         thumb_file_name = self.downloadimagelabel.objectName()
-        image_file_name = QtWidgets.QFileDialog.getSaveFileName(self.mainpage, "Save image", thumb_file_name.replace("_thumb", ""), "Images (*.jpg *.jpeg *.png *.tif *.tiff)")[0]
+        image_file_name = QtWidgets.QFileDialog.getSaveFileName(self.downloadpage, "Save image", thumb_file_name.replace("_thumb", ""), "Images (*.jpg *.jpeg *.png *.tif *.tiff)")[0]
         if image_file_name:
             file_extension = Path(thumb_file_name).suffix
             if Path(image_file_name).suffix != file_extension:
