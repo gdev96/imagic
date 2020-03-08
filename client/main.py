@@ -5,6 +5,28 @@ from imagic import Imagic
 from message import UploadStatus
 
 
+class Worker(QtCore.QObject):
+    finished = QtCore.pyqtSignal()
+
+    def setArgument(self, argument):
+        self.argument = argument
+
+    @QtCore.pyqtSlot()
+    def uploadImage(self):
+        self.result = UploadStatus(imagic.upload_image())
+        self.finished.emit()
+
+    @QtCore.pyqtSlot()
+    def findThumbs(self):
+        imagic.find_thumbs(self.argument)
+        self.finished.emit()
+
+    @QtCore.pyqtSlot()
+    def downloadImage(self):
+        imagic.download_image(self.argument)
+        self.finished.emit()
+
+
 class ClickableQLabel(QtWidgets.QLabel):
     clicked = QtCore.pyqtSignal()
 
@@ -165,6 +187,10 @@ class Ui_MainWindow:
 
         self.retranslateUi(MainWindow)
         self.stackedWidget.setCurrentIndex(0)
+
+        worker.finished.connect(thread.quit)
+        worker.finished.connect(loop.quit)
+
         self.uploadButton.clicked.connect(self.uploadButton_onclick)
         self.uploadCancelButton.clicked.connect(self.uploadCancelButton_onclick)
         self.uploadImage.clicked.connect(self.uploadImage_onclick)
@@ -232,11 +258,27 @@ class Ui_MainWindow:
 
     def uploadImage_onclick(self):
         imagic.select_category(self.uploadComboBox.currentText())
-        result = UploadStatus(imagic.upload_image())
-        if result == UploadStatus.UPLOADED:
+
+        # Block signals during image upload
+        self.uploadImage.blockSignals(True)
+        self.uploadCancelButton.blockSignals(True)
+
+        thread.started.connect(worker.uploadImage)
+        thread.start()
+
+        # Wait for thread to finish
+        loop.exec()
+
+        thread.started.disconnect(worker.uploadImage)
+
+        # Restore signals
+        self.uploadImage.blockSignals(False)
+        self.uploadCancelButton.blockSignals(False)
+
+        if worker.result == UploadStatus.UPLOADED:
             QtWidgets.QMessageBox.information(self.uploadPage, "Upload result", "Image successfully uploaded")
         else:
-            if result == UploadStatus.DUPLICATE:
+            if worker.result == UploadStatus.DUPLICATE:
                 response = "Image already exists in this category"
             else:  # INVALID
                 response = "Image cannot be decoded"
@@ -249,7 +291,24 @@ class Ui_MainWindow:
         self.stackedWidget.setCurrentIndex(0)
 
     def searchButton_onclick(self):
-        imagic.find_thumbs(self.searchComboBox.currentText())
+        worker.setArgument(self.searchComboBox.currentText())
+
+        # Block signals during thumbs retrieval
+        self.searchButton.blockSignals(True)
+        self.searchCancelButton.blockSignals(True)
+
+        thread.started.connect(worker.findThumbs)
+        thread.start()
+
+        # Wait for thread to finish
+        loop.exec()
+
+        thread.started.disconnect(worker.findThumbs)
+
+        # Restore signals
+        self.searchButton.blockSignals(False)
+        self.searchCancelButton.blockSignals(False)
+
         row = 0
         column = 0
         if not imagic.current_thumbs:
@@ -281,7 +340,26 @@ class Ui_MainWindow:
     def thumbLabel_onclick(self):
         sending_thumb = self.thumbsPage.sender()
         thumb_file_name = sending_thumb.objectName()
-        imagic.download_image(thumb_file_name)
+        worker.setArgument(thumb_file_name)
+
+        # Block signals during image download
+        for i in range(self.gridLayout.count()):
+            self.gridLayout.itemAt(i).widget().blockSignals(True)
+        self.downloadCancelButton.blockSignals(True)
+
+        thread.started.connect(worker.downloadImage)
+        thread.start()
+
+        # Wait for thread to finish
+        loop.exec()
+
+        thread.started.disconnect(worker.downloadImage)
+
+        # Restore signals
+        for i in range(self.gridLayout.count()):
+            self.gridLayout.itemAt(i).widget().blockSignals(False)
+        self.downloadCancelButton.blockSignals(False)
+
         width = self.downloadImageLabel.width()
         height = self.downloadImageLabel.height()
         if Path(thumb_file_name).suffix != ".gif":
@@ -328,8 +406,15 @@ class Ui_MainWindow:
 
 if __name__ == "__main__":
     import sys
+
     imagic = Imagic()
+
+    thread = QtCore.QThread()
+    worker = Worker()
+    worker.moveToThread(thread)
+
     app = QtWidgets.QApplication(sys.argv)
+    loop = QtCore.QEventLoop()
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
