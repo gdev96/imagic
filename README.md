@@ -8,13 +8,13 @@ The application architecture is client-server.
 
 There are:
 
-- one or more clients that make requests
-- a load balancer (frontend) that forwards requests to the most unloaded servers
-- one or more servers that handle client requests
+- one or more clients that make requests;
+- a load balancer (frontend), which acts likes an application proxy, forwarding requests to servers basing on message type;
+- one or more servers that handle client requests.
 
 <img width="700" src="resources/imagic_architecture.svg">
 
-Every server has its own database which collects infos about images. To guarantee consistency, upload requests are broadcasted, and each request has a unique identifier.
+Every server has its own database which collects infos about images. To guarantee consistency, upload requests are broadcasted, and each request has a unique identifier. Other requests, instead, are forwarded to the most unloaded servers, according to the balancing algorithm.
 
 When a server receives an upload request, it creates a thumbnail of the image, saves it, together with the image, in its file system, and records image infos in its database.
 
