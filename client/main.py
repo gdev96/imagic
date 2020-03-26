@@ -319,7 +319,7 @@ class Ui_MainWindow:
             thumb_label.setText("No image found")
             self.gridLayout.addWidget(thumb_label, row, column, QtCore.Qt.AlignCenter)
         else:
-            for thumb_file_name, thumb_file in imagic.current_thumbs.items():
+            for thumb_file_name, thumb_file in imagic.current_thumbs:
                 image_pixmap = QtGui.QPixmap()
                 image_pixmap.loadFromData(QtCore.QByteArray(thumb_file))
                 thumb_label = ClickableQLabel()

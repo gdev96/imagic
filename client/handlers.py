@@ -59,7 +59,7 @@ class MessageHandler:
             category_length = len(payload.category)
 
             payload = struct.pack(
-                '!I{}sI{}s'.format(image_file_length, category_length),
+                f'!I{image_file_length}sI{category_length}s',
                 image_file_length,
                 payload.image_file,
                 category_length,
@@ -84,20 +84,20 @@ class MessageHandler:
             response_status = struct.unpack('!B', self.current_message.payload)[0]
             return self.current_message.header, response_status
         if received_message_type == MessageType.FIND_THUMBS:
-            thumbs_dict = dict()
+            thumbs = list()
             offset = 0
             while True:
                 next_length = struct.unpack_from('!I', self.current_message.payload, offset)[0]
                 if next_length == 0:
                     break
                 offset += struct.calcsize('!I')
-                thumb_file = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)[0]
+                thumb_file = struct.unpack_from(f'!{next_length}s', self.current_message.payload, offset)[0]
                 offset += next_length
                 next_length = struct.unpack_from('!I', self.current_message.payload, offset)[0]
                 offset += struct.calcsize('!I')
-                thumb_file_name = struct.unpack_from('!{}s'.format(next_length), self.current_message.payload, offset)[0]
+                thumb_file_name = struct.unpack_from(f'!{next_length}s', self.current_message.payload, offset)[0]
                 offset += next_length
-                thumbs_dict[thumb_file_name.decode("raw_unicode_escape")] = thumb_file
-            return self.current_message.header, thumbs_dict
+                thumbs.append((thumb_file_name.decode("raw_unicode_escape"), thumb_file))
+            return self.current_message.header, thumbs
         # DOWNLOAD_IMAGE
         return self.current_message.header, self.current_message.payload
