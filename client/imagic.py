@@ -35,4 +35,3 @@ class Imagic:
     def save_image(self, image_path):
         with open(image_path, "wb") as f:
             f.write(self.current_image.image_file)
-            f.close()
