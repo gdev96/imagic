@@ -12,7 +12,7 @@ class Imagic:
 
     def validate_image(self, image_file_path):
         image_file = self.image_validator.validate(image_file_path)
-        if image_file:
+        if image_file is not None:
             self.current_image = Image(image_file)
             return True
         return False
