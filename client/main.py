@@ -311,7 +311,7 @@ class Ui_MainWindow:
 
         row = 0
         column = 0
-        if not imagic.current_thumbs:
+        if imagic.current_thumbs is None:
             thumb_label = QtWidgets.QLabel()
             font = QtGui.QFont()
             font.setPointSize(20)
