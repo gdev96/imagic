@@ -11,7 +11,7 @@ class Image:
         image_length = 0
         for key in self.__dict__.keys():
             attribute = self.__getattribute__(key)
-            if attribute:
+            if attribute is not None:
                 image_length += len(attribute)
         return image_length
 
@@ -27,5 +27,4 @@ class ImageValidator:
     def get_image(image_file_path):
         with open(image_file_path, "rb") as f:
             image_file = f.read()
-            f.close()
-            return image_file
+        return image_file
